@@ -1,13 +1,9 @@
 import sys
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from PyQt5.QtCore import Qt, QSize, QRect, QPoint
 from PyQt5.QtGui import QImage, QPalette, QBrush, QIcon
-from PyQt5.QtCore import QSize, Qt
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip
-
-
-
-
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton
 
 
 class MyApp(QWidget):
@@ -21,6 +17,7 @@ class MyApp(QWidget):
         self.window_size = QSize(self.window_width, self.window_height)
 
         self.dragPos = 0
+        self.is_window_move = False
 
         self.initUI()
 
@@ -42,18 +39,30 @@ class MyApp(QWidget):
         palette.setBrush(10, QBrush(simage))
         self.setPalette(palette)
 
+        x_button_loc = QPoint(int(self.window_width * 0.95), int(self.window_height * 0.03))
+        x_button_size = QSize(int(self.window_height * 0.05), int(self.window_height * 0.05))
+
+        self.button = QPushButton('', self)
+        self.button.clicked.connect(self.close)
+        self.button.setIcon(QtGui.QIcon('res/xbutton.svg'))
+        self.button.setIconSize(QtCore.QSize(24, 24))
+        self.button.resize(x_button_size)
+        self.button.move(x_button_loc)
+        self.button.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 
         self.show()
 
     def mousePressEvent(self, event):
-        pass
-        if event.buttons() == Qt.LeftButton:
+        if event.buttons() == Qt.LeftButton and event.y() < self.window_height * 0.1:
+            self.is_window_move = True
             self.dragPos = event.globalPos()
             event.accept()
+        else:
+            self.is_window_move = False
 
     def mouseMoveEvent(self, event):
 
-        if event.buttons() == Qt.LeftButton:
+        if self.is_window_move and event.buttons() == Qt.LeftButton:
             self.move(self.pos() + event.globalPos() - self.dragPos)
             self.dragPos = event.globalPos()
             event.accept()
