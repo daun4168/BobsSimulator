@@ -73,8 +73,13 @@ class MyApp(QWidget):
             event.accept()
 
 
-
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = MyApp()
-    sys.exit(app.exec_())
+    try:
+        app = QApplication(sys.argv)
+        ex = MyApp()
+        sys.exit(app.exec_())
+
+    except Exception as e:
+        print("Exception!!!!!!!!!!")
+        print(e)
+        input()
