@@ -2,8 +2,8 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from PyQt5.QtCore import Qt, QSize, QRect, QPoint
-from PyQt5.QtGui import QImage, QPalette, QBrush, QIcon
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton
+from PyQt5.QtGui import QImage, QPalette, QBrush, QIcon, QPixmap, QPainter, QPen
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton, QLabel
 
 
 class MyApp(QWidget):
@@ -25,7 +25,7 @@ class MyApp(QWidget):
 
         self.setWindowTitle(self.title)
         self.setFixedSize(self.window_size)
-        self.setWindowIcon(QIcon('res/bob.png'))
+        self.setWindowIcon(QIcon('res/icon_bob.png'))
         # self.setAttribute(Qt.WA_TranslucentBackground)
 
         flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.FramelessWindowHint) | int(QtCore.Qt.WindowStaysOnTopHint))
@@ -39,18 +39,23 @@ class MyApp(QWidget):
         palette.setBrush(10, QBrush(simage))
         self.setPalette(palette)
 
+
         x_button_loc = QPoint(int(self.window_width * 0.95), int(self.window_height * 0.03))
         x_button_size = QSize(int(self.window_height * 0.05), int(self.window_height * 0.05))
 
         self.button = QPushButton('', self)
         self.button.clicked.connect(self.close)
-        self.button.setIcon(QtGui.QIcon('res/xbutton.svg'))
+        self.button.setIcon(QtGui.QIcon('res/x_icon_2.png'))
         self.button.setIconSize(QtCore.QSize(24, 24))
         self.button.resize(x_button_size)
         self.button.move(x_button_loc)
         self.button.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 
         self.show()
+
+    def draw_minion(self, card_id, is_legendary=False, is_golden=False, size=(0.1, 0.2), point=(0.5, 0.5)):
+        pass
+
 
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton and event.y() < self.window_height * 0.1:
