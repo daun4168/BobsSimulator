@@ -1,9 +1,9 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets
 
-from PyQt5.QtCore import Qt, QSize, QRect, QPoint
-from PyQt5.QtGui import QImage, QPalette, QBrush, QIcon, QPixmap, QPainter, QPen
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton, QLabel
+from PySide2.QtCore import Qt, QSize, QRect, QPoint
+from PySide2.QtGui import QImage, QPalette, QBrush, QIcon, QPixmap, QPainter, QPen
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton, QLabel
 
 
 class MyApp(QWidget):
@@ -26,6 +26,7 @@ class MyApp(QWidget):
         self.setWindowTitle(self.title)
         self.setFixedSize(self.window_size)
         self.setWindowIcon(QIcon('res/icon_bob.png'))
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         # self.setAttribute(Qt.WA_TranslucentBackground)
 
         flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.FramelessWindowHint) | int(QtCore.Qt.WindowStaysOnTopHint))
@@ -36,7 +37,7 @@ class MyApp(QWidget):
         simage = oimage.scaled(self.window_size)
 
         palette = QPalette()
-        palette.setBrush(10, QBrush(simage))
+        palette.setBrush(QPalette.Background, QBrush(simage))
         self.setPalette(palette)
 
 
