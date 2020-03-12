@@ -3,8 +3,8 @@ import os
 
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt, QSize, QRect, QPoint
-from PySide2.QtGui import QImage, QPalette, QBrush, QIcon, QPixmap, QPainter, QPen, QColor, QRegion
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QSizeGrip, QPushButton, QLabel
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 def path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -35,14 +35,14 @@ class MyApp(QWidget):
 
         self.setWindowTitle(self.title)
         self.setFixedSize(self.window_size)
-        self.setWindowIcon(QIcon(path('res/icon_bob.png')))
+        self.setWindowIcon(QIcon(path('res/img/icon_bob.png')))
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         # self.setAttribute(Qt.WA_TranslucentBackground)
 
         flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.FramelessWindowHint) | int(QtCore.Qt.WindowStaysOnTopHint))
         self.setWindowFlags(flags)
 
-        oimage = QImage(path("res/background.jpg"))
+        oimage = QImage(path("res/img/background.jpg"))
         simage = oimage.scaled(self.window_size)
 
         palette = QPalette()
@@ -54,38 +54,78 @@ class MyApp(QWidget):
 
         self.button = QPushButton('', self)
         self.button.clicked.connect(self.close)
-        self.button.setIcon(QtGui.QIcon(path('res/x_icon_2.png')))
+        self.button.setIcon(QtGui.QIcon(path('res/img/x_icon_2.png')))
         self.button.setIconSize(QtCore.QSize(24, 24))
         self.button.resize(x_button_size)
         self.button.move(x_button_loc)
         self.button.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 
-        self.draw_minion("BOT_606")
+        self.draw_minion("BOT_606", is_golden=True, attack=4)
         self.show()
 
-    def draw_minion(self, card_id, is_legendary=False, is_golden=False, size=None, point=None):
+    def draw_minion(self, card_id, attack=0, health=0, is_legendary=False, is_golden=False, size=None, point=None):
         if not size:
-            size = QSize(int(self.window_width * 0.4), int(self.window_width * 0.4))
+            size = QSize(int(self.window_width * 0.2), int(self.window_width * 0.2))
+            size = QSize(712, 712)
         if not point:
             point = QPoint(int(self.window_width * 0), int(self.window_height * 0))
         pic = QLabel(self)
         pixmap = QPixmap(712, 712)
         pixmap.fill(Qt.transparent)
         painter = QPainter(pixmap)
-        painter.drawPixmap(100, 100, 512, 512, QPixmap(path(f"res/cards/512x/{card_id}.jpg")))
+        painter.drawPixmap(100, 100, 512, 512, QPixmap(path(f"res/img/cards/512x/{card_id}.jpg")))
 
         painter.setCompositionMode(QPainter.CompositionMode_DestinationIn)
-        painter.drawPixmap(0, 0, 712, 712, QPixmap(path("res/minion_mask.png")))
+        painter.drawPixmap(0, 0, 712, 712, QPixmap(path("res/img/minion_mask.png")))
         painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
         if not is_legendary and not is_golden:
-            painter.drawPixmap(166, 100, 390, 512, QPixmap(path(f"res/minion_common.png")))
+            painter.drawPixmap(166, 100, 390, 512, QPixmap(path(f"res/img/minion_common.png")))
         elif not is_legendary and is_golden:
-            painter.drawPixmap(135, 95, 450, 522, QPixmap(path(f"res/minion_golden_common.png")))
+            painter.drawPixmap(135, 95, 450, 522, QPixmap(path(f"res/img/minion_golden_common.png")))
         elif is_legendary and not is_golden:
-            painter.drawPixmap(166, 50, 508, 562, QPixmap(path(f"res/minion_legendary.png")))
+            painter.drawPixmap(166, 50, 508, 562, QPixmap(path(f"res/img/minion_legendary.png")))
         elif is_legendary and is_golden:
-            painter.drawPixmap(135, 40, 570, 576, QPixmap(path(f"res/minion_golden_legendary.png")))
+            painter.drawPixmap(135, 40, 570, 576, QPixmap(path(f"res/img/minion_golden_legendary.png")))
+
+        painter.drawPixmap(150, 410, 154, 173, QPixmap(path(f"res/img/attack_minion.png")))
+        painter.drawPixmap(430, 390, 143, 210, QPixmap(path(f"res/img/cost_health.png")))
+
+
+
+        QFontDatabase.addApplicationFont(path('res/font/Franklin_Gothic_Book_Regular.ttf'))
+        number_font = QFont()
+        number_font.setFamily("Franklin Gothic Book Regular")
+        number_font.setPointSize(76)
+        painter.setFont(number_font)
+
+        pen = QPen()
+        pen.setColor(Qt.black)
+        pen.setWidth(10)
+        painter.setPen(pen)
+
+        # painter.setFont(QFont('Arial Bold', 76))
+        painter.drawText(QRect(140, 410, 200, 200), int(Qt.AlignCenter), str(attack))
+
+        # pen = QPen()
+        # pen.setColor(Qt.white)
+        # pen.setWidth(2)
+        # painter.setPen(pen)
+        #
+        # painter.setFont(QFont('Arial Bold', 70))
+        # painter.drawText(QRect(140, 410, 200, 200), int(Qt.AlignCenter), str(attack))
+
+
+
+
+
+        # pic.setAlignment(Qt.AlignCenter)
+        # painter.drawText(200, 500, 'Default')
+        #painter.drawText(QRect(200, 200, 200, 200), int(Qt.AlignCenter), 'Default')
+
+
+        painter.end()
+
 
         pixmap = pixmap.scaled(size)
         pic.setPixmap(pixmap)
