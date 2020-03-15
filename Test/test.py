@@ -1,78 +1,73 @@
-## Ex 8-10. 텍스트 그리기 (drawText).
-
 import sys
-from PySide2.QtWidgets import QWidget, QApplication
-from PySide2.QtGui import QPainter, QPen, QColor, QBrush, QFont
-from PySide2.QtCore import Qt
+from PySide2.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QGridLayout,
+                               QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox)
+from PySide2.QtGui import QIcon
+from PySide2.QtCore import Qt, Signal
 
+class Logon(QWidget):
+    ok = Signal()
 
-class MyApp(QWidget):
+    def __init__(self,ids,pws,parent=None):
+        QWidget.__init__(self,parent)
 
-    def __init__(self):
-        super().__init__()
-        self.initUI()
+        self.listIds = ids
+        self.listPWs = pws
 
-    def initUI(self):
-        self.setGeometry(300, 300, 450, 300)
-        self.setWindowTitle('drawText')
-        self.show()
+        self.labelId = QLabel('&Id :')
+        self.labelId.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.labelPW = QLabel('&Password:')
 
-    def paintEvent(self, e):
-        qp = QPainter()
-        qp.begin(self)
-        self.draw_text(qp)
-        qp.end()
+        self.lineEditId = QLineEdit()
+        self.lineEditPW = QLineEdit()
+        self.lineEditPW.setEchoMode(QLineEdit.Password)
 
-    def draw_text(self, qp):
-        qp.drawText(20, 40, 'Default')
+        self.labelId.setBuddy(self.lineEditId)
+        self.labelPW.setBuddy(self.lineEditPW)
 
-        qp.setFont(QFont('Arial', 16))
-        qp.drawText(150, 40, 'Arial, 16 pts')
+        self.buttonOk = QPushButton("&Ok")
+        self.buttonOk.setIcon(QIcon(":/images/ok.png"))
 
-        qp.setFont(QFont('Arial', 18))
-        qp.drawText(290, 40, 'Arial, 18 pts')
+        layout1 = QGridLayout()
+        layout1.addWidget(self.labelId,0,0)
+        layout1.addWidget(self.lineEditId,0,1);
+        layout1.addWidget(self.labelPW,1,0)
+        layout1.addWidget(self.lineEditPW,1,1)
 
-        qp.setFont(QFont('Times New Roman', 14))
-        qp.drawText(20, 90, 'Times New Roman')
-        qp.drawText(20, 110, '14 pts')
+        layout2 = QHBoxLayout()
+        layout2.addStretch()
+        layout2.addWidget(self.buttonOk)
 
-        qp.setFont(QFont('Times New Roman', 16))
-        qp.drawText(150, 90, 'Times New Roman')
-        qp.drawText(150, 110, '16 pts')
+        mainLayout = QVBoxLayout()
+        mainLayout.addLayout(layout1)
+        mainLayout.addLayout(layout2)
 
-        qp.setFont(QFont('Times New Roman', 18))
-        qp.drawText(290, 90, 'Times New Roman')
-        qp.drawText(290, 110, '18 pts')
+        self.setLayout(mainLayout)
+        self.setWindowTitle('Log on')
+        self.setWindowIcon(QIcon(":/images/ok.png"))
 
-        qp.setFont(QFont('Consolas', 14))
-        qp.drawText(20, 160, 'Consolas')
-        qp.drawText(20, 180, '14 pts')
+        self.buttonOk.clicked.connect(self.onOk)
 
-        qp.setFont(QFont('Consolas', 16))
-        qp.drawText(150, 160, 'Consolas')
-        qp.drawText(150, 180, '16 pts')
-
-        qp.setFont(QFont('Consolas', 18))
-        qp.drawText(290, 160, 'Consolas')
-        qp.drawText(290, 180, '18 pts')
-
-        qp.setFont(QFont('Courier New', 14, italic=True))
-        qp.drawText(20, 220, 'Courier New')
-        qp.drawText(20, 240, '14 pts')
-        qp.drawText(20, 260, 'Italic')
-
-        qp.setFont(QFont('Courier New', 16, italic=True))
-        qp.drawText(150, 220, 'Courier New')
-        qp.drawText(150, 240, '16 pts')
-        qp.drawText(150, 260, 'Italic')
-
-        qp.setFont(QFont('Courier New', 18, italic=True))
-        qp.drawText(290, 220, 'Courier New')
-        qp.drawText(290, 240, '18 pts')
-        qp.drawText(290, 260, 'Italic')
-
+    def onOk(self):
+        if (self.lineEditId.text() not in self.listIds):
+            QMessageBox.critical(self,"Logon error","Unregistered user")
+            self.lineEditId.setFocus()
+        else:
+            idx = self.listIds.index(self.lineEditId.text())
+            if self.lineEditPW.text() != self.listPWs[idx] :
+                QMessageBox.critical(self,"Logon error","Incroreect password")
+                self.lineEditPW.setFocus()
+            else:
+                self.ok.emit()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = MyApp()
-    sys.exit(app.exec_())
+
+    ids = ['James','John','Jane']
+    pws = ['123','456','789']
+
+    logon = Logon(ids,pws)
+
+    logon.ok.connect(app.exit)
+
+    logon.show()
+    app.exec_()

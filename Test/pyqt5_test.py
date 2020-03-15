@@ -6,6 +6,12 @@ from PySide2.QtCore import Qt, QSize, QRect, QPoint
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
+
+from Test import LogHandler
+
+
+
+
 def path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
@@ -16,6 +22,7 @@ def path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+
 class MyApp(QWidget):
 
     def __init__(self):
@@ -25,7 +32,7 @@ class MyApp(QWidget):
         self.window_width = 1200
         self.window_height = 800
         self.window_size = QSize(self.window_width, self.window_height)
-        self.move(50, 50)
+        self.move(QPoint(50, 50))
         self.dragPos = 0
         self.is_window_move = False
 
@@ -39,7 +46,8 @@ class MyApp(QWidget):
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         # self.setAttribute(Qt.WA_TranslucentBackground)
 
-        flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.FramelessWindowHint) | int(QtCore.Qt.WindowStaysOnTopHint))
+        # flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.FramelessWindowHint) | int(QtCore.Qt.WindowStaysOnTopHint))
+        flags = QtCore.Qt.WindowFlags(int(QtCore.Qt.WindowStaysOnTopHint))
         self.setWindowFlags(flags)
 
         oimage = QImage(path("res/img/background.jpg"))
@@ -60,7 +68,7 @@ class MyApp(QWidget):
         self.button.move(x_button_loc)
         self.button.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 
-        self.draw_minion("BOT_606", is_golden=True, attack=4)
+        self.draw_minion("BOT_606", is_golden=True, attack=2345, health=878)
         self.show()
 
     def draw_minion(self, card_id, attack=0, health=0, is_legendary=False, is_golden=False, size=None, point=None):
@@ -91,41 +99,16 @@ class MyApp(QWidget):
         painter.drawPixmap(150, 410, 154, 173, QPixmap(path(f"res/img/attack_minion.png")))
         painter.drawPixmap(430, 390, 143, 210, QPixmap(path(f"res/img/cost_health.png")))
 
-
-
-        QFontDatabase.addApplicationFont(path('res/font/Franklin_Gothic_Book_Regular.ttf'))
+        QFontDatabase.addApplicationFont(path('res/font/BelweMediumBT.ttf'))
         number_font = QFont()
-        number_font.setFamily("Franklin Gothic Book Regular")
-        number_font.setPointSize(76)
+        number_font.setFamily("Belwe Medium BT")
+        number_font.setPointSize(80)
         painter.setFont(number_font)
 
-        pen = QPen()
-        pen.setColor(Qt.black)
-        pen.setWidth(10)
-        painter.setPen(pen)
-
-        # painter.setFont(QFont('Arial Bold', 76))
-        painter.drawText(QRect(140, 410, 200, 200), int(Qt.AlignCenter), str(attack))
-
-        # pen = QPen()
-        # pen.setColor(Qt.white)
-        # pen.setWidth(2)
-        # painter.setPen(pen)
-        #
-        # painter.setFont(QFont('Arial Bold', 70))
-        # painter.drawText(QRect(140, 410, 200, 200), int(Qt.AlignCenter), str(attack))
-
-
-
-
-
-        # pic.setAlignment(Qt.AlignCenter)
-        # painter.drawText(200, 500, 'Default')
-        #painter.drawText(QRect(200, 200, 200, 200), int(Qt.AlignCenter), 'Default')
-
+        self.drawOutlinedText(painter, str(attack), 115, 405)
+        self.drawOutlinedText(painter, str(health), 380, 405)
 
         painter.end()
-
 
         pixmap = pixmap.scaled(size)
         pic.setPixmap(pixmap)
@@ -133,6 +116,26 @@ class MyApp(QWidget):
         pic.move(point)
         pic.show()  # You were missing this.
         return pic
+
+    def drawOutlinedText(self, painter, text, x, y, outline_size=3, width=250, height=200, text_color=Qt.white, outline_color=Qt.black):
+        pen = QPen()
+        pen.setColor(outline_color)
+        painter.setPen(pen)
+
+        painter.drawText(QRect(x + outline_size, y + outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x + outline_size, y - outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x - outline_size, y + outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x - outline_size, y - outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x, y + outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x, y - outline_size, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x + outline_size, y, width, height), int(Qt.AlignCenter), text)
+        painter.drawText(QRect(x - outline_size, y, width, height), int(Qt.AlignCenter), text)
+
+        pen = QPen()
+        pen.setColor(text_color)
+        painter.setPen(pen)
+
+        painter.drawText(QRect(x, y, width, height), int(Qt.AlignCenter), text)
 
     def mousePressEvent(self, event):
         if event.buttons() == Qt.LeftButton and event.y() < self.window_height * 0.1:
@@ -150,7 +153,20 @@ class MyApp(QWidget):
             event.accept()
 
 
+def battle_start_handler(battle_num):
+    print(f"{battle_num}, START BATTLE!!!!")
+
 if __name__ == '__main__':
+    HS_LOG_FILE_DIR= os.path.join(os.getcwd(), "Test/logs")
+    log_file_2020_03_06_20_31_28 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-06 20-31-28.log"), 'r', encoding="UTF8")
+    game = LogHandler.HSGame(log_file_2020_03_06_20_31_28)
+
+    game.battle_start.connect(battle_start_handler)
+
+    game.line_reader()
+
+
+
     try:
         app = QApplication(sys.argv)
         ex = MyApp()
