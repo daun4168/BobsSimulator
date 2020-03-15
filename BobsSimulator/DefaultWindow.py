@@ -55,8 +55,6 @@ class DefaultWindow(QMainWindow):
                           "Qt classes.")
 
 
-
-
 if __name__ == '__main__':
     try:
         app = QApplication(sys.argv)
