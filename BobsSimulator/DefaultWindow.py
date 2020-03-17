@@ -8,6 +8,7 @@ from PySide2.QtWidgets import *
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
 from BobsSimulator.HomeWidget import HomeWidget
 from BobsSimulator.LoadingWidget import LoadingWidget
+from BobsSimulator.WaitingWidget import WaitingWidget
 
 
 class DefaultWindow(QMainWindow):
@@ -47,7 +48,10 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def real_time_simulate(self):
-        pass
+        self.waitingWidget = WaitingWidget(self)
+
+        self.setCentralWidget(self.waitingWidget)
+        self.show()
 
     def log_file_simulate(self):
         self.loadingWidget = LoadingWidget(self)

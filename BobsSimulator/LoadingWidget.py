@@ -27,8 +27,6 @@ QProgressBar::chunk{
 """
 
 
-
-
 class LoadingWidget(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
@@ -52,6 +50,7 @@ class LoadingWidget(QWidget):
 
     def set_progress(self, value):
         self.ui.progressBar.setValue(value)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
