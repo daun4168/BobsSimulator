@@ -662,7 +662,8 @@ if __name__ == '__main__':
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
 
 
-    HSGame(log_file_2020_03_06_20_31_28)
+    game = HSGame(log_file_2020_03_06_20_31_28)
+    game.line_reader()
     # HSGame(log_file_2020_03_01_21_19_18)
     # HSGame(log_file_2020_03_01_21_19_18)
     # HSGame(hs_log_file)

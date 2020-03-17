@@ -2,7 +2,7 @@ import xmltodict
 import json
 
 card_name_dict = {}
-CardDefs = open(r'res\CardDefs.xml', 'r', encoding='UTF8')
+CardDefs = open(r'res/CardDefs.xml', 'r', encoding='UTF8')
 
 card_dict = xmltodict.parse(CardDefs.read())
 card_dict = json.dumps(card_dict)
