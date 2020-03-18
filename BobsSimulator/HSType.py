@@ -1,3 +1,11 @@
+class Game:
+    def __init__(self):
+        self.turn = 0
+        self.battle = 0
+        self.player_hero_id = ""
+        self.player_hp = 40
+        self.player
+
 class Hero:
     def __init__(self):
         self.card_id = ""

@@ -23,6 +23,16 @@ class WaitingWidget(QWidget):
         waiting_img_left_pxm = waiting_img_left_pxm.scaled(self.ui.waitingImgLeft.width(), self.ui.waitingImgLeft.height())
         self.ui.waitingImgLeft.setPixmap(waiting_img_left_pxm)
 
+        waiting_img_right = QImage(r'res/img/tyrande.png')
+        waiting_img_right_pxm = QPixmap.fromImage(waiting_img_right)
+        waiting_img_right_pxm = waiting_img_right_pxm.scaled(self.ui.waitingImgRight.width(), self.ui.waitingImgRight.height())
+        self.ui.waitingImgRight.setPixmap(waiting_img_right_pxm)
+
+        self.ui.waitingTextTop.setText("Waiting For\nGame Starts...")
+        font = QFont("Times", 50, QFont.Bold)
+        self.ui.waitingTextTop.setFont(font)
+        self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
+
 
 
 
