@@ -5,7 +5,6 @@ from PySide2.QtWidgets import *
 from BobsSimulator.UI.WaitingWidgetUI import Ui_LoadingWidget
 
 
-
 class WaitingWidget(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
@@ -28,12 +27,30 @@ class WaitingWidget(QWidget):
         waiting_img_right_pxm = waiting_img_right_pxm.scaled(self.ui.waitingImgRight.width(), self.ui.waitingImgRight.height())
         self.ui.waitingImgRight.setPixmap(waiting_img_right_pxm)
 
+
+class WaitingGameWidget(WaitingWidget):
+    def __init__(self, parent):
+        WaitingWidget.__init__(self, parent)
+
         self.ui.waitingTextTop.setText("Waiting For\nGame Starts...")
         font = QFont("Times", 50, QFont.Bold)
         self.ui.waitingTextTop.setFont(font)
         self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
 
 
+class WaitingBattleWidget(WaitingWidget):
+    def __init__(self, parent):
+        WaitingWidget.__init__(self, parent)
+
+        self.ui.waitingTextTop.setText("Waiting For\nNext Game...")
+        font = QFont("Times", 50, QFont.Bold)
+        self.ui.waitingTextTop.setFont(font)
+        self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
+
+        self.ui.waitingTextBottom.setText(f"Previous Battle: {parent.game.battle_num}")
+        font = QFont("Times", 45, QFont.Bold)
+        self.ui.waitingTextBottom.setFont(font)
+        self.ui.waitingTextBottom.setStyleSheet(f"QLabel {{ color: orange; }}")
 
 
 if __name__ == '__main__':

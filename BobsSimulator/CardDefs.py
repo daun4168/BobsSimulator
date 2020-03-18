@@ -1,6 +1,8 @@
 import xmltodict
 import json
 
+print("import CardDefs Start!")
+
 card_name_dict = {}
 CardDefs = open(r'res/CardDefs.xml', 'r', encoding='UTF8')
 

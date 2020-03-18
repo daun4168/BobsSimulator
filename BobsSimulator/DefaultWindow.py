@@ -5,11 +5,14 @@ from PySide2.QtCore import Qt, QSize, QRect, QPoint
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
 from BobsSimulator.HomeWidget import HomeWidget
 from BobsSimulator.LoadingWidget import LoadingWidget
-from BobsSimulator.WaitingWidget import WaitingWidget
+from BobsSimulator.WaitingWidget import WaitingGameWidget, WaitingBattleWidget
+from BobsSimulator.ErrorWIdget import ErrorWidget
 
+from BobsSimulator.HSType import Game
+
+from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
 
 class DefaultWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -30,6 +33,7 @@ class DefaultWindow(QMainWindow):
 
         # Some Variables
         self.hs_dir = "C:/Program Files (x86)/Hearthstone"
+        self.game = Game()
 
         # background setting
         bg_image = QImage("res/img/background.jpg").scaled(self.window_size)
@@ -42,25 +46,39 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def home(self):
-        self.homeWidget = HomeWidget(self)
+        homeWidget = HomeWidget(self)
 
-        self.setCentralWidget(self.homeWidget)
+        self.setCentralWidget(homeWidget)
         self.show()
 
     def real_time_simulate(self):
-        self.waitingWidget = WaitingWidget(self)
+        errorWidget = ErrorWidget(self, "It's not implemented..")
 
-        self.setCentralWidget(self.waitingWidget)
+        self.setCentralWidget(errorWidget)
         self.show()
 
     def log_file_simulate(self):
-        self.loadingWidget = LoadingWidget(self)
-
-        self.setCentralWidget(self.loadingWidget)
+        loadingWidget = LoadingWidget(self)
+        self.setCentralWidget(loadingWidget)
         self.show()
 
+        QtCore.QCoreApplication.processEvents()
+        print("log file starts")
+        import BobsSimulator.CardDefs
+
+        waitingWidget = WaitingGameWidget(self)
+
+
+
+        self.setCentralWidget(waitingWidget)
+        self.show()
+
+
     def text_simulate(self):
-        pass
+        errorWidget = ErrorWidget(self, "It's not implemented..")
+
+        self.setCentralWidget(errorWidget)
+        self.show()
 
     def set_hs_dir(self):
         while True:
@@ -77,12 +95,11 @@ class DefaultWindow(QMainWindow):
                 return False
 
 
-
     def about(self):
         QMessageBox.about(self, "About Bob's Simulator",
                           "<h2>Bob's Simulator 0.1</h2>"
                           "<p>Copyright &copy; 2020 Daun Jeong</p>"
-                          "<p>github: <a href='https://github.com/daun4168/BobsSimulator'>https://github.com/daun4168/BobsSimulator</a></p></p>"
+                          "<p>github: <a href='https://github.com/daun4168/BobsSimulator'>https://github.com/daun4168/BobsSimulator</a></p>"
                           "<p>e-mail: <a href='mailto:daun4168@naver.com'>daun4168@naver.com</a></p>")
 
     def help(self):

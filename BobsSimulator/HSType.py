@@ -1,10 +1,10 @@
 class Game:
     def __init__(self):
-        self.turn = 0
-        self.battle = 0
+        self.turn_num = 0
+        self.battle_num = 0
         self.player_hero_id = ""
         self.player_hp = 40
-        self.player
+
 
 class Hero:
     def __init__(self):
