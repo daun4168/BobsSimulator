@@ -4,3 +4,4 @@ pyside2-uic HomeWidget.ui > HomeWidgetUI.py
 pyside2-uic LoadingWidget.ui > LoadingWidgetUI.py
 pyside2-uic WaitingWidget.ui > WaitingWidgetUI.py
 pyside2-uic ErrorWidget.ui > ErrorWidgetUI.py
+pyside2-uic BattleInfoWidget.ui > BattleInfoWidgetUI.py

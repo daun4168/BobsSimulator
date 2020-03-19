@@ -58,20 +58,21 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def log_file_simulate(self):
-        loadingWidget = LoadingWidget(self)
-        self.setCentralWidget(loadingWidget)
-        self.show()
+        fname = QFileDialog.getOpenFileName(self, "Select log file", filter='Log file(*.log)')
+        self.log_file_name = fname[0]
+        if not self.log_file_name:
+            return
 
-        QtCore.QCoreApplication.processEvents()
-        print("log file starts")
-        import BobsSimulator.CardDefs
+        self.loading()
 
         waitingWidget = WaitingGameWidget(self)
 
-
-
         self.setCentralWidget(waitingWidget)
         self.show()
+
+
+
+        self.log
 
 
     def text_simulate(self):
@@ -109,6 +110,14 @@ class DefaultWindow(QMainWindow):
 
     def license(self):
         QMessageBox.aboutQt(self)
+
+    def loading(self):
+        loadingWidget = LoadingWidget(self)
+        self.setCentralWidget(loadingWidget)
+        self.show()
+
+        QtCore.QCoreApplication.processEvents()
+        import BobsSimulator.Util
 
     def createMenus(self):
         # Mode MENU

@@ -2,11 +2,11 @@ import os
 import logging
 import hearthstone.enums as hsenums
 from PySide2.QtCore import Signal, QObject
-from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step
+from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step, State
 
 
-from BobsSimulator.CardDefs import card_name_by_id
-from BobsSimulator.HSType import Hero, Card, Board
+from BobsSimulator.Util import card_name_by_id
+from BobsSimulator.HSType import Hero, Card, Board, ENTITY_TYPES
 from BobsSimulator.Regex import *
 
 
@@ -59,22 +59,6 @@ PowerTaskListDebugPrintPowerTXT = open("Test/logs/PowerTaskListDebugPrintPower.l
 # except AttributeError as e:
 #     print(f"Unknown tag Error: {e}")
 #     logging.warning(f"Unknown tag Error: {e}")
-
-
-
-ENTITY_TYPE = ["CREATE_GAME",
-               "FULL_ENTITY",
-               "TAG_CHANGE",
-               "BLOCK_START",
-               "BLOCK_END",
-               "SHOW_ENTITY",
-               "HIDE_ENTITY",
-               "META_DATA",
-               "CHANGE_ENTITY",
-               "RESET_GAME",
-               "SUB_SPELL_START",
-               "SUB_SPELL_END",
-               ]
 
 
 class HSGame(QObject):
@@ -182,20 +166,11 @@ class HSGame(QObject):
         return tag, value
 
     def activate_game(self, entity_id):
-        # if entity_id == self.game_entity and GameTag.NUM_TURNS_IN_PLAY.value in self.entities[self.game_entity]:
-        #     if self.entities[self.game_entity][GameTag.NUM_TURNS_IN_PLAY.value] > self.game_turn and \
-        #             GameTag.MISSION_EVENT.value in self.entities[self.game_entity] and \
-        #             self.entities[self.game_entity][GameTag.MISSION_EVENT.value] == 2:
-        #         self.game_turn = self.entities[self.game_entity][GameTag.NUM_TURNS_IN_PLAY.value]
-        #
-        #         if self.game_turn % 2 == 1 and self.game_turn > 1:
-        #
-        #             print(f"{'-'*20}BATTLE{self.game_turn//2}{'-'*20}")
-        #
-        #             self.print_entities_pretty()
-        #
-        #             print('-'*50)
-        pass
+        if entity_id == self.game_entity and GameTag.STATE.value in self.entities[self.game_entity]:
+            if self.entities[self.game_entity][GameTag.STATE.value] == State.COMPLETE:
+                    print(f"---------GAME END!!!----------")
+
+                    self.print_entities_pretty()
 
     def print_entity_pretty(self, entity_id):
         card_name = ""
@@ -246,7 +221,7 @@ class HSGame(QObject):
                         "CARDRACE", "RARITY",
                         "TECH_LEVEL", "DIVINE_SHIELD", "TAUNT", "POISONOUS", "WINDFURY",
                         "REBORN", "ELITE", "FROZEN", "LINKED_ENTITY", "CREATOR", "STEALTH", "EXHAUSTED",
-                        "DEATHRATTLE", "ATTACHED"]
+                        "DEATHRATTLE", "ATTACHED", "PLAYER_LEADERBOARD_PLACE"]
             # GameTag.
             for gametag in gametags:
                 if GameTag[gametag].value in self.entities[entity_id]:
@@ -542,7 +517,7 @@ class HSGame(QObject):
             self.contexts[level].append(context)
             return full_entity_id_list
         words = context.split()
-        if words[0] in ENTITY_TYPE:
+        if words[0] in ENTITY_TYPES:
             if words[0] == "BLOCK_END" or words[0] == "SUB_SPELL_END":
                 if level < len(self.contexts):
                     self.contexts[level].append(context)
@@ -662,7 +637,7 @@ if __name__ == '__main__':
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
 
 
-    game = HSGame(log_file_2020_03_06_20_31_28)
+    game = HSGame(log_file_2020_03_01_21_19_18)
     game.line_reader()
     # HSGame(log_file_2020_03_01_21_19_18)
     # HSGame(log_file_2020_03_01_21_19_18)
