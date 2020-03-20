@@ -48,7 +48,7 @@ class Logon(QWidget):
         self.buttonOk.clicked.connect(self.onOk)
 
     def onOk(self):
-        if (self.lineEditId.text() not in self.listIds):
+        if self.lineEditId.text() not in self.listIds:
             QMessageBox.critical(self,"Logon error","Unregistered user")
             self.lineEditId.setFocus()
         else:

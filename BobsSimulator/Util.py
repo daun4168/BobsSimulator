@@ -2,6 +2,8 @@ import xmltodict
 import json
 import hearthstone.enums as hsenums
 
+from BobsSimulator.HSLogging import main_logger
+
 
 card_name_dict = {}
 CardDefs = open(r'res/CardDefs.xml', 'r', encoding='UTF8')
@@ -34,7 +36,7 @@ def tag_value_to_int(tag, value):
         try:
             tag = int(hsenums.GameTag[tag])
         except KeyError:
-            logging.error(f"tag_value_to_int() key(tag) error - no tag key, tag: {tag}, value: {value}")
+            main_logger.exception(f"tag_value_to_int() key(tag) error - no tag key, tag: {tag}, value: {value}")
     else:
         tag = int(tag)
 
@@ -58,11 +60,12 @@ def tag_value_to_int(tag, value):
                 value = int(hsenums.PlayState[value])
             elif tag == int(hsenums.GameTag.STATE):
                 value = int(hsenums.State[value])
-
             else:
-                logging.error(f"tag_value_to_int() key(value) error - no tag name, tag: {tag}, value: {value}")
+                main_logger.error(f"tag_value_to_int() key(value) error - no tag name, tag: {tag}, value: {value}")
         except KeyError:
-            logging.error(f"tag_value_to_int() key(value) error - no value key, tag: {tag}, value: {value}")
+            main_logger.exception(f"tag_value_to_int() key(value) error - no value key, tag: {tag}, value: {value}")
     else:
         value = int(value)
+
+    return tag, value
 

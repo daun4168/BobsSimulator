@@ -11,6 +11,7 @@ from BobsSimulator.WaitingWidget import WaitingGameWidget, WaitingBattleWidget
 from BobsSimulator.ErrorWIdget import ErrorWidget
 
 from BobsSimulator.HSType import Game
+from BobsSimulator.HSLogging import main_logger
 
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
 
@@ -46,18 +47,21 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def home(self):
+        main_logger.info("Bob's Simulator Home.")
         homeWidget = HomeWidget(self)
 
         self.setCentralWidget(homeWidget)
         self.show()
 
     def real_time_simulate(self):
+        main_logger.info("Real Time Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
 
         self.setCentralWidget(errorWidget)
         self.show()
 
     def log_file_simulate(self):
+        main_logger.info("Log File Simulate Starts.")
         fname = QFileDialog.getOpenFileName(self, "Select log file", filter='Log file(*.log)')
         self.log_file_name = fname[0]
         if not self.log_file_name:
@@ -72,10 +76,8 @@ class DefaultWindow(QMainWindow):
 
 
 
-        self.log
-
-
     def text_simulate(self):
+        main_logger.info("Text File Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
 
         self.setCentralWidget(errorWidget)
@@ -88,9 +90,11 @@ class DefaultWindow(QMainWindow):
             if fname:
                 if os.path.isfile(os.path.join(fname, 'Hearthstone.exe')):
                     self.hs_dir = fname
+                    main_logger.info(f"Set HS Directory: {self.hs_dir}")
                     return True
                 else:
                     QMessageBox.information(self, "ERROR", "Can't find Hearthstone.exe!!")
+                    main_logger.info(f"Failed to Set HS Directory: {self.hs_dir}")
                     continue
             else:
                 return False

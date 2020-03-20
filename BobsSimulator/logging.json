@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "formatters": {
+    "default": {
+      "format": "%(asctime)s - %(levelname)s: %(message)s"
+    },
+
+    "only_message": {
+      "format": "%(message)s"
+    }
+  },
+
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "level": "INFO",
+      "formatter": "default",
+      "stream": "ext://sys.stdout"
+    },
+
+    "console_err": {
+      "class": "logging.StreamHandler",
+      "level": "ERROR",
+      "formatter": "default",
+      "stream": "ext://sys.stderr"
+    },
+
+    "main_file_handler": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "default",
+      "filename": "logs/BobsSimulator.log",
+      "mode": "w"
+    },
+
+    "hsbattle_file_handler": {
+      "class": "logging.FileHandler",
+      "level": "INFO",
+      "formatter": "only_message",
+      "filename": "logs/HSBattle.log",
+      "mode": "w"
+    },
+
+    "hsloghandler_file_handler": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "default",
+      "filename": "logs/HSLogHandler.log",
+      "mode": "w"
+    }
+  },
+
+  "loggers": {
+    "main": {
+      "level": "DEBUG",
+      "handlers": ["console_err","main_file_handler"],
+      "propagate": "no"
+    },
+
+
+    "hsbattle": {
+      "level": "INFO",
+      "handlers": ["hsbattle_file_handler"],
+      "propagate": "no"
+    },
+
+    "hsloghandler": {
+      "level": "DEBUG",
+      "handlers": ["hsloghandler_file_handler"],
+      "propagate": "no"
+    }
+  }
+}
