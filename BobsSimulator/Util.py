@@ -7,11 +7,9 @@ from PySide2.QtCore import QEventLoop, QTimer
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER
 
-import hearthstone_data
 
-
-carddefs_path = hearthstone_data.get_carddefs_path()
-carddefs_version = int(float(hearthstone_data.__version__))
+carddefs_path = 'res/CardDefs.xml'
+carddefs_version = 43246
 
 if VERSION_NUMBER != carddefs_version:
     main_logger.warning(f"Build number NOT correct, Program: {VERSION_NUMBER}, CardDefs: {carddefs_version}")

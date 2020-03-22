@@ -1,6 +1,7 @@
 /.idea/
 /venv/pyvenv.cfg
 /venv/
+/venv2/
 /output/
 /work/
 /output.spec
