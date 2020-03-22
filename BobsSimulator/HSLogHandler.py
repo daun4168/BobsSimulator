@@ -5,7 +5,7 @@ from PySide2.QtCore import Signal, QObject
 from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step, State
 
 
-from BobsSimulator.Util import card_name_by_id, tag_value_to_int
+from BobsSimulator.Util import card_name_by_id, tag_value_to_int, qsleep
 from BobsSimulator.HSType import Game, Battle, Hero, Minion, Secret, \
     ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS, BOB_NAMES, Enchantment
 from BobsSimulator.Regex import *
@@ -34,6 +34,8 @@ class HSLogHandler(QObject):
 
         self.contexts = []
         self.recent_parsing_line = None
+        self.do_line_reader = False
+        self.is_line_reader = False
 
     def init_game(self):
         self.game = Game()
@@ -52,12 +54,25 @@ class HSLogHandler(QObject):
     def read_line(self):
         return self.log_file.readline()
 
+    def line_reader_start(self):
+        self.do_line_reader = True
+        if self.is_line_reader:
+            return
+        else:
+            self.line_reader()
+
     def line_reader(self):
-        line = self.read_line()
-        while line:
-            self.line_parser(line)
+        self.is_line_reader = True
+        while True:
+            if not self.do_line_reader:
+                self.is_line_reader = False
+                return
             line = self.read_line()
+            if not line:
+                break
+            self.line_parser(line)
         self.end_file()
+        self.is_line_reader = False
 
     def get_entity_id_by_entity(self, entity):
         entity_id = None
@@ -125,9 +140,11 @@ class HSLogHandler(QObject):
             self.print_entity_pretty(entity_id)
 
     def game_start(self):
+        self.do_line_reader = False
         self.sig_game_start.emit()
 
     def game_info(self):
+        self.do_line_reader = False
         self.sig_game_info.emit()
 
     def battle_start(self):
@@ -197,7 +214,8 @@ class HSLogHandler(QObject):
                     minion.entity_id = entity_id
                     minion.card_id = card_id
                     minion.golden = card_id.startswith('TB_BaconUps')
-
+                    if GameTag["ELITE"].value in self.entities[entity_id]:
+                        minion.elite = self.entities[entity_id][GameTag["ELITE"].value]
                     if GameTag["ATK"].value in self.entities[entity_id]:
                         minion.attack = self.entities[entity_id][GameTag["ATK"].value]
                     if GameTag["HEALTH"].value in self.entities[entity_id]:
@@ -250,7 +268,7 @@ class HSLogHandler(QObject):
             print(f"{' '*20}BATTLE{self.game.battle_num}{' '*20}")
             self.print_entities_pretty()
 
-
+        self.do_line_reader = False
         self.sig_battle_start.emit()
 
     def battle_end(self):
@@ -292,6 +310,7 @@ class HSLogHandler(QObject):
             print(f"Enemy HP: {self.game.battle.enemy_hero.health - self.game.battle.enemy_hero.damage}")
             print('=' * 50)
 
+        self.do_line_reader = False
         self.sig_battle_end.emit()
 
     def end_game(self):
@@ -320,9 +339,11 @@ class HSLogHandler(QObject):
             print(f"---------GAME END!!!----------")
             self.print_entities_pretty()
 
+        self.do_line_reader = False
         self.sig_end_game.emit()
 
     def end_file(self):
+        self.do_line_reader = False
         self.sig_end_file.emit()
 
     def line_parser(self, line):

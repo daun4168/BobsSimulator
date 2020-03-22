@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ErrorWidget</class>
- <widget class="QWidget" name="ErrorWidget">
+ <class>BattleInfoWidget</class>
+ <widget class="QWidget" name="BattleInfoWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,15 +10,20 @@
     <height>570</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>15</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <widget class="QPushButton" name="homeButton">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>20</x>
      <y>490</y>
-     <width>261</width>
+     <width>151</width>
      <height>61</height>
     </rect>
    </property>
@@ -31,7 +36,7 @@
    <property name="font">
     <font>
      <family>Yu Gothic</family>
-     <pointsize>25</pointsize>
+     <pointsize>15</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
@@ -40,10 +45,10 @@
     <string>GO HOME</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="homeButton_2">
+  <widget class="QPushButton" name="simulateButton">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>290</x>
      <y>490</y>
      <width>251</width>
      <height>61</height>
@@ -58,7 +63,7 @@
    <property name="font">
     <font>
      <family>Yu Gothic</family>
-     <pointsize>25</pointsize>
+     <pointsize>30</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
@@ -67,137 +72,32 @@
     <string>SIMULATE</string>
    </property>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QPushButton" name="nextButton">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>230</y>
-     <width>781</width>
-     <height>121</height>
+     <x>630</x>
+     <y>490</y>
+     <width>161</width>
+     <height>61</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="pboard">
-    <item row="0" column="3">
-     <widget class="QWidget" name="pcard4" native="true"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="pcard1" native="true"/>
-    </item>
-    <item row="0" column="4">
-     <widget class="QWidget" name="pcard5" native="true"/>
-    </item>
-    <item row="0" column="6">
-     <widget class="QWidget" name="pcard7" native="true"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QWidget" name="pcard3" native="true"/>
-    </item>
-    <item row="0" column="5">
-     <widget class="QWidget" name="pcard6" native="true"/>
-    </item>
-    <item row="0" column="1">
-     <widget class="QWidget" name="pcard2" native="true"/>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>350</y>
-     <width>781</width>
-     <height>81</height>
-    </rect>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
-   <layout class="QGridLayout" name="pinfo">
-    <item row="0" column="3">
-     <widget class="QWidget" name="pinfo4" native="true"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="pinfo1" native="true"/>
-    </item>
-    <item row="0" column="4">
-     <widget class="QWidget" name="pinfo5" native="true"/>
-    </item>
-    <item row="0" column="6">
-     <widget class="QWidget" name="pinfo7" native="true"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QWidget" name="pinfo3" native="true"/>
-    </item>
-    <item row="0" column="5">
-     <widget class="QWidget" name="pinfo6" native="true"/>
-    </item>
-    <item row="0" column="1">
-     <widget class="QWidget" name="pinfo2" native="true"/>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="layoutWidget_3">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>130</y>
-     <width>781</width>
-     <height>81</height>
-    </rect>
+   <property name="font">
+    <font>
+     <family>Yu Gothic</family>
+     <pointsize>15</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
-   <layout class="QGridLayout" name="einfo">
-    <item row="0" column="3">
-     <widget class="QWidget" name="einfo4" native="true"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="einfo1" native="true"/>
-    </item>
-    <item row="0" column="4">
-     <widget class="QWidget" name="einfo5" native="true"/>
-    </item>
-    <item row="0" column="6">
-     <widget class="QWidget" name="einfo7" native="true"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QWidget" name="einfo3" native="true"/>
-    </item>
-    <item row="0" column="5">
-     <widget class="QWidget" name="einfo6" native="true"/>
-    </item>
-    <item row="0" column="1">
-     <widget class="QWidget" name="einfo2" native="true"/>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>10</y>
-     <width>781</width>
-     <height>121</height>
-    </rect>
+   <property name="text">
+    <string>NEXT BATTLE</string>
    </property>
-   <layout class="QGridLayout" name="eboard">
-    <item row="0" column="5">
-     <widget class="QWidget" name="ecard6" native="true"/>
-    </item>
-    <item row="0" column="1">
-     <widget class="QWidget" name="ecard2" native="true"/>
-    </item>
-    <item row="0" column="2">
-     <widget class="QWidget" name="ecard3" native="true"/>
-    </item>
-    <item row="0" column="0">
-     <widget class="QWidget" name="ecard1" native="true"/>
-    </item>
-    <item row="0" column="6">
-     <widget class="QWidget" name="ecard7" native="true"/>
-    </item>
-    <item row="0" column="3">
-     <widget class="QWidget" name="ecard4" native="true"/>
-    </item>
-    <item row="0" column="4">
-     <widget class="QWidget" name="ecard5" native="true"/>
-    </item>
-   </layout>
   </widget>
  </widget>
  <resources/>

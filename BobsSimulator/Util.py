@@ -2,6 +2,8 @@ import xmltodict
 import json
 import hearthstone.enums as hsenums
 
+from PySide2.QtCore import QEventLoop, QTimer
+
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER
 
@@ -34,6 +36,12 @@ for card_data in card_data_list:
     card_name_dict[card_id] = {}
     for lang in lang_list:
         card_name_dict[card_id][lang] = card_data['Tag'][0][lang]
+
+
+def qsleep(ms):
+    loop = QEventLoop()
+    QTimer.singleShot(ms, loop.quit)
+    loop.exec_()
 
 
 def card_name_by_id(card_id, locale='koKR'):

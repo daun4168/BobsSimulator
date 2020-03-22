@@ -39,18 +39,19 @@ class WaitingGameWidget(WaitingWidget):
 
 
 class WaitingBattleWidget(WaitingWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, battle_num=0):
         WaitingWidget.__init__(self, parent)
 
-        self.ui.waitingTextTop.setText("Waiting For\nNext Game...")
+        self.ui.waitingTextTop.setText("Waiting For\nNext Battle...")
         font = QFont("Times", 50, QFont.Bold)
         self.ui.waitingTextTop.setFont(font)
         self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
 
-        self.ui.waitingTextBottom.setText(f"Previous Battle: {parent.game.battle_num}")
-        font = QFont("Times", 45, QFont.Bold)
-        self.ui.waitingTextBottom.setFont(font)
-        self.ui.waitingTextBottom.setStyleSheet(f"QLabel {{ color: orange; }}")
+        if battle_num > 0:
+            self.ui.waitingTextBottom.setText(f"Previous Battle: {battle_num}")
+            font = QFont("Times", 40, QFont.Bold)
+            self.ui.waitingTextBottom.setFont(font)
+            self.ui.waitingTextBottom.setStyleSheet(f"QLabel {{ color: orange; }}")
 
 
 if __name__ == '__main__':

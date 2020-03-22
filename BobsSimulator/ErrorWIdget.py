@@ -6,7 +6,7 @@ from BobsSimulator.UI.ErrorWidgetUI import Ui_ErrorWidget
 
 
 class ErrorWidget(QWidget):
-    def __init__(self, parent=None, error_msg=None):
+    def __init__(self, parent, error_msg=None):
         QWidget.__init__(self, parent)
 
         self.ui = Ui_ErrorWidget()

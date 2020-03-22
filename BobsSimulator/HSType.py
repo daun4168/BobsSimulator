@@ -66,6 +66,7 @@ class Minion:
         self.entity_id = 0
         self.card_id = ""
         self.golden = False
+        self.elite = False
 
         self.attack = 0
         self.health = 0
