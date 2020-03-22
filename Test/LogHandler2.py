@@ -102,6 +102,8 @@ class HSGame(QObject):
 
         # self.line_reader()
 
+        self.is_hero_contain = {}  # key: level, value: bool
+
     def init_game(self):
         self.entities = {}
         self.entity_names = {}
@@ -115,6 +117,8 @@ class HSGame(QObject):
         self.minions_other = [None] * 7
         self.graveyard_me = []
         self.graveyard_other = []
+
+        self.is_hero_contain = {}  # key: level, value: bool
 
     def read_line(self):
         return self.log_file.readline()
@@ -168,9 +172,9 @@ class HSGame(QObject):
     def activate_game(self, entity_id):
         if entity_id == self.game_entity and GameTag.STATE.value in self.entities[self.game_entity]:
             if self.entities[self.game_entity][GameTag.STATE.value] == State.COMPLETE:
-                    print(f"---------GAME END!!!----------")
+                print(f"---------GAME END!!!----------")
 
-                    self.print_entities_pretty()
+                self.print_entities_pretty()
 
     def print_entity_pretty(self, entity_id):
         card_name = ""
@@ -188,32 +192,11 @@ class HSGame(QObject):
         if GameTag.CARDTYPE.value in self.entities[entity_id]:
             cardtype = self.entities[entity_id][GameTag.CARDTYPE.value]
 
-        # #  NOT: NO NAME
-        # #  NOT: GRAVEYARD, REMOVEDFROMGAME, SECRET
-        # if card_name and entity_id > 5350:
-        #     print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
-        #
-        #     if cardtype == CardType.MINION.value:
-        #         gametags = ["CONTROLLER", "ZONE_POSITION", "ATK", "HEALTH", "COST", "TAG_LAST_KNOWN_COST_IN_HAND",
-        #                     "CARDRACE", "RARITY",
-        #                     "TECH_LEVEL", "DIVINE_SHIELD", "TAUNT", "POISONOUS", "WINDFURY",
-        #                     "REBORN", "ELITE", "FROZEN", "LINKED_ENTITY", "CREATOR", "STEALTH", "EXHAUSTED",
-        #                     "DEATHRATTLE"]
-        #         for gametag in gametags:
-        #             if GameTag[gametag].value in self.entities[entity_id]:
-        #                 print(f"{gametag}:{self.entities[entity_id][GameTag[gametag].value]}", end=" | ")
-        #         print()
-
-        summon_buff_card_ids = [
-            "BOT_312e",
-            "TB_BaconUps_032e",
-            "UNG_999t2e",
-        ]
 
         if card_name and \
-           zone == Zone.PLAY.value and \
-           (cardtype in [CardType.HERO.value, CardType.HERO_POWER.value, CardType.MINION.value] or
-            card_id in summon_buff_card_ids):
+                zone == Zone.PLAY.value and \
+                (cardtype in [CardType.HERO.value, CardType.HERO_POWER.value, CardType.MINION.value] or
+                 card_id in DEATHRATTLE_BUFF_CARDIDS):
             # zone in [Zone.PLAY.value, Zone.DECK.value, Zone.HAND.value, Zone.SETASIDE.value]:
             print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
 
@@ -229,12 +212,6 @@ class HSGame(QObject):
                 if 1234 in self.entities[entity_id]:
                     print(self.entities[entity_id][1234])
             print()
-
-            # if self.entities[entity_id]["CardID"] == "BOT_312":
-            #     for tag, value in self.entities[entity_id].items():
-            #         if tag in GameTag.__members__.values():
-            #             tag = GameTag(tag).name
-            #         print(f"TAG: {tag}, VALUE: {value}")
 
     def print_entities_pretty(self):
         for entity_id in self.entities.keys():
@@ -275,7 +252,6 @@ class HSGame(QObject):
                 self.entities[entity_id][tag] = value
 
     def get_entity_id_by_entity(self, entity):
-        entity_id = None
         if ENTITY_DESCRIPTION_RE.match(entity):
             entity_id = int(ENTITY_DESCRIPTION_RE.match(entity).group("id"))
         elif entity.isdigit():
@@ -286,34 +262,26 @@ class HSGame(QObject):
             entity_id = self.player_other
         return entity_id
 
-
     def block_handler(self, level):
         self.block_num += 1
-        full_entity_id_list = []
         # print(f"{self.block_num}: {self.contexts[level][0]}")
         text = self.contexts[level][0].strip()
         match_data = BLOCK_START_ENTITY_RE.match(text)
 
         blocktype = match_data.group("BlockType")
         entity_id = self.get_entity_id_by_entity(match_data.group("Entity"))
+        self.is_hero_contain[level] = False
 
         line_num = len(self.contexts[level])
         for i in range(1, line_num-1):
-            full_entity_id_list += self.entity_parser(self.contexts[level][i], level + 1)
+            self.entity_parser(self.contexts[level][i], level + 1)
         if self.contexts[level][line_num-1].split()[0] != "BLOCK_END":
-            full_entity_id_list += self.entity_parser(self.contexts[level][line_num-1], level + 1)
+            self.entity_parser(self.contexts[level][line_num-1], level + 1)
             # self.entity_parser((" "*4*level) + "BLOCK_END", level + 1)
-        full_entity_id_list += self.call_handler(level+1)
+        self.call_handler(level+1)
 
         if blocktype == "TRIGGER" and entity_id == self.baconshop8playerenchant:
-            pass
-            is_hero_contain = False
-            for full_entity_id in full_entity_id_list:
-                if self.entities[full_entity_id]["CardID"].upper().find('HERO') != -1:
-                    is_hero_contain = True
-                    break
-
-            if is_hero_contain:
+            if self.is_hero_contain[level]:
                 print('-'*50)
                 self.game_turn = self.entities[self.game_entity][GameTag.TURN.value]
 
@@ -370,7 +338,10 @@ class HSGame(QObject):
                 logging.error(f"full_entity_handler Error - tag/value: {text}")
 
         self.activate_game(entity_id)
-        return entity_id
+
+        if self.entities[entity_id]["CardID"].upper().find('HERO') != -1:
+            self.is_hero_contain[level - 1] = True
+        return
 
     def tag_change_handler(self, level):
         self.tag_change_num += 1
@@ -480,7 +451,6 @@ class HSGame(QObject):
 
     def call_handler(self, level):
         start_idx = len(self.contexts) - 1
-        full_entity_id_list = []
         for i in range(start_idx, level - 1, -1):
             if not self.contexts[i]:
                 del self.contexts[i]
@@ -489,8 +459,7 @@ class HSGame(QObject):
             if opcode == "CREATE_GAME":
                 self.create_game_handler(level)
             elif opcode == "FULL_ENTITY":
-                full_entity_id = self.full_entity_handler(i)
-                full_entity_id_list.append(full_entity_id)
+                self.full_entity_handler(i)
             elif opcode == "TAG_CHANGE":
                 self.tag_change_handler(i)
             elif opcode == "BLOCK_START":
@@ -509,36 +478,34 @@ class HSGame(QObject):
                 logging.error(f"call_handler() error: {self.contexts[i]}")
                 raise NotImplementedError
             del self.contexts[i]
-        return full_entity_id_list
 
     def entity_parser(self, context, level=0):
         context_level = (len(context) - len(context.lstrip())) // 4
-        full_entity_id_list = []
         if context_level > level:
             self.contexts[level].append(context)
-            return full_entity_id_list
+            return
         words = context.split()
         if words[0] in ENTITY_TYPES:
             if words[0] == "BLOCK_END" or words[0] == "SUB_SPELL_END":
                 if level < len(self.contexts):
                     self.contexts[level].append(context)
-                    full_entity_id_list += self.call_handler(level)
+                    self.call_handler(level)
             elif words[0] == "CREATE_GAME" or words[0] == "BLOCK_START" or words[0] == "FULL_ENTITY" or words[0] == "CHANGE_ENTITY" \
                     or words[0] == "SHOW_ENTITY" or words[0] == "META_DATA" or words[0] == "SUB_SPELL_START":
-                full_entity_id_list += self.call_handler(context_level)
+                self.call_handler(context_level)
                 if len(self.contexts) != level:
                     logging.error(f"entity_parser()  error: level not correct")
                     raise IndexError
                 self.contexts.append(list())
                 self.contexts[level].append(context)
             elif words[0] == "TAG_CHANGE" or words[0] == "HIDE_ENTITY":
-                full_entity_id_list += self.call_handler(level)
+                self.call_handler(level)
                 self.contexts.append(list())
                 self.contexts[level].append(context)
-                full_entity_id_list += self.call_handler(level)
+                self.call_handler(level)
         else:
             logging.error(f"entity_parser() error: unknown entity type: {words[0]}")
-        return full_entity_id_list
+        return
 
     def line_parser(self, line):
         if GAME_STATE_DEBUG_PRINT_POWER_RE.match(line):

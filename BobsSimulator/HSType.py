@@ -8,51 +8,78 @@ class Game:
 
         self.turn_num = 0
         self.battle_num = 0
-        self.player_hero_id = ""
-        self.player_hp = 40
+        self.leaderboard_place = 1
 
-        self.board = Board()
-        self.board_history = {}  # key: battle_num, value: board
+        self.battle = Battle()
+        self.battle_history = {}  # key: battle_num, value: board
 
         self.player_graveyard = []
         self.enemy_graveyard = []
 
 
-class Board:
+class Battle:
     def __init__(self):
-        self.turn_num = 0
-        self.battle_num = 0
-
-        self.player_board = [None] * 7
+        self.player_board = [None] * 8
         self.player_hero = Hero()
+        self.player_hero_power = HeroPower()
+        self.player_hero_secrets = []
 
-        self.enemy_board = [None] * 7
+        self.enemy_board = [None] * 8
         self.enemy_hero = Hero()
+        self.enemy_hero_power = HeroPower()
+        self.enemy_hero_secrets = []
+
 
 class Hero:
     def __init__(self):
+        self.entity_id = 0
         self.card_id = ""
         self.health = 40
+        self.damage = 0
+        self.taken_damage = 0
         self.tech_level = 0
 
 
-class Card:
+
+class HeroPower:
     def __init__(self):
+        self.entity_id = 0
+        self.card_id = ""
+        self.exhausted = False
+
+
+class Secret:
+    def __init__(self):
+        self.entity_id = 0
+        self.card_id = ""
+
+
+class Enchantment:
+    def __init__(self):
+        self.entity_id = 0
+        self.card_id = ""
+        self.attached_id = 0
+
+
+class Minion:
+    def __init__(self):
+        self.entity_id = 0
         self.card_id = ""
         self.golden = False
 
         self.attack = 0
         self.health = 0
+        self.damage = 0
         self.taunt = False
         self.divine_shield = False
         self.poisonous = False
         self.windfury = False
         self.reborn = False
-        self.death_rate = []
+        self.enchantments = []
 
         self.zone = None
-        self.player = None
-        self.is_mine = False
+        self.pos = None
+        self.is_mine = False  # if card is player's, True
 
 
 ENTITY_TYPES = ["CREATE_GAME",
@@ -69,6 +96,27 @@ ENTITY_TYPES = ["CREATE_GAME",
                 "SUB_SPELL_END",
                 ]
 
+DEATHRATTLE_BUFF_CARDIDS = [
+    "BOT_312e",
+    "TB_BaconUps_032e",
+    "UNG_999t2e",
+]
 
+BOB_NAMES = [
+    "Bobs Gasthaus",
+    "Bob's Tavern",
+    "Taberna de Bob",
+    "Taberna de Bob",
+    "Taverne de Bob",
+    "Locanda di Bob",
+    "ボブの酒場",
+    "밥의 선술집",
+    "Karczma Boba",
+    "Taverna do Bob",
+    "Таверна Боба",
+    "โรงเตี๊ยมของบ็อบ",
+    "鲍勃的酒馆",
+    "鮑伯的旅店",
+]
 
 

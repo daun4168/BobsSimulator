@@ -30,7 +30,8 @@
       "level": "DEBUG",
       "formatter": "default",
       "filename": "logs/BobsSimulator.log",
-      "mode": "w"
+      "mode": "w",
+      "encoding": "UTF-8"
     },
 
     "hsbattle_file_handler": {
@@ -38,7 +39,8 @@
       "level": "INFO",
       "formatter": "only_message",
       "filename": "logs/HSBattle.log",
-      "mode": "w"
+      "mode": "w",
+      "encoding": "UTF-8"
     },
 
     "hsloghandler_file_handler": {
@@ -46,7 +48,8 @@
       "level": "DEBUG",
       "formatter": "default",
       "filename": "logs/HSLogHandler.log",
-      "mode": "w"
+      "mode": "w",
+      "encoding": "UTF-8"
     }
   },
 

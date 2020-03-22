@@ -3,12 +3,23 @@ import json
 import hearthstone.enums as hsenums
 
 from BobsSimulator.HSLogging import main_logger
+from BobsSimulator.Main import VERSION_NUMBER
+
+import hearthstone_data
+
+
+carddefs_path = hearthstone_data.get_carddefs_path()
+carddefs_version = int(float(hearthstone_data.__version__))
+
+if VERSION_NUMBER != carddefs_version:
+    main_logger.warning(f"Build number NOT correct, Program: {VERSION_NUMBER}, CardDefs: {carddefs_version}")
 
 
 card_name_dict = {}
-CardDefs = open(r'res/CardDefs.xml', 'r', encoding='UTF8')
-
+CardDefs = open(carddefs_path, 'r', encoding='UTF8')
 card_dict = xmltodict.parse(CardDefs.read())
+CardDefs.close()
+
 card_dict = json.dumps(card_dict)
 card_dict = json.loads(card_dict)
 
@@ -25,10 +36,10 @@ for card_data in card_data_list:
         card_name_dict[card_id][lang] = card_data['Tag'][0][lang]
 
 
-def card_name_by_id(card_id, lang='koKR'):
+def card_name_by_id(card_id, locale='koKR'):
     if not card_id:
         return ""
-    return card_name_dict[card_id][lang]
+    return card_name_dict[card_id][locale]
 
 
 def tag_value_to_int(tag, value):
@@ -60,6 +71,8 @@ def tag_value_to_int(tag, value):
                 value = int(hsenums.PlayState[value])
             elif tag == int(hsenums.GameTag.STATE):
                 value = int(hsenums.State[value])
+            elif tag == int(hsenums.GameTag.CLASS):
+                value = int(hsenums.CardClass[value])
             else:
                 main_logger.error(f"tag_value_to_int() key(value) error - no tag name, tag: {tag}, value: {value}")
         except KeyError:

@@ -1,19 +1,28 @@
 import sys
 import os
+from enum import IntEnum
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt, QSize, QRect, QPoint
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
+from BobsSimulator.Main import VERSION_NUMBER, LOCALE
 from BobsSimulator.HomeWidget import HomeWidget
 from BobsSimulator.LoadingWidget import LoadingWidget
 from BobsSimulator.WaitingWidget import WaitingGameWidget, WaitingBattleWidget
 from BobsSimulator.ErrorWIdget import ErrorWidget
-
 from BobsSimulator.HSType import Game
-from BobsSimulator.HSLogging import main_logger
+from BobsSimulator.HSLogging import main_logger, hsbattle_logger
+
 
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
+
+
+class SimulateType(IntEnum):
+    REAL = 1
+    FILE = 2
+    TEXT = 3
+
 
 class DefaultWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -34,7 +43,9 @@ class DefaultWindow(QMainWindow):
 
         # Some Variables
         self.hs_dir = "C:/Program Files (x86)/Hearthstone"
-        self.game = Game()
+        self.simulate_type = None  # SimulateType
+        self.log_file = None  # file pointer
+        self.log_handler = None  # HSLogHandler
 
         # background setting
         bg_image = QImage("res/img/background.jpg").scaled(self.window_size)
@@ -47,6 +58,7 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def home(self):
+        self.simulate_type = None
         main_logger.info("Bob's Simulator Home.")
         homeWidget = HomeWidget(self)
 
@@ -54,6 +66,7 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def real_time_simulate(self):
+        self.simulate_type = SimulateType.REAL
         main_logger.info("Real Time Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
 
@@ -61,10 +74,11 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def log_file_simulate(self):
-        main_logger.info("Log File Simulate Starts.")
+        self.simulate_type = SimulateType.FILE
+        main_logger.info("Log File Simulate Start")
         fname = QFileDialog.getOpenFileName(self, "Select log file", filter='Log file(*.log)')
-        self.log_file_name = fname[0]
-        if not self.log_file_name:
+        log_file_name = fname[0]
+        if not log_file_name:
             return
 
         self.loading()
@@ -74,9 +88,21 @@ class DefaultWindow(QMainWindow):
         self.setCentralWidget(waitingWidget)
         self.show()
 
+        self.log_file = open(log_file_name, 'r', encoding="UTF8")
+        from BobsSimulator.HSLogHandler import HSLogHandler
+        self.log_handler = HSLogHandler(self.log_file)
 
+        self.log_handler.sig_game_start.connect(self.game_start_handler)
+        self.log_handler.sig_game_info.connect(self.game_info_handler)
+        self.log_handler.sig_battle_start.connect(self.battle_start_handler)
+        self.log_handler.sig_battle_end.connect(self.battle_end_handler)
+        self.log_handler.sig_end_game.connect(self.end_game_handler)
+        self.log_handler.sig_end_file.connect(self.end_file_handler)
+
+        self.log_handler.line_reader()
 
     def text_simulate(self):
+        self.simulate_type = SimulateType.TEXT
         main_logger.info("Text File Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
 
@@ -98,7 +124,6 @@ class DefaultWindow(QMainWindow):
                     continue
             else:
                 return False
-
 
     def about(self):
         QMessageBox.about(self, "About Bob's Simulator",
@@ -180,7 +205,112 @@ class DefaultWindow(QMainWindow):
         help_menu.addAction(self.aboutAction)
         help_menu.addAction(self.licenseAction)
 
+    def game_start_handler(self):
+        hsbattle_logger.info(f"# {'='*50}")
+        hsbattle_logger.info(f"# Game Start")
 
+    def game_info_handler(self):
+        hsbattle_logger.info(f"# Build: {self.log_handler.game.build_number}")
+        hsbattle_logger.info(f"# Game Type: {self.log_handler.game.game_type}")
+        hsbattle_logger.info(f"# Format Type: {self.log_handler.game.format_type}")
+        hsbattle_logger.info(f"# Scenario ID: {self.log_handler.game.scenarioID}")
+        hsbattle_logger.info(f"# Battle tag: {self.log_handler.game.player_battle_tag}")
+        hsbattle_logger.info(f"# {'-'*50}")
+
+    def battle_start_handler(self):
+        from BobsSimulator.Util import card_name_by_id
+
+        def hero_log_print(hero, start_text):
+            hero_cardid = hero.card_id
+            hero_name = card_name_by_id(hero_cardid, locale=LOCALE)
+            hero_hp = hero.health - hero.damage
+            hero_tech = hero.tech_level
+            hsbattle_logger.info(f"""* {start_text} -name "{hero_name} @{hero_cardid}" -hp {hero_hp} -tech {hero_tech} """)
+
+        def hero_power_log_print(hero_power, start_text):
+            hero_power_cardid = hero_power.card_id
+            hero_power_name = card_name_by_id(hero_power_cardid, locale=LOCALE)
+            hero_power_log_text = f"""* {start_text} -name "{hero_power_name} @{hero_power_cardid}" """
+            if hero_power.exhausted:
+                hero_power_log_text += "-exhausted "
+            hsbattle_logger.info(hero_power_log_text)
+
+        def secret_log_print(secrets, start_text):
+            for secret in secrets:
+                secret_cardid = secret.card_id
+                secret_name = card_name_by_id(secret_cardid, locale=LOCALE)
+                hsbattle_logger.info(f"""* {start_text} -name "{secret_name} @{secret_cardid}" """)
+
+        def minion_log_print(board, start_text):
+            for minion in board:
+                if not minion:
+                    continue
+                minion_cardid = minion.card_id
+                minion_name = card_name_by_id(minion_cardid, locale=LOCALE)
+                minion_hp = minion.health - minion.damage
+
+                minion_text = f"""* {start_text} -name "{minion_name} @{minion_cardid}" -atk {minion.attack} -hp {minion_hp} -pos {minion.pos} """
+                if minion.golden:
+                    minion_text += "-golden "
+                if minion.taunt:
+                    minion_text += "-taunt "
+                if minion.divine_shield:
+                    minion_text += "-divine_shield "
+                if minion.poisonous:
+                    minion_text += "-poisonous "
+                if minion.windfury:
+                    minion_text += "-windfury "
+                if minion.reborn:
+                    minion_text += "-reborn "
+
+                for enchant in minion.enchantments:
+                    enchant_cardid = enchant.card_id
+                    enchant_name = card_name_by_id(enchant_cardid, locale=LOCALE)
+                    minion_text += f"""-enchant "{enchant_name} @{enchant_cardid}" """
+
+                hsbattle_logger.info(minion_text)
+
+        # PLAYER
+        hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} Start")
+        hero_log_print(self.log_handler.game.battle.player_hero, "PlayerHero")
+        hero_power_log_print(self.log_handler.game.battle.player_hero_power, "PlayerHeroPower")
+        secret_log_print(self.log_handler.game.battle.player_hero_secrets, "PlayerHeroSecret")
+        minion_log_print(self.log_handler.game.battle.player_board, "PlayerMinion")
+
+        # ENEMY
+        hsbattle_logger.info(f"# versus")
+        hero_log_print(self.log_handler.game.battle.enemy_hero, "EnemyHero")
+        hero_power_log_print(self.log_handler.game.battle.enemy_hero_power, "EnemyHeroPower")
+        secret_log_print(self.log_handler.game.battle.enemy_hero_secrets, "EnemyHeroSecret")
+        minion_log_print(self.log_handler.game.battle.enemy_board, "EnemyMinion")
+
+    def battle_end_handler(self):
+        hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} End")
+        player_hp = self.log_handler.game.battle.player_hero.health - self.log_handler.game.battle.player_hero.damage
+        enemy_hp = self.log_handler.game.battle.enemy_hero.health - self.log_handler.game.battle.enemy_hero.damage
+
+        if self.log_handler.game.battle.player_hero.taken_damage == 0 and self.log_handler.game.battle.player_hero.taken_damage == 0:
+            hsbattle_logger.info(f"# DRAW")
+        elif self.log_handler.game.battle.player_hero.taken_damage == 0:
+            hsbattle_logger.info(f"# Player Win")
+            hsbattle_logger.info(f"# Player Give Damage: {self.log_handler.game.battle.enemy_hero.taken_damage}")
+        else:
+            hsbattle_logger.info(f"# Enemy Win")
+            hsbattle_logger.info(f"# Player Take Damage: {self.log_handler.game.battle.player_hero.taken_damage}")
+
+        hsbattle_logger.info(f"# PlayerHP: {player_hp}, EnemyHP: {enemy_hp}")
+        hsbattle_logger.info(f"# PlayerRank: {self.log_handler.game.leaderboard_place}")
+
+        hsbattle_logger.info(f"# {'-'*50}")
+
+    def end_game_handler(self):
+        hsbattle_logger.info(f"# Game End")
+        hsbattle_logger.info(f"# Player Rank: {self.log_handler.game.leaderboard_place}")
+        hsbattle_logger.info(f"# {'='*50}")
+
+    def end_file_handler(self):
+        if self.simulate_type == SimulateType.FILE:
+            main_logger.info("Log File Simulate End")
 
 
 if __name__ == '__main__':

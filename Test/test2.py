@@ -1,10 +1,22 @@
-import sys
-from PySide2.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QGridLayout,
-                               QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox)
-from PySide2.QtGui import QIcon
-from PySide2.QtCore import Qt, Signal
 
-import hearthstone_data
-carddefs_path = hearthstone_data.get_carddefs_path()
+from BobsSimulator.HSType import Hero, Minion, Battle, ENTITY_TYPES, Enchantment
 
-print(int(float(hearthstone_data.__version__)))
+
+entity_id_to_minion_dict = {}
+
+battle = Battle()
+minion = Minion()
+
+
+battle.player_board[2] = minion
+entity_id_to_minion_dict[10] = minion
+
+
+enchant = Enchantment()
+
+enchant.entity_id = 200
+
+entity_id_to_minion_dict[10].enchantments.append(enchant)
+
+
+print(1)
