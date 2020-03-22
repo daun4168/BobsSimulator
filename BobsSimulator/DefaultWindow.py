@@ -12,6 +12,8 @@ from BobsSimulator.LoadingWidget import LoadingWidget
 from BobsSimulator.WaitingWidget import WaitingGameWidget, WaitingBattleWidget
 from BobsSimulator.BattleInfoWidget import BattleInfoWidget
 from BobsSimulator.ErrorWIdget import ErrorWidget
+from BobsSimulator.FileEndWidget import FileEndWidget
+from BobsSimulator.GameEndWidget import GameEndWidget
 from BobsSimulator.HSType import Game
 from BobsSimulator.HSLogging import main_logger, hsbattle_logger
 
@@ -303,7 +305,7 @@ class DefaultWindow(QMainWindow):
         player_hp = self.log_handler.game.battle.player_hero.health - self.log_handler.game.battle.player_hero.damage
         enemy_hp = self.log_handler.game.battle.enemy_hero.health - self.log_handler.game.battle.enemy_hero.damage
 
-        if self.log_handler.game.battle.player_hero.taken_damage == 0 and self.log_handler.game.battle.player_hero.taken_damage == 0:
+        if self.log_handler.game.battle.player_hero.taken_damage == 0 and self.log_handler.game.battle.enemy_hero.taken_damage == 0:
             hsbattle_logger.info(f"# DRAW")
         elif self.log_handler.game.battle.player_hero.taken_damage == 0:
             hsbattle_logger.info(f"# Player Win")
@@ -334,17 +336,23 @@ class DefaultWindow(QMainWindow):
         hsbattle_logger.info(f"# Player Rank: {self.log_handler.game.leaderboard_place}")
         hsbattle_logger.info(f"# {'='*50}")
 
-        if self.simulate_type == SimulateType.REAL:
-            waitingWidget = WaitingGameWidget(self)
-            self.setCentralWidget(waitingWidget)
-            self.show()
-            QtCore.QCoreApplication.processEvents()
 
-        self.log_handler.line_reader_start()
+        hero_cardid = self.log_handler.game.battle.player_hero.card_id
+        rank_num = self.log_handler.game.leaderboard_place
+        gameEndWidget = GameEndWidget(hero_cardid, rank_num, self)
+        self.setCentralWidget(gameEndWidget)
+        self.show()
+
+        QtCore.QCoreApplication.processEvents()
+
 
     def end_file_handler(self):
         if self.simulate_type == SimulateType.FILE:
             main_logger.info("Log File Simulate End")
+            fileEndWidget = FileEndWidget(self)
+            self.setCentralWidget(fileEndWidget)
+            self.show()
+            return
 
         self.log_handler.line_reader_start()
 
@@ -352,6 +360,12 @@ class DefaultWindow(QMainWindow):
         print("simulate")
 
     def next_battle(self):
+        if self.simulate_type == SimulateType.REAL:
+            waitingWidget = WaitingGameWidget(self)
+            self.setCentralWidget(waitingWidget)
+            self.show()
+            QtCore.QCoreApplication.processEvents()
+
         self.log_handler.line_reader_start()
 
 

@@ -4,6 +4,7 @@ import hearthstone.enums as hsenums
 
 from PySide2.QtCore import QEventLoop, QTimer
 
+
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER
 
@@ -87,4 +88,11 @@ def tag_value_to_int(tag, value):
         value = int(value)
 
     return tag, value
+
+
+
+
+
+
+
 

@@ -5,3 +5,5 @@ pyside2-uic LoadingWidget.ui > LoadingWidgetUI.py
 pyside2-uic WaitingWidget.ui > WaitingWidgetUI.py
 pyside2-uic ErrorWidget.ui > ErrorWidgetUI.py
 pyside2-uic BattleInfoWidget.ui > BattleInfoWidgetUI.py
+pyside2-uic FileEndWidget.ui > FileEndWidgetUI.py
+pyside2-uic GameEndWidget.ui > GameEndWidgetUI.py
