@@ -13,9 +13,6 @@ class Game:
         self.battle = Battle()
         self.battle_history = {}  # key: battle_num, value: board
 
-        self.player_graveyard = []
-        self.enemy_graveyard = []
-
 
 class Battle:
     def __init__(self):
@@ -23,11 +20,13 @@ class Battle:
         self.player_hero = Hero()
         self.player_hero_power = HeroPower()
         self.player_hero_secrets = []
+        self.player_graveyard = []
 
         self.enemy_board = [None] * 8
         self.enemy_hero = Hero()
         self.enemy_hero_power = HeroPower()
         self.enemy_hero_secrets = []
+        self.enemy_graveyard = []
 
 
 class Hero:

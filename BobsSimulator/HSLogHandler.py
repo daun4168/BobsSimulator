@@ -170,6 +170,8 @@ class HSLogHandler(QObject):
             if GameTag.CARDTYPE.value in self.entities[entity_id]:
                 cardtype = self.entities[entity_id][GameTag.CARDTYPE.value]
 
+
+
             if card_name and zone == Zone.PLAY.value:
                 if cardtype == CardType.HERO.value:
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:  # player hero

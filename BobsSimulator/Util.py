@@ -7,10 +7,13 @@ from PySide2.QtCore import QEventLoop, QTimer
 
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER
+import hearthstone_data
+import hearthstone
 
-
-carddefs_path = 'res/CardDefs.xml'
-carddefs_version = 43246
+# carddefs_path = 'res/CardDefs.xml'
+# carddefs_version = 43246
+carddefs_path = hearthstone_data.get_carddefs_path()
+carddefs_version = int(float(hearthstone_data.__version__))
 
 if VERSION_NUMBER != carddefs_version:
     main_logger.warning(f"Build number NOT correct, Program: {VERSION_NUMBER}, CardDefs: {carddefs_version}")
@@ -90,9 +93,14 @@ def tag_value_to_int(tag, value):
     return tag, value
 
 
+if __name__ == "__main__":
+    import hearthstone
 
+    import hearthstone_data
 
-
+    print(hearthstone.__version__)
+    print(hearthstone_data.__version__)
+    print(hearthstone_data.get_carddefs_path())
 
 
 
