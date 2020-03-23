@@ -2,7 +2,7 @@ import sys
 import os
 from enum import IntEnum
 from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt, QSize, QRect, QPoint
+from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
@@ -46,6 +46,10 @@ class DefaultWindow(QMainWindow):
 
         # Some Variables
         self.hs_dir = "C:/Program Files (x86)/Hearthstone"
+        self.log_file_name = os.path.join(self.hs_dir, 'Logs/Power.log')
+        self.log_file_dir = os.path.join(self.hs_dir, 'Logs')
+        self.dirwatcher = None
+        self.filewatcher = None
         self.simulate_type = None  # SimulateType
         self.log_file = None  # file pointer
         self.log_handler = None  # HSLogHandler
@@ -60,33 +64,89 @@ class DefaultWindow(QMainWindow):
 
         self.show()
 
-    def home(self):
+    def init(self):
+        self.dirwatcher = None
+        self.filewatcher = None
         self.simulate_type = None
+        self.log_file = None
+        self.log_handler = None
+
+    def home(self):
+        self.init()
+
         main_logger.info("Bob's Simulator Home.")
         homeWidget = HomeWidget(self)
 
         self.setCentralWidget(homeWidget)
         self.show()
 
+    def log_file_changed(self):
+        if not self.log_handler:
+            self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
+            from BobsSimulator.HSLogHandler import HSLogHandler
+            self.log_handler = HSLogHandler(self.log_file)
+
+            self.log_handler.sig_game_start.connect(self.game_start_handler)
+            self.log_handler.sig_game_info.connect(self.game_info_handler)
+            self.log_handler.sig_battle_start.connect(self.battle_start_handler)
+            self.log_handler.sig_battle_end.connect(self.battle_end_handler)
+            self.log_handler.sig_end_game.connect(self.end_game_handler)
+            self.log_handler.sig_end_file.connect(self.end_file_handler)
+
+        print("log file changed!!!")
+        self.log_handler.line_reader_start()
+
+    def log_dir_changed(self):
+        print('log_dir_changed')
+        if not self.filewatcher:
+            self.filewatcher = QFileSystemWatcher([self.log_file_name])
+        if len(self.filewatcher.files()) == 0:
+            self.filewatcher.fileChanged.connect(self.log_file_changed)
+
     def real_time_simulate(self):
+        self.init()
         self.simulate_type = SimulateType.REAL
         main_logger.info("Real Time Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
 
-        self.setCentralWidget(errorWidget)
+        if not os.path.isfile(os.path.join(self.hs_dir, 'Hearthstone.exe')):
+            QMessageBox.information(self, "ERROR", "Please Set Correct Hearthstone Directory First")
+            self.set_hs_dir()
+
+        if not os.path.isfile(os.path.join(self.hs_dir, 'Hearthstone.exe')):
+            return
+
+        self.log_file_name = os.path.join(self.hs_dir, 'Logs/Power.log')
+        self.log_file_dir = os.path.join(self.hs_dir, 'Logs')
+
+        self.loading()
+
+        if not os.path.isdir(self.log_file_dir):
+            os.mkdir(self.log_file_dir)
+
+        waitingGameWidget = WaitingGameWidget(self)
+        self.setCentralWidget(waitingGameWidget)
         self.show()
 
+        self.dirwatcher = QFileSystemWatcher([self.log_file_dir])
+        self.dirwatcher.directoryChanged.connect(self.log_dir_changed)
+
+        if os.path.isfile(self.log_file_name):
+            self.log_file_changed()
+
     def log_file_simulate(self):
+        self.init()
         self.simulate_type = SimulateType.FILE
         main_logger.info("Log File Simulate Start")
         fname = QFileDialog.getOpenFileName(self, "Select log file", filter='Log file(*.log)')
-        log_file_name = fname[0]
-        if not log_file_name:
+        self.log_file_name = fname[0]
+        if not self.log_file_name:
+            self.home()
             return
 
         self.loading()
 
-        self.log_file = open(log_file_name, 'r', encoding="UTF8")
+        self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
         from BobsSimulator.HSLogHandler import HSLogHandler
         self.log_handler = HSLogHandler(self.log_file)
 
@@ -97,9 +157,8 @@ class DefaultWindow(QMainWindow):
         self.log_handler.sig_end_game.connect(self.end_game_handler)
         self.log_handler.sig_end_file.connect(self.end_file_handler)
 
-        self.log_handler.line_reader_start()
-
     def text_simulate(self):
+        self.init()
         self.simulate_type = SimulateType.TEXT
         main_logger.info("Text File Simulate Starts.")
         errorWidget = ErrorWidget(self, "It's not implemented..")
@@ -298,8 +357,6 @@ class DefaultWindow(QMainWindow):
         self.show()
         QtCore.QCoreApplication.processEvents()
 
-        # self.log_handler.do_line_reader = True
-
     def battle_end_log_handler(self):
         hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} End")
         player_hp = self.log_handler.game.battle.player_hero.health - self.log_handler.game.battle.player_hero.damage
@@ -344,7 +401,6 @@ class DefaultWindow(QMainWindow):
         self.show()
 
         QtCore.QCoreApplication.processEvents()
-
 
     def end_file_handler(self):
         if self.simulate_type == SimulateType.FILE:
