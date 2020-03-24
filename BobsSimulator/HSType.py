@@ -28,6 +28,16 @@ class Player:
         self.secrets = []
         self.graveyard = []
 
+    def empty(self):
+        return self.board.count(None) == len(self.board)
+
+    def sum_damage(self):
+        damage = 0
+
+
+
+        return damage
+
 
 class Hero:
     def __init__(self):
@@ -65,6 +75,14 @@ class Minion:
         self.card_id = ""
         self.golden = False
         self.elite = False
+        self.tech_level = 1
+        self.cost = 0
+
+        # self.race = None -> CARDRACE ******
+        # self.faction -> FACTION *******
+        # self.battlecry
+
+        self.exhausted = 0
 
         self.attack = 0
         self.health = 0
@@ -74,11 +92,15 @@ class Minion:
         self.poisonous = False
         self.windfury = False
         self.reborn = False
+        self.deathrattle = False
+        self.battlecry = False
+        self.start_of_combat = False
         self.enchantments = []
 
         self.zone = None
         self.pos = None
         self.is_mine = False  # if card is player's, True
+
 
 
 ENTITY_TYPES = ["CREATE_GAME",

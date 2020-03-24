@@ -120,6 +120,7 @@ class HSLogHandler(QObject):
                     print(f"{gametag}:{self.entities[entity_id][GameTag[gametag].value]}", end=" | ")
             print()
 
+
         if card_name and \
                 zone == Zone.SECRET.value:
             print(f"{entity_id} - Name: {card_name}, CardID: {card_id} Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
@@ -216,8 +217,16 @@ class HSLogHandler(QObject):
                     minion.entity_id = entity_id
                     minion.card_id = card_id
                     minion.golden = card_id.startswith('TB_BaconUps')
+                    if GameTag["BACON_MINION_IS_LEVEL_TWO"].value in self.entities[entity_id]:
+                        minion.golden = self.entities[entity_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value]
                     if GameTag["ELITE"].value in self.entities[entity_id]:
                         minion.elite = self.entities[entity_id][GameTag["ELITE"].value]
+                    if GameTag["TECH_LEVEL"].value in self.entities[entity_id]:
+                        minion.tech_level = self.entities[entity_id][GameTag["TECH_LEVEL"].value]
+                    if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
+                        minion.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                    if GameTag["COST"].value in self.entities[entity_id]:
+                        minion.cost = self.entities[entity_id][GameTag["COST"].value]
                     if GameTag["ATK"].value in self.entities[entity_id]:
                         minion.attack = self.entities[entity_id][GameTag["ATK"].value]
                     if GameTag["HEALTH"].value in self.entities[entity_id]:
@@ -234,6 +243,12 @@ class HSLogHandler(QObject):
                         minion.windfury = self.entities[entity_id][GameTag["WINDFURY"].value]
                     if GameTag["REBORN"].value in self.entities[entity_id]:
                         minion.reborn = self.entities[entity_id][GameTag["REBORN"].value]
+                    if GameTag["DEATHRATTLE"].value in self.entities[entity_id]:
+                        minion.deathrattle = self.entities[entity_id][GameTag["DEATHRATTLE"].value]
+                    if GameTag["BATTLECRY"].value in self.entities[entity_id]:
+                        minion.battlecry = self.entities[entity_id][GameTag["BATTLECRY"].value]
+                    if GameTag["START_OF_COMBAT"].value in self.entities[entity_id]:
+                        minion.start_of_combat = self.entities[entity_id][GameTag["START_OF_COMBAT"].value]
 
                     minion.zone = zone
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
@@ -675,7 +690,7 @@ if __name__ == '__main__':
     power = open(os.path.join(HS_LOG_FILE_DIR, "Power.log"), 'r', encoding="UTF8")
     power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
 
-    log_handler = HSLogHandler(log_file_2020_03_21_23_33_29, is_print_console=True)
-    log_handler.line_reader()
+    log_handler = HSLogHandler(log_file_2020_03_06_20_31_28, is_print_console=True)
+    log_handler.line_reader_start()
 
 

@@ -6,7 +6,7 @@ from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, St
 
 
 from BobsSimulator.Util import card_name_by_id
-from BobsSimulator.HSType import Hero, Minion, Battle, ENTITY_TYPES
+from BobsSimulator.HSType import Hero, Minion, Battle, ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS
 from BobsSimulator.Regex import *
 
 
@@ -209,8 +209,15 @@ class HSGame(QObject):
             for gametag in gametags:
                 if GameTag[gametag].value in self.entities[entity_id]:
                     print(f"{gametag}:{self.entities[entity_id][GameTag[gametag].value]}", end=" | ")
-                if 1234 in self.entities[entity_id]:
-                    print(self.entities[entity_id][1234])
+            if cardtype == CardType.MINION.value:
+                for tag, value in self.entities[entity_id].items():
+                    if tag in GameTag.__members__.values():
+                        tag = GameTag(tag).name
+                        if not tag in ['CONTROLLER', 'COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                                       'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                                       'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION', 'START_OF_COMBAT',
+                                       'TRIGGER_VISUAL', 'DEATHRATTLE']:
+                            print(f"TAG: {tag}, VALUE: {value}")
             print()
 
     def print_entities_pretty(self):
@@ -605,7 +612,7 @@ if __name__ == '__main__':
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
 
 
-    game = HSGame(log_file_2020_03_01_21_19_18)
+    game = HSGame(log_file_2020_03_06_20_31_28)
     game.line_reader()
     # HSGame(log_file_2020_03_01_21_19_18)
     # HSGame(log_file_2020_03_01_21_19_18)

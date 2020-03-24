@@ -60,7 +60,7 @@ class DefaultWindow(QMainWindow):
         palette.setBrush(QPalette.Background, QBrush(bg_image))
         self.setPalette(palette)
 
-        self.createMenus()
+        self.create_menus()
 
         self.show()
 
@@ -207,7 +207,7 @@ class DefaultWindow(QMainWindow):
         QtCore.QCoreApplication.processEvents()
         import BobsSimulator.Util
 
-    def createMenus(self):
+    def create_menus(self):
         # Mode MENU
         # Go To Home
         self.HomeAction = QAction("&Home", self)
@@ -416,7 +416,8 @@ class DefaultWindow(QMainWindow):
 
     def simulate(self):
         from BobsSimulator.Simulator import Simulator
-        result = Simulator.simulate(self.log_handler.game.battle)
+        simulator = Simulator()
+        result = simulator.simulate(self.log_handler.game.battle)
 
         simulate_num = len(result)
         if not simulate_num:

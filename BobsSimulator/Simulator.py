@@ -9,22 +9,40 @@ import copy
 class Simulator(QObject):
     def __init__(self):
         QObject.__init__()
+        self.battle = None
 
-    @staticmethod
-    def simulate(battle: Battle, simulate_num=1) -> list:
+
+    def simulate(self, battle: Battle, simulate_num=1) -> list:
         result = []
         simulator_logger.info("="*50)
         simulator_logger.info("Simulate Start")
 
         for i in range(simulate_num):
-            copy_battle = copy.deepcopy(battle)
-            result.append(Simulator.simulate_once(copy_battle))
+            self.battle = copy.deepcopy(battle)
+            result.append(self.simulate_once())
         simulator_logger.info("=" * 50)
         return result
 
-    @staticmethod
-    def simulate_once(battle: Battle):
+
+    def simulate_once(self):
+
+        seq = 0
+
+        did_attack_last_seq = True
+        did_attack_this_seq = True
+
+        while True:
+            if self.battle.me.empty() and self.battle.enemy.empty():  # Draw
+                return 0
+            elif self.battle.me.empty():  # Lose
+
+
+
+
+
 
         battle.test_number += i
 
         return battle.test_number
+
+
