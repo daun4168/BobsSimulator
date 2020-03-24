@@ -16,17 +16,17 @@ class Game:
 
 class Battle:
     def __init__(self):
-        self.player_board = [None] * 8
-        self.player_hero = Hero()
-        self.player_hero_power = HeroPower()
-        self.player_hero_secrets = []
-        self.player_graveyard = []
+        self.me = Player()
+        self.enemy = Player()
 
-        self.enemy_board = [None] * 8
-        self.enemy_hero = Hero()
-        self.enemy_hero_power = HeroPower()
-        self.enemy_hero_secrets = []
-        self.enemy_graveyard = []
+
+class Player:
+    def __init__(self):
+        self.board = [None] * 8
+        self.hero = Hero()
+        self.hero_power = HeroPower()
+        self.secrets = []
+        self.graveyard = []
 
 
 class Hero:
@@ -37,7 +37,6 @@ class Hero:
         self.damage = 0
         self.taken_damage = 0
         self.tech_level = 0
-
 
 
 class HeroPower:

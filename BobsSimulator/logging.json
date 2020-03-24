@@ -50,6 +50,14 @@
       "filename": "logs/HSLogHandler.log",
       "mode": "w",
       "encoding": "UTF-8"
+    },
+    "simulator_file_handler": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "default",
+      "filename": "logs/Simulator.log",
+      "mode": "w",
+      "encoding": "UTF-8"
     }
   },
 
@@ -70,6 +78,12 @@
     "hsloghandler": {
       "level": "DEBUG",
       "handlers": ["hsloghandler_file_handler"],
+      "propagate": "no"
+    },
+
+    "simulator": {
+      "level": "INFO",
+      "handlers": ["simulator_file_handler"],
       "propagate": "no"
     }
   }

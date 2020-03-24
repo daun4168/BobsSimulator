@@ -157,6 +157,8 @@ class DefaultWindow(QMainWindow):
         self.log_handler.sig_end_game.connect(self.end_game_handler)
         self.log_handler.sig_end_file.connect(self.end_file_handler)
 
+        self.log_handler.line_reader_start()
+
     def text_simulate(self):
         self.init()
         self.simulate_type = SimulateType.TEXT
@@ -191,8 +193,8 @@ class DefaultWindow(QMainWindow):
 
     def help(self):
         QMessageBox.information(self, "Help",
-                          "<h2>Hello</h2>"
-                          "<p>I will help you :)</p>")
+                                "<h2>Hello</h2>"
+                                "<p>I will help you :)</p>")
 
     def license(self):
         QMessageBox.aboutQt(self)
@@ -337,17 +339,17 @@ class DefaultWindow(QMainWindow):
 
         # PLAYER
         hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} Start")
-        hero_log_print(self.log_handler.game.battle.player_hero, "PlayerHero")
-        hero_power_log_print(self.log_handler.game.battle.player_hero_power, "PlayerHeroPower")
-        secret_log_print(self.log_handler.game.battle.player_hero_secrets, "PlayerHeroSecret")
-        minion_log_print(self.log_handler.game.battle.player_board, "PlayerMinion")
+        hero_log_print(self.log_handler.game.battle.me.hero, "PlayerHero")
+        hero_power_log_print(self.log_handler.game.battle.me.hero_power, "PlayerHeroPower")
+        secret_log_print(self.log_handler.game.battle.me.secrets, "PlayerHeroSecret")
+        minion_log_print(self.log_handler.game.battle.me.board, "PlayerMinion")
 
         # ENEMY
         hsbattle_logger.info(f"# versus")
-        hero_log_print(self.log_handler.game.battle.enemy_hero, "EnemyHero")
-        hero_power_log_print(self.log_handler.game.battle.enemy_hero_power, "EnemyHeroPower")
-        secret_log_print(self.log_handler.game.battle.enemy_hero_secrets, "EnemyHeroSecret")
-        minion_log_print(self.log_handler.game.battle.enemy_board, "EnemyMinion")
+        hero_log_print(self.log_handler.game.battle.enemy.hero, "EnemyHero")
+        hero_power_log_print(self.log_handler.game.battle.enemy.hero_power, "EnemyHeroPower")
+        secret_log_print(self.log_handler.game.battle.enemy.secrets, "EnemyHeroSecret")
+        minion_log_print(self.log_handler.game.battle.enemy.board, "EnemyMinion")
 
     def battle_start_handler(self):
         self.battle_start_log_handler()
@@ -359,17 +361,17 @@ class DefaultWindow(QMainWindow):
 
     def battle_end_log_handler(self):
         hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} End")
-        player_hp = self.log_handler.game.battle.player_hero.health - self.log_handler.game.battle.player_hero.damage
-        enemy_hp = self.log_handler.game.battle.enemy_hero.health - self.log_handler.game.battle.enemy_hero.damage
+        player_hp = self.log_handler.game.battle.me.hero.health - self.log_handler.game.battle.me.hero.damage
+        enemy_hp = self.log_handler.game.battle.enemy.hero.health - self.log_handler.game.battle.enemy.hero.damage
 
-        if self.log_handler.game.battle.player_hero.taken_damage == 0 and self.log_handler.game.battle.enemy_hero.taken_damage == 0:
+        if self.log_handler.game.battle.me.hero.taken_damage == 0 and self.log_handler.game.battle.enemy.hero.taken_damage == 0:
             hsbattle_logger.info(f"# DRAW")
-        elif self.log_handler.game.battle.player_hero.taken_damage == 0:
+        elif self.log_handler.game.battle.me.hero.taken_damage == 0:
             hsbattle_logger.info(f"# Player Win")
-            hsbattle_logger.info(f"# Player Give Damage: {self.log_handler.game.battle.enemy_hero.taken_damage}")
+            hsbattle_logger.info(f"# Player Give Damage: {self.log_handler.game.battle.enemy.hero.taken_damage}")
         else:
             hsbattle_logger.info(f"# Enemy Win")
-            hsbattle_logger.info(f"# Player Take Damage: {self.log_handler.game.battle.player_hero.taken_damage}")
+            hsbattle_logger.info(f"# Player Take Damage: {self.log_handler.game.battle.me.hero.taken_damage}")
 
         hsbattle_logger.info(f"# PlayerHP: {player_hp}, EnemyHP: {enemy_hp}")
         hsbattle_logger.info(f"# PlayerRank: {self.log_handler.game.leaderboard_place}")
@@ -394,7 +396,7 @@ class DefaultWindow(QMainWindow):
         hsbattle_logger.info(f"# {'='*50}")
 
 
-        hero_cardid = self.log_handler.game.battle.player_hero.card_id
+        hero_cardid = self.log_handler.game.battle.me.hero.card_id
         rank_num = self.log_handler.game.leaderboard_place
         gameEndWidget = GameEndWidget(hero_cardid, rank_num, self)
         self.setCentralWidget(gameEndWidget)
@@ -413,7 +415,26 @@ class DefaultWindow(QMainWindow):
         self.log_handler.line_reader_start()
 
     def simulate(self):
-        print("simulate")
+        from BobsSimulator.Simulator import Simulator
+        result = Simulator.simulate(self.log_handler.game.battle)
+
+        simulate_num = len(result)
+        if not simulate_num:
+            return
+        win_num = sum(x > 0 for x in result)
+        lose_num = sum(x < 0 for x in result)
+        draw_num = sum(x == 0 for x in result)
+        average_damage = sum(result) / simulate_num
+
+        print("------simulation result-------")
+        print(f'Simulate Number: {simulate_num}')
+        print(result)
+        print(f'Win Number: {win_num}, ratio: {win_num/simulate_num * 100}%')
+        print(f'Lose Number: {lose_num}, ratio: {lose_num/simulate_num * 100}%')
+        print(f'Draw Number: {draw_num}, ratio: {draw_num/simulate_num * 100}%')
+        print(f'Average Damage: {average_damage}')
+
+
 
     def next_battle(self):
         if self.simulate_type == SimulateType.REAL:

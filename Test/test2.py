@@ -8,7 +8,7 @@ battle = Battle()
 minion = Minion()
 
 
-battle.player_board[2] = minion
+battle.me.board[2] = minion
 entity_id_to_minion_dict[10] = minion
 
 

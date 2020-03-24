@@ -16,17 +16,17 @@ class BattleInfoWidget(QWidget):
         self.ui = Ui_BattleInfoWidget()
         self.ui.setupUi(self)
 
-        player_minion_num = len(battle.player_board) - battle.player_board.count(None)
-        enemy_minion_num = len(battle.enemy_board) - battle.enemy_board.count(None)
+        player_minion_num = len(battle.me.board) - battle.me.board.count(None)
+        enemy_minion_num = len(battle.enemy.board) - battle.enemy.board.count(None)
 
-        for minion in battle.player_board:
+        for minion in battle.me.board:
             if minion is None:
                 continue
             widget = QWidget(self)
             widget.setGeometry(QRect(-150 + minion.pos * 115 + (7 - player_minion_num) * 57.5, 220, 178, 178))
             draw_minion(widget, minion.card_id, minion.attack, minion.health - minion.damage, minion.elite, minion.golden)
 
-        for minion in battle.enemy_board:
+        for minion in battle.enemy.board:
             if minion is None:
                 continue
             widget = QWidget(self)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     for i in range(1, 6):
         minion = Minion()
-        battle.player_board[i] = minion
+        battle.me.board[i] = minion
         minion.card_id = "EX1_062"
         minion.attack = 103
         minion.health = 7
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     for i in range(1, 5):
         minion = Minion()
-        battle.enemy_board[i] = minion
+        battle.enemy.board[i] = minion
         minion.card_id = "EX1_507"
         minion.attack = 55
         minion.health = 330

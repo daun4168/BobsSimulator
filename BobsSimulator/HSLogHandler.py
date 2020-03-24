@@ -175,40 +175,40 @@ class HSLogHandler(QObject):
             if card_name and zone == Zone.PLAY.value:
                 if cardtype == CardType.HERO.value:
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:  # player hero
-                        battle.player_hero.entity_id = entity_id
-                        battle.player_hero.card_id = card_id
+                        battle.me.hero.entity_id = entity_id
+                        battle.me.hero.card_id = card_id
                         if GameTag["HEALTH"].value in self.entities[entity_id]:
-                            battle.player_hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
+                            battle.me.hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
                         if GameTag["DAMAGE"].value in self.entities[entity_id]:
-                            battle.player_hero.damage = self.entities[entity_id][GameTag["DAMAGE"].value]
+                            battle.me.hero.damage = self.entities[entity_id][GameTag["DAMAGE"].value]
                         if GameTag["PLAYER_TECH_LEVEL"].value in self.entities[entity_id]:
-                            battle.player_hero.tech_level = self.entities[entity_id][GameTag["PLAYER_TECH_LEVEL"].value]
+                            battle.me.hero.tech_level = self.entities[entity_id][GameTag["PLAYER_TECH_LEVEL"].value]
                         if GameTag["PLAYER_LEADERBOARD_PLACE"].value in self.entities[entity_id]:
                             self.game.leaderboard_place = self.entities[entity_id][GameTag.PLAYER_LEADERBOARD_PLACE.value]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
-                        battle.enemy_hero.entity_id = entity_id
-                        battle.enemy_hero.card_id = card_id
+                        battle.enemy.hero.entity_id = entity_id
+                        battle.enemy.hero.card_id = card_id
                         if GameTag["HEALTH"].value in self.entities[entity_id]:
-                            battle.enemy_hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
+                            battle.enemy.hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
                         if GameTag["DAMAGE"].value in self.entities[entity_id]:
-                            battle.enemy_hero.damage = self.entities[entity_id][GameTag["DAMAGE"].value]
+                            battle.enemy.hero.damage = self.entities[entity_id][GameTag["DAMAGE"].value]
 
                         if GameTag["PLAYER_TECH_LEVEL"].value in self.entities[entity_id]:
-                            battle.enemy_hero.tech_level = self.entities[entity_id][GameTag["PLAYER_TECH_LEVEL"].value]
+                            battle.enemy.hero.tech_level = self.entities[entity_id][GameTag["PLAYER_TECH_LEVEL"].value]
 
                 elif cardtype == CardType.HERO_POWER.value:
                     if GameTag["CONTROLLER"].value not in self.entities[entity_id]:
                         hsloghandler_logger.error(f"gametag controller not exist, battle: {self.game.battle_num}, entity_id: {entity_id}")
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:  # player hero
-                        battle.player_hero_power.entity_id = entity_id
-                        battle.player_hero_power.card_id = card_id
+                        battle.me.hero_power.entity_id = entity_id
+                        battle.me.hero_power.card_id = card_id
                         if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                            battle.player_hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                            battle.me.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
-                        battle.enemy_hero_power.entity_id = entity_id
-                        battle.enemy_hero_power.card_id = card_id
+                        battle.enemy.hero_power.entity_id = entity_id
+                        battle.enemy.hero_power.card_id = card_id
                         if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                            battle.enemy_hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                            battle.enemy.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
 
                 elif cardtype == CardType.MINION.value:
                     minion = Minion()
@@ -239,10 +239,10 @@ class HSLogHandler(QObject):
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:
                         minion.is_mine = True
-                        battle.player_board[minion.pos] = minion
+                        battle.me.board[minion.pos] = minion
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:
                         minion.is_mine = False
-                        battle.enemy_board[minion.pos] = minion
+                        battle.enemy.board[minion.pos] = minion
                 elif cardtype == CardType.ENCHANTMENT.value and card_id in DEATHRATTLE_BUFF_CARDIDS:
                     if not GameTag["ATTACHED"].value in self.entities[entity_id]:
                         continue
@@ -259,9 +259,9 @@ class HSLogHandler(QObject):
                 secret.entity_id = entity_id
                 secret.card_id = card_id
                 if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:  # player hero
-                    battle.player_hero_secrets.append(secret)
+                    battle.me.secrets.append(secret)
                 elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
-                    battle.enemy_hero_secrets.append(secret)
+                    battle.enemy.secrets.append(secret)
 
         self.game.battle = battle
         self.game.battle_history[self.game.battle_num] = battle
@@ -294,22 +294,22 @@ class HSLogHandler(QObject):
                 if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
                         damage = int(self.entities[entity_id][GameTag["DAMAGE"].value])
-                        self.game.battle.player_hero.taken_damage = damage - self.game.battle.player_hero.damage
-                        self.game.battle.player_hero.damage = damage
+                        self.game.battle.me.hero.taken_damage = damage - self.game.battle.me.hero.damage
+                        self.game.battle.me.hero.damage = damage
                     if GameTag["PLAYER_LEADERBOARD_PLACE"].value in self.entities[entity_id]:
                         self.game.leaderboard_place = int(self.entities[entity_id][GameTag.PLAYER_LEADERBOARD_PLACE.value])
                 elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
                         damage = int(self.entities[entity_id][GameTag["DAMAGE"].value])
-                        self.game.battle.enemy_hero.taken_damage = damage - self.game.battle.enemy_hero.damage
-                        self.game.battle.enemy_hero.damage = damage
+                        self.game.battle.enemy.hero.taken_damage = damage - self.game.battle.enemy.hero.damage
+                        self.game.battle.enemy.hero.damage = damage
 
         if self.is_print_console:
             print(f"{' '*20}BATTLE END{' '*20}")
-            print(f"Damage taken: {self.game.battle.player_hero.taken_damage}")
-            print(f"My HP: {self.game.battle.player_hero.health - self.game.battle.player_hero.damage}")
-            print(f"Damage give: {self.game.battle.enemy_hero.taken_damage}")
-            print(f"Enemy HP: {self.game.battle.enemy_hero.health - self.game.battle.enemy_hero.damage}")
+            print(f"Damage taken: {self.game.battle.me.hero.taken_damage}")
+            print(f"My HP: {self.game.battle.me.hero.health - self.game.battle.me.hero.damage}")
+            print(f"Damage give: {self.game.battle.enemy.hero.taken_damage}")
+            print(f"Enemy HP: {self.game.battle.enemy.hero.health - self.game.battle.enemy.hero.damage}")
             print('=' * 50)
 
         self.do_line_reader = False
