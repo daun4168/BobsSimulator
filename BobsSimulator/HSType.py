@@ -1,3 +1,5 @@
+from typing import List
+
 class Game:
     def __init__(self):
         self.build_number = None
@@ -19,6 +21,9 @@ class Battle:
         self.me = Player()
         self.enemy = Player()
 
+        self.atk_player = None
+        self.seq = 0
+
 
 class Player:
     def __init__(self):
@@ -28,14 +33,23 @@ class Player:
         self.secrets = []
         self.graveyard = []
 
+        self.atk_minion = None
+        self.not_attack_last_seq = False
+
+    def minion_num(self):
+        return self.board.count(None)
+
     def empty(self):
         return self.board.count(None) == len(self.board)
 
     def sum_damage(self):
         damage = 0
+        damage += self.hero.tech_level
 
-
-
+        for minion in self.board:
+            if minion is None:
+                continue
+            damage += minion.tech_level
         return damage
 
 
@@ -73,8 +87,8 @@ class Minion:
     def __init__(self):
         self.entity_id = 0
         self.card_id = ""
-        self.golden = False
-        self.elite = False
+        self.golden = False  # PREMIUM or BACON_MINION_IS_LEVEL_TWO
+        self.elite = False  # is legendary?
         self.tech_level = 1
         self.cost = 0
 
@@ -92,9 +106,16 @@ class Minion:
         self.poisonous = False
         self.windfury = False
         self.reborn = False
+        self.charge = False
+        self.modular = False
         self.deathrattle = False
         self.battlecry = False
+        self.discover = False
+        self.aura = False
+        self.overkill = False
         self.start_of_combat = False
+        self.TAG_SCRIPT_DATA_NUM_1 = 0  # Number of Hero Power Used
+        self.TAG_SCRIPT_DATA_NUM_2 = 0  # Red Whelp combat start damage
         self.enchantments = []
 
         self.zone = None

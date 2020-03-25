@@ -216,15 +216,14 @@ class HSLogHandler(QObject):
                     entity_id_to_minion_dict[entity_id] = minion
                     minion.entity_id = entity_id
                     minion.card_id = card_id
-                    minion.golden = card_id.startswith('TB_BaconUps')
                     if GameTag["BACON_MINION_IS_LEVEL_TWO"].value in self.entities[entity_id]:
-                        minion.golden = self.entities[entity_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value]
+                        minion.golden = bool(self.entities[entity_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value])
                     if GameTag["ELITE"].value in self.entities[entity_id]:
-                        minion.elite = self.entities[entity_id][GameTag["ELITE"].value]
+                        minion.elite = bool(self.entities[entity_id][GameTag["ELITE"].value])
                     if GameTag["TECH_LEVEL"].value in self.entities[entity_id]:
                         minion.tech_level = self.entities[entity_id][GameTag["TECH_LEVEL"].value]
                     if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                        minion.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                        minion.exhausted = bool(self.entities[entity_id][GameTag["EXHAUSTED"].value])
                     if GameTag["COST"].value in self.entities[entity_id]:
                         minion.cost = self.entities[entity_id][GameTag["COST"].value]
                     if GameTag["ATK"].value in self.entities[entity_id]:
@@ -234,21 +233,35 @@ class HSLogHandler(QObject):
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
                         minion.damage = self.entities[entity_id][GameTag["DAMAGE"].value]
                     if GameTag["TAUNT"].value in self.entities[entity_id]:
-                        minion.taunt = self.entities[entity_id][GameTag["TAUNT"].value]
+                        minion.taunt = bool(self.entities[entity_id][GameTag["TAUNT"].value])
                     if GameTag["DIVINE_SHIELD"].value in self.entities[entity_id]:
-                        minion.divine_shield = self.entities[entity_id][GameTag["DIVINE_SHIELD"].value]
+                        minion.divine_shield = bool(self.entities[entity_id][GameTag["DIVINE_SHIELD"].value])
                     if GameTag["POISONOUS"].value in self.entities[entity_id]:
-                        minion.poisonous = self.entities[entity_id][GameTag["POISONOUS"].value]
+                        minion.poisonous = bool(self.entities[entity_id][GameTag["POISONOUS"].value])
                     if GameTag["WINDFURY"].value in self.entities[entity_id]:
-                        minion.windfury = self.entities[entity_id][GameTag["WINDFURY"].value]
+                        minion.windfury = bool(self.entities[entity_id][GameTag["WINDFURY"].value])
                     if GameTag["REBORN"].value in self.entities[entity_id]:
-                        minion.reborn = self.entities[entity_id][GameTag["REBORN"].value]
+                        minion.reborn = bool(self.entities[entity_id][GameTag["REBORN"].value])
+                    if GameTag["CHARGE"].value in self.entities[entity_id]:
+                        minion.charge = bool(self.entities[entity_id][GameTag["CHARGE"].value])
+                    if GameTag["MODULAR"].value in self.entities[entity_id]:
+                        minion.modular = bool(self.entities[entity_id][GameTag["MODULAR"].value])
                     if GameTag["DEATHRATTLE"].value in self.entities[entity_id]:
-                        minion.deathrattle = self.entities[entity_id][GameTag["DEATHRATTLE"].value]
+                        minion.deathrattle = bool(self.entities[entity_id][GameTag["DEATHRATTLE"].value])
                     if GameTag["BATTLECRY"].value in self.entities[entity_id]:
-                        minion.battlecry = self.entities[entity_id][GameTag["BATTLECRY"].value]
+                        minion.battlecry = bool(self.entities[entity_id][GameTag["BATTLECRY"].value])
+                    if GameTag["DISCOVER"].value in self.entities[entity_id]:
+                        minion.discover = bool(self.entities[entity_id][GameTag["DISCOVER"].value])
+                    if GameTag["AURA"].value in self.entities[entity_id]:
+                        minion.aura = bool(self.entities[entity_id][GameTag["AURA"].value])
                     if GameTag["START_OF_COMBAT"].value in self.entities[entity_id]:
-                        minion.start_of_combat = self.entities[entity_id][GameTag["START_OF_COMBAT"].value]
+                        minion.start_of_combat = bool(self.entities[entity_id][GameTag["START_OF_COMBAT"].value])
+                    if GameTag["OVERKILL"].value in self.entities[entity_id]:
+                        minion.overkill = bool(self.entities[entity_id][GameTag["OVERKILL"].value])
+                    if GameTag["TAG_SCRIPT_DATA_NUM_1"].value in self.entities[entity_id]:
+                        minion.TAG_SCRIPT_DATA_NUM_1 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_1"].value]
+                    if GameTag["TAG_SCRIPT_DATA_NUM_2"].value in self.entities[entity_id]:
+                        minion.TAG_SCRIPT_DATA_NUM_2 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_2"].value]
 
                     minion.zone = zone
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
@@ -258,7 +271,7 @@ class HSLogHandler(QObject):
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:
                         minion.is_mine = False
                         battle.enemy.board[minion.pos] = minion
-                elif cardtype == CardType.ENCHANTMENT.value and card_id in DEATHRATTLE_BUFF_CARDIDS:
+                elif cardtype == CardType.ENCHANTMENT.value:
                     if not GameTag["ATTACHED"].value in self.entities[entity_id]:
                         continue
                     enchantment = Enchantment()

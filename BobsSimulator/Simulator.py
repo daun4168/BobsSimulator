@@ -23,18 +23,29 @@ class Simulator(QObject):
         simulator_logger.info("=" * 50)
         return result
 
-
     def simulate_once(self):
+        self.battle.seq = 0
+        players = [self.battle.me, self.battle.enemy]
+        for player in players:
+            player.not_attack_last_seq = True
 
-        seq = 0
-
-        did_attack_last_seq = True
-        did_attack_this_seq = True
 
         while True:
+            if self.battle.me.not_attack_last_turn and self.battle.enemy.not_attack_last_turn:  # Draw
+                return 0
             if self.battle.me.empty() and self.battle.enemy.empty():  # Draw
                 return 0
             elif self.battle.me.empty():  # Lose
+                return -self.battle.enemy.sum_damage()
+            elif self.battle.enemy.empty():  # Win
+                return self.battle.me.sum_damage()
+
+            if seq > 10000:
+                simulator_logger.error("INFINITE LOOP")
+                return 0
+
+    def simulate_hero_power(self):
+        pass
 
 
 
