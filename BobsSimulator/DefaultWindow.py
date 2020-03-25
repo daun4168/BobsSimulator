@@ -338,7 +338,7 @@ class DefaultWindow(QMainWindow):
                 hsbattle_logger.info(minion_text)
 
         # PLAYER
-        hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} Start")
+        hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num}")
         hero_log_print(self.log_handler.game.battle.me.hero, "PlayerHero")
         hero_power_log_print(self.log_handler.game.battle.me.hero_power, "PlayerHeroPower")
         secret_log_print(self.log_handler.game.battle.me.secrets, "PlayerHeroSecret")

@@ -4,13 +4,13 @@ from BobsSimulator.HSType import Battle
 from BobsSimulator.HSLogging import simulator_logger
 
 import copy
+import random
 
 
 class Simulator(QObject):
     def __init__(self):
         QObject.__init__()
-        self.battle = None
-
+        self.battle = Battle()
 
     def simulate(self, battle: Battle, simulate_num=1) -> list:
         result = []
@@ -25,10 +25,8 @@ class Simulator(QObject):
 
     def simulate_once(self):
         self.battle.seq = 0
-        players = [self.battle.me, self.battle.enemy]
-        for player in players:
-            player.not_attack_last_seq = True
-
+        for player in self.battle.players():
+            player.not_attack_last_seq = False
 
         while True:
             if self.battle.me.not_attack_last_turn and self.battle.enemy.not_attack_last_turn:  # Draw
@@ -40,12 +38,21 @@ class Simulator(QObject):
             elif self.battle.enemy.empty():  # Win
                 return self.battle.me.sum_damage()
 
-            if seq > 10000:
+            if self.battle.seq > 10000:
                 simulator_logger.error("INFINITE LOOP")
                 return 0
 
     def simulate_hero_power(self):
         pass
+
+    def set_attack_player(self):
+        if self.battle.me.minion_num() > self.battle.enemy.minion_num():
+            self.battle.atk_player = self.battle.me
+        elif self.battle.me.minion_num() < self.battle.enemy.minion_num():
+            self.battle.atk_player = self.battle.enemy
+        else:
+            self.battle.atk_player = random.choice(self.battle.players())
+
 
 
 

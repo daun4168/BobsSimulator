@@ -1,4 +1,5 @@
 from typing import List
+import logging
 
 class Game:
     def __init__(self):
@@ -24,6 +25,13 @@ class Battle:
         self.atk_player = None
         self.seq = 0
 
+    def players(self):
+        return [self.me, self.enemy]
+
+    def print_log(self, logger: logging.Logger):
+        logger.info(f"# Battle Info")
+        self.me.
+
 
 class Player:
     def __init__(self):
@@ -35,6 +43,16 @@ class Player:
 
         self.atk_minion = None
         self.not_attack_last_seq = False
+
+    def print_log(self, logger: logging.Logger, is_me=True):
+        self.hero.print_log(logger, is_me)
+        self.hero_power.print_log(logger, is_me)
+        for secret in self.secrets:
+            secret.print_log(logger, is_me)
+        for minion in self.board:
+            if minion is None:
+                continue
+            minion.print_log(logger, is_me)
 
     def minion_num(self):
         return self.board.count(None)
@@ -62,6 +80,17 @@ class Hero:
         self.taken_damage = 0
         self.tech_level = 0
 
+    def print_log(self, logger: logging.Logger, is_me=True):
+        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Main import LOCALE
+        hero_cardid = self.card_id
+        hero_name = card_name_by_id(hero_cardid, locale=LOCALE)
+        hero_hp = self.health - self.damage
+        hero_tech = self.tech_level
+        if is_me:
+            self.Player
+        start_text =
+        logger.info(f"""* {start_text} -name "{hero_name} @{hero_cardid}" -hp {hero_hp} -tech {hero_tech} """)
 
 class HeroPower:
     def __init__(self):
