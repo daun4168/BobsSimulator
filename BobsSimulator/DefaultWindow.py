@@ -285,71 +285,8 @@ class DefaultWindow(QMainWindow):
         self.log_handler.line_reader_start()
 
     def battle_start_log_handler(self):
-        from BobsSimulator.Util import card_name_by_id
-
-        def hero_log_print(hero, start_text):
-            hero_cardid = hero.card_id
-            hero_name = card_name_by_id(hero_cardid, locale=LOCALE)
-            hero_hp = hero.health - hero.damage
-            hero_tech = hero.tech_level
-            hsbattle_logger.info(f"""* {start_text} -name "{hero_name} @{hero_cardid}" -hp {hero_hp} -tech {hero_tech} """)
-
-        def hero_power_log_print(hero_power, start_text):
-            hero_power_cardid = hero_power.card_id
-            hero_power_name = card_name_by_id(hero_power_cardid, locale=LOCALE)
-            hero_power_log_text = f"""* {start_text} -name "{hero_power_name} @{hero_power_cardid}" """
-            if hero_power.exhausted:
-                hero_power_log_text += "-exhausted "
-            hsbattle_logger.info(hero_power_log_text)
-
-        def secret_log_print(secrets, start_text):
-            for secret in secrets:
-                secret_cardid = secret.card_id
-                secret_name = card_name_by_id(secret_cardid, locale=LOCALE)
-                hsbattle_logger.info(f"""* {start_text} -name "{secret_name} @{secret_cardid}" """)
-
-        def minion_log_print(board, start_text):
-            for minion in board:
-                if not minion:
-                    continue
-                minion_cardid = minion.card_id
-                minion_name = card_name_by_id(minion_cardid, locale=LOCALE)
-                minion_hp = minion.health - minion.damage
-
-                minion_text = f"""* {start_text} -name "{minion_name} @{minion_cardid}" -atk {minion.attack} -hp {minion_hp} -pos {minion.pos} """
-                if minion.golden:
-                    minion_text += "-golden "
-                if minion.taunt:
-                    minion_text += "-taunt "
-                if minion.divine_shield:
-                    minion_text += "-divine_shield "
-                if minion.poisonous:
-                    minion_text += "-poisonous "
-                if minion.windfury:
-                    minion_text += "-windfury "
-                if minion.reborn:
-                    minion_text += "-reborn "
-
-                for enchant in minion.enchantments:
-                    enchant_cardid = enchant.card_id
-                    enchant_name = card_name_by_id(enchant_cardid, locale=LOCALE)
-                    minion_text += f"""-enchant "{enchant_name} @{enchant_cardid}" """
-
-                hsbattle_logger.info(minion_text)
-
-        # PLAYER
         hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num}")
-        hero_log_print(self.log_handler.game.battle.me.hero, "PlayerHero")
-        hero_power_log_print(self.log_handler.game.battle.me.hero_power, "PlayerHeroPower")
-        secret_log_print(self.log_handler.game.battle.me.secrets, "PlayerHeroSecret")
-        minion_log_print(self.log_handler.game.battle.me.board, "PlayerMinion")
-
-        # ENEMY
-        hsbattle_logger.info(f"# versus")
-        hero_log_print(self.log_handler.game.battle.enemy.hero, "EnemyHero")
-        hero_power_log_print(self.log_handler.game.battle.enemy.hero_power, "EnemyHeroPower")
-        secret_log_print(self.log_handler.game.battle.enemy.secrets, "EnemyHeroSecret")
-        minion_log_print(self.log_handler.game.battle.enemy.board, "EnemyMinion")
+        self.log_handler.game.battle.print_log(hsbattle_logger)
 
     def battle_start_handler(self):
         self.battle_start_log_handler()

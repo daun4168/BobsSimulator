@@ -30,7 +30,9 @@ class Battle:
 
     def print_log(self, logger: logging.Logger):
         logger.info(f"# Battle Info")
-        self.me.
+        self.me.print_log(logger, is_me=True)
+        logger.info(f"# versus")
+        self.enemy.print_log(logger, is_me=True)
 
 
 class Player:
@@ -41,7 +43,7 @@ class Player:
         self.secrets = []
         self.graveyard = []
 
-        self.atk_minion = None
+        self.atk_minion_pos = None
         self.not_attack_last_seq = False
 
     def print_log(self, logger: logging.Logger, is_me=True):
@@ -83,14 +85,13 @@ class Hero:
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
         from BobsSimulator.Main import LOCALE
-        hero_cardid = self.card_id
-        hero_name = card_name_by_id(hero_cardid, locale=LOCALE)
-        hero_hp = self.health - self.damage
-        hero_tech = self.tech_level
+        name = card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
-            self.Player
-        start_text =
-        logger.info(f"""* {start_text} -name "{hero_name} @{hero_cardid}" -hp {hero_hp} -tech {hero_tech} """)
+            start_text = "PlayerHero"
+        else:
+            start_text = "EnemyHero"
+        logger.info(f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
+
 
 class HeroPower:
     def __init__(self):
@@ -98,11 +99,35 @@ class HeroPower:
         self.card_id = ""
         self.exhausted = False
 
+    def print_log(self, logger: logging.Logger, is_me=True):
+        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Main import LOCALE
+        name = card_name_by_id(self.card_id, locale=LOCALE)
+        if is_me:
+            start_text = "PlayerHeroPower"
+        else:
+            start_text = "EnemyHeroPower"
+        log_text = f"""* {start_text} -name "{name}@{self.card_id}" """
+        if self.exhausted:
+            log_text += "-exhausted "
+        logger.info(log_text)
+
 
 class Secret:
     def __init__(self):
         self.entity_id = 0
         self.card_id = ""
+
+    def print_log(self, logger: logging.Logger, is_me=True):
+        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Main import LOCALE
+        name = card_name_by_id(self.card_id, locale=LOCALE)
+        if is_me:
+            start_text = "PlayerSecret"
+        else:
+            start_text = "EnemySecret"
+        log_text = f"""* {start_text} -name "{name}@{self.card_id}" """
+        logger.info(log_text)
 
 
 class Enchantment:
@@ -116,14 +141,14 @@ class Minion:
     def __init__(self):
         self.entity_id = 0
         self.card_id = ""
-        self.golden = False  # PREMIUM or BACON_MINION_IS_LEVEL_TWO
+        self.golden = False  # PREMIUM
+        self.level2 = False  # BACON_MINION_IS_LEVEL_TWO
         self.elite = False  # is legendary?
         self.tech_level = 1
         self.cost = 0
 
         # self.race = None -> CARDRACE ******
         # self.faction -> FACTION *******
-        # self.battlecry
 
         self.exhausted = 0
 
@@ -133,7 +158,7 @@ class Minion:
         self.taunt = False
         self.divine_shield = False
         self.poisonous = False
-        self.windfury = False
+        self.windfury = 0  # attack n times more!
         self.reborn = False
         self.charge = False
         self.modular = False
@@ -151,6 +176,34 @@ class Minion:
         self.pos = None
         self.is_mine = False  # if card is player's, True
 
+    def print_log(self, logger: logging.Logger, is_me=True):
+        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Main import LOCALE
+        name = card_name_by_id(self.card_id, locale=LOCALE)
+        if is_me:
+            start_text = "PlayerMinion"
+        else:
+            start_text = "EnemyMinion"
+
+        log_text = f"""* {start_text} -name "{name}@{self.card_id}" -atk {self.attack} -hp {self.health - self.damage} -pos {self.pos} """
+        if self.level2:
+            log_text += "-level2 "
+        if self.taunt:
+            log_text += "-taunt "
+        if self.divine_shield:
+            log_text += "-divine_shield "
+        if self.poisonous:
+            log_text += "-poisonous "
+        if self.windfury:
+            log_text += "-windfury "
+        if self.reborn:
+            log_text += "-reborn "
+
+        for enchant in self.enchantments:
+            enchant_cardid = enchant.card_id
+            enchant_name = card_name_by_id(enchant_cardid, locale=LOCALE)
+            log_text += f"""-enchant "{enchant_name}@{enchant_cardid}" """
+        logger.info(log_text)
 
 
 ENTITY_TYPES = ["CREATE_GAME",

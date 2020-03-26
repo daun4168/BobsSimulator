@@ -7,6 +7,8 @@ import copy
 import random
 
 
+
+
 class Simulator(QObject):
     def __init__(self):
         QObject.__init__()
@@ -14,21 +16,30 @@ class Simulator(QObject):
 
     def simulate(self, battle: Battle, simulate_num=1) -> list:
         result = []
-        simulator_logger.info("="*50)
-        simulator_logger.info("Simulate Start")
+        simulator_logger.info(f'''# {"="*50}''')
+        simulator_logger.info("# Simulate Start")
+        simulator_logger.info("-"*50)
+        simulator_logger.info("# Battle Info")
+        battle.print_log(simulator_logger)
+        simulator_logger.info("-"*50)
 
         for i in range(simulate_num):
+            simulator_logger.info("-"*50)
+            simulator_logger.info(f"# Simulation {i+1}/{simulate_num}")
             self.battle = copy.deepcopy(battle)
             result.append(self.simulate_once())
+            simulator_logger.info("-"*50)
         simulator_logger.info("=" * 50)
         return result
 
     def simulate_once(self):
-        self.battle.seq = 0
-        for player in self.battle.players():
-            player.not_attack_last_seq = False
+        self.simulate_init()
+
+        self.set_attack_player()
+        self.simulate_hero_power()
 
         while True:
+            self.battle.seq += 1
             if self.battle.me.not_attack_last_turn and self.battle.enemy.not_attack_last_turn:  # Draw
                 return 0
             if self.battle.me.empty() and self.battle.enemy.empty():  # Draw
@@ -42,8 +53,12 @@ class Simulator(QObject):
                 simulator_logger.error("INFINITE LOOP")
                 return 0
 
-    def simulate_hero_power(self):
-        pass
+            self.simulate_attack()
+
+    def simulate_init(self):
+        self.battle.seq = 0
+        for player in self.battle.players():
+            player.not_attack_last_seq = False
 
     def set_attack_player(self):
         if self.battle.me.minion_num() > self.battle.enemy.minion_num():
@@ -53,14 +68,16 @@ class Simulator(QObject):
         else:
             self.battle.atk_player = random.choice(self.battle.players())
 
+        for player in self.battle.players():
+            player.atk_minion_pos = None
+
+    def simulate_hero_power(self):
+        pass
+
+    def next_attacker(self):
 
 
-
-
-
-
-        battle.test_number += i
-
-        return battle.test_number
+    def simulate_attack(self):
+        pass
 
 

@@ -216,8 +216,10 @@ class HSLogHandler(QObject):
                     entity_id_to_minion_dict[entity_id] = minion
                     minion.entity_id = entity_id
                     minion.card_id = card_id
+                    if GameTag["PREMIUM"].value in self.entities[entity_id]:
+                        minion.golden = bool(self.entities[entity_id][GameTag["PREMIUM"].value])
                     if GameTag["BACON_MINION_IS_LEVEL_TWO"].value in self.entities[entity_id]:
-                        minion.golden = bool(self.entities[entity_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value])
+                        minion.level2 = bool(self.entities[entity_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value])
                     if GameTag["ELITE"].value in self.entities[entity_id]:
                         minion.elite = bool(self.entities[entity_id][GameTag["ELITE"].value])
                     if GameTag["TECH_LEVEL"].value in self.entities[entity_id]:
@@ -239,7 +241,7 @@ class HSLogHandler(QObject):
                     if GameTag["POISONOUS"].value in self.entities[entity_id]:
                         minion.poisonous = bool(self.entities[entity_id][GameTag["POISONOUS"].value])
                     if GameTag["WINDFURY"].value in self.entities[entity_id]:
-                        minion.windfury = bool(self.entities[entity_id][GameTag["WINDFURY"].value])
+                        minion.windfury = int(self.entities[entity_id][GameTag["WINDFURY"].value])
                     if GameTag["REBORN"].value in self.entities[entity_id]:
                         minion.reborn = bool(self.entities[entity_id][GameTag["REBORN"].value])
                     if GameTag["CHARGE"].value in self.entities[entity_id]:
