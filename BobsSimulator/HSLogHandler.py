@@ -1,17 +1,14 @@
 import os
 import logging
-import hearthstone.enums as hsenums
 from PySide2.QtCore import Signal, QObject
-from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step, State
 
-
-from BobsSimulator.Util import card_name_by_id, tag_value_to_int, qsleep
+from BobsSimulator.Util import card_name_by_id, tag_value_to_int
 from BobsSimulator.HSType import Game, Battle, Hero, Minion, Secret, \
-    ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS, BOB_NAMES, Enchantment
+    ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS, BOB_NAMES, Enchantment, \
+    GameTag, CardType, Faction, Race, Zone, State
 from BobsSimulator.Regex import *
 from BobsSimulator.HSLogging import hsloghandler_logger
 from BobsSimulator.Main import VERSION_NUMBER
-import hearthstone_data
 
 
 class HSLogHandler(QObject):
@@ -264,8 +261,15 @@ class HSLogHandler(QObject):
                         minion.TAG_SCRIPT_DATA_NUM_1 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_1"].value]
                     if GameTag["TAG_SCRIPT_DATA_NUM_2"].value in self.entities[entity_id]:
                         minion.TAG_SCRIPT_DATA_NUM_2 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_2"].value]
-
-                    minion.zone = zone
+                    if GameTag["TAG_SCRIPT_DATA_NUM_3"].value in self.entities[entity_id]:
+                        minion.TAG_SCRIPT_DATA_NUM_3 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_3"].value]
+                    if GameTag["CARDRACE"].value in self.entities[entity_id]:
+                        minion.race = Race(self.entities[entity_id][GameTag["CARDRACE"].value])
+                    if GameTag["FACTION"].value in self.entities[entity_id]:
+                        minion.faction = Faction(self.entities[entity_id][GameTag["FACTION"].value])
+                    if 1530 in self.entities[entity_id]:  # Zapp, Attack minion with the lowest Attack
+                        minion.atk_lowest_atk_minion = bool(self.entities[entity_id][1530])
+                    minion.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.player_player_id:
                         minion.is_mine = True

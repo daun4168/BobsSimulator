@@ -11,13 +11,11 @@ from BobsSimulator.HomeWidget import HomeWidget
 from BobsSimulator.LoadingWidget import LoadingWidget
 from BobsSimulator.WaitingWidget import WaitingGameWidget, WaitingBattleWidget
 from BobsSimulator.BattleInfoWidget import BattleInfoWidget
-from BobsSimulator.ErrorWIdget import ErrorWidget
+from BobsSimulator.ErrorWidget import ErrorWidget
 from BobsSimulator.FileEndWidget import FileEndWidget
 from BobsSimulator.GameEndWidget import GameEndWidget
 from BobsSimulator.HSType import Game
 from BobsSimulator.HSLogging import main_logger, hsbattle_logger
-
-
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
 
 

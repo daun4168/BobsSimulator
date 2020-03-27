@@ -1,12 +1,11 @@
 import sys
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt, QSize, QRect, QPoint
 
 from BobsSimulator.UI.BattleInfoWidgetUI import Ui_BattleInfoWidget
 from BobsSimulator.HSType import Battle, Minion
 from BobsSimulator.Draw import draw_minion
-from PySide2.QtCore import Qt, QSize, QRect, QPoint
-
 
 
 class BattleInfoWidget(QWidget):

@@ -1,14 +1,11 @@
 import xmltodict
 import json
-import hearthstone.enums as hsenums
-
 from PySide2.QtCore import QEventLoop, QTimer
-
 
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER
+from BobsSimulator.HSType import GameTag, CardType, Faction, Race, Rarity, Zone, Mulligan, Step, State, CardClass, PlayState
 import hearthstone_data
-import hearthstone
 
 # carddefs_path = 'res/CardDefs.xml'
 # carddefs_version = 43246
@@ -55,7 +52,7 @@ def card_name_by_id(card_id, locale='koKR'):
 def tag_value_to_int(tag, value):
     if not tag.isdigit():
         try:
-            tag = int(hsenums.GameTag[tag])
+            tag = int(GameTag[tag])
         except KeyError:
             main_logger.exception(f"tag_value_to_int() key(tag) error - no tag key, tag: {tag}, value: {value}")
     else:
@@ -63,26 +60,26 @@ def tag_value_to_int(tag, value):
 
     if not value.isdigit():
         try:
-            if tag == int(hsenums.GameTag.CARDTYPE):
-                value = int(hsenums.CardType[value])
-            elif tag == int(hsenums.GameTag.FACTION):
-                value = int(hsenums.Faction[value])
-            elif tag == int(hsenums.GameTag.CARDRACE):
-                value = int(hsenums.Race[value])
-            elif tag == int(hsenums.GameTag.RARITY):
-                value = int(hsenums.Rarity[value])
-            elif tag == int(hsenums.GameTag.ZONE):
-                value = int(hsenums.Zone[value])
-            elif tag == int(hsenums.GameTag.MULLIGAN_STATE):
-                value = int(hsenums.Mulligan[value])
-            elif tag == int(hsenums.GameTag.STEP) or tag == int(hsenums.GameTag.NEXT_STEP):
-                value = int(hsenums.Step[value])
-            elif tag == int(hsenums.GameTag.PLAYSTATE):
-                value = int(hsenums.PlayState[value])
-            elif tag == int(hsenums.GameTag.STATE):
-                value = int(hsenums.State[value])
-            elif tag == int(hsenums.GameTag.CLASS):
-                value = int(hsenums.CardClass[value])
+            if tag == int(GameTag.CARDTYPE):
+                value = int(CardType[value])
+            elif tag == int(GameTag.FACTION):
+                value = int(Faction[value])
+            elif tag == int(GameTag.CARDRACE):
+                value = int(Race[value])
+            elif tag == int(GameTag.RARITY):
+                value = int(Rarity[value])
+            elif tag == int(GameTag.ZONE):
+                value = int(Zone[value])
+            elif tag == int(GameTag.MULLIGAN_STATE):
+                value = int(Mulligan[value])
+            elif tag == int(GameTag.STEP) or tag == int(GameTag.NEXT_STEP):
+                value = int(Step[value])
+            elif tag == int(GameTag.PLAYSTATE):
+                value = int(PlayState[value])
+            elif tag == int(GameTag.STATE):
+                value = int(State[value])
+            elif tag == int(GameTag.CLASS):
+                value = int(CardClass[value])
             else:
                 main_logger.error(f"tag_value_to_int() key(value) error - no tag name, tag: {tag}, value: {value}")
         except KeyError:

@@ -1,32 +1,47 @@
-from typing import List
+from typing import List, Dict, Optional
+from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, Rarity, Mulligan, \
+    Step, PlayState, CardClass
 import logging
+
 
 class Game:
     def __init__(self):
-        self.build_number = None
-        self.game_type = None
-        self.format_type = None
-        self.scenarioID = None
-        self.player_battle_tag = None
+        self.build_number = None  # type: Optional[int]
+        self.game_type = None  # type: Optional[str]
+        self.format_type = None  # type: Optional[str]
+        self.scenarioID = None  # type: Optional[int]
+        self.player_battle_tag = None  # type: Optional[str]
 
-        self.turn_num = 0
-        self.battle_num = 0
-        self.leaderboard_place = 1
+        self.turn_num = 0  # type: int
+        self.battle_num = 0  # type: int
+        self.leaderboard_place = 1  # type: int
 
-        self.battle = Battle()
-        self.battle_history = {}  # key: battle_num, value: board
+        self.battle = Battle()  # type: Battle
+        self.battle_history = {}  # type: Dict[Battle] # key: battle_num, value: board
 
 
 class Battle:
     def __init__(self):
-        self.me = Player()
-        self.enemy = Player()
+        self.me = Player()  # type: Player
+        self.enemy = Player()  # type: Player
 
-        self.atk_player = None
-        self.seq = 0
+        self.is_me_attack = None  # type: Optional[bool]
+        self.seq = 0  # type: int
+
+    def atk_player(self) -> 'Player':
+        if self.is_me_attack:
+            return self.me
+        else:
+            return self.enemy
+
+    def dfn_player(self) -> 'Player':
+        if self.is_me_attack:
+            return self.enemy
+        else:
+            return self.me
 
     def players(self):
-        return [self.me, self.enemy]
+        return self.me, self.enemy
 
     def print_log(self, logger: logging.Logger):
         logger.info(f"# Battle Info")
@@ -37,14 +52,14 @@ class Battle:
 
 class Player:
     def __init__(self):
-        self.board = [None] * 8
-        self.hero = Hero()
-        self.hero_power = HeroPower()
-        self.secrets = []
-        self.graveyard = []
+        self.board = [None] * 8  # type: List[Optional[Minion]]
+        self.hero = Hero()  # type: Hero
+        self.hero_power = HeroPower()  # type: HeroPower
+        self.secrets = []  # type: List[Secret]
+        self.graveyard = []  # type: List[Minion]
 
-        self.atk_minion_pos = None
-        self.not_attack_last_seq = False
+        self.atk_minion_pos = None  # type: Optional[int]
+        self.not_attack_last_seq = False  # type: bool
 
     def print_log(self, logger: logging.Logger, is_me=True):
         self.hero.print_log(logger, is_me)
@@ -75,12 +90,12 @@ class Player:
 
 class Hero:
     def __init__(self):
-        self.entity_id = 0
-        self.card_id = ""
-        self.health = 40
-        self.damage = 0
-        self.taken_damage = 0
-        self.tech_level = 0
+        self.entity_id = 0  # type: int
+        self.card_id = ""  # type: str
+        self.health = 40  # type: int
+        self.damage = 0  # type: int
+        self.taken_damage = 0  # type: int
+        self.tech_level = 0  # type: int
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
@@ -95,9 +110,9 @@ class Hero:
 
 class HeroPower:
     def __init__(self):
-        self.entity_id = 0
-        self.card_id = ""
-        self.exhausted = False
+        self.entity_id = 0  # type: int
+        self.card_id = ""  # type: str
+        self.exhausted = False  # type: bool
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
@@ -115,8 +130,8 @@ class HeroPower:
 
 class Secret:
     def __init__(self):
-        self.entity_id = 0
-        self.card_id = ""
+        self.entity_id = 0  # type: int
+        self.card_id = ""  # type: str
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
@@ -132,49 +147,51 @@ class Secret:
 
 class Enchantment:
     def __init__(self):
-        self.entity_id = 0
-        self.card_id = ""
-        self.attached_id = 0
+        self.entity_id = 0  # type: int
+        self.card_id = ""  # type: str
+        self.attached_id = 0  # type: int
 
 
 class Minion:
     def __init__(self):
-        self.entity_id = 0
-        self.card_id = ""
-        self.golden = False  # PREMIUM
-        self.level2 = False  # BACON_MINION_IS_LEVEL_TWO
-        self.elite = False  # is legendary?
-        self.tech_level = 1
-        self.cost = 0
+        self.entity_id = 0  # type: int
+        self.card_id = ""  # type: str
+        self.golden = False  # type: bool  # PREMIUM
+        self.level2 = False  # type: bool  # BACON_MINION_IS_LEVEL_TWO
+        self.elite = False  # type: bool  # is legendary?
+        self.tech_level = 1  # type: int
+        self.cost = 0  # type: int
 
-        # self.race = None -> CARDRACE ******
-        # self.faction -> FACTION *******
+        self.race = None  # type: Optional[Race]
+        self.faction = None  # type: Optional[Faction]
+        self.zone = None  # type: Optional[Zone]
 
-        self.exhausted = 0
+        self.exhausted = False  # type: bool
 
-        self.attack = 0
-        self.health = 0
-        self.damage = 0
-        self.taunt = False
-        self.divine_shield = False
-        self.poisonous = False
+        self.attack = 0  # type: int
+        self.health = 0  # type: int
+        self.damage = 0  # type: int
+        self.taunt = False  # type: bool
+        self.divine_shield = False  # type: bool
+        self.poisonous = False  # type: bool
         self.windfury = 0  # attack n times more!
-        self.reborn = False
-        self.charge = False
-        self.modular = False
-        self.deathrattle = False
-        self.battlecry = False
-        self.discover = False
-        self.aura = False
-        self.overkill = False
-        self.start_of_combat = False
-        self.TAG_SCRIPT_DATA_NUM_1 = 0  # Number of Hero Power Used
-        self.TAG_SCRIPT_DATA_NUM_2 = 0  # Red Whelp combat start damage
-        self.enchantments = []
+        self.reborn = False  # type: bool
+        self.charge = False  # type: bool
+        self.modular = False  # type: bool
+        self.deathrattle = False  # type: bool
+        self.battlecry = False  # type: bool
+        self.discover = False  # type: bool
+        self.aura = False  # type: bool
+        self.overkill = False  # type: bool
+        self.start_of_combat = False  # type: bool
+        self.atk_lowest_atk_minion = False  # type: bool
+        self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
+        self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
+        self.TAG_SCRIPT_DATA_NUM_3 = 0  # type: int  # sth...
+        self.enchantments = []  # type: List[Enchantment]
 
-        self.zone = None
-        self.pos = None
-        self.is_mine = False  # if card is player's, True
+        self.pos = 0  # type: int
+        self.is_mine = False  # type: bool  # if card is player's, True
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
