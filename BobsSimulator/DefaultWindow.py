@@ -371,7 +371,6 @@ class DefaultWindow(QMainWindow):
         print(f'Average Damage: {average_damage}')
 
 
-
     def next_battle(self):
         if self.simulate_type == SimulateType.REAL:
             waitingWidget = WaitingGameWidget(self)
@@ -384,7 +383,7 @@ class DefaultWindow(QMainWindow):
 
 if __name__ == '__main__':
     try:
-        app = QApplication(sys.argv)
+        app = QApplication()
         ex = DefaultWindow()
         sys.exit(app.exec_())
 

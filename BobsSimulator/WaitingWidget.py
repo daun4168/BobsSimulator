@@ -1,6 +1,6 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtGui import QImage, QPixmap, QFont
+from PySide2.QtWidgets import QWidget, QApplication
 
 from BobsSimulator.UI.WaitingWidgetUI import Ui_LoadingWidget
 
@@ -55,8 +55,7 @@ class WaitingBattleWidget(WaitingWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication()
     ex = WaitingWidget()
     ex.show()
     sys.exit(app.exec_())
-

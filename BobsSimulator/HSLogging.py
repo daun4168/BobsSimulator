@@ -3,6 +3,8 @@ import logging.config
 import os
 import json
 
+from BobsSimulator.Main import VERSION_NUMBER
+
 
 class HSLogBugFilter(logging.Filter):
 
@@ -26,11 +28,8 @@ simulator_logger = logging.getLogger('simulator')
 
 hsloghandler_logger.addFilter(HSLogBugFilter())
 
-from BobsSimulator.Main import VERSION_NUMBER
-
 main_logger.info("Logging Start")
 main_logger.info(f"Version: {VERSION_NUMBER}")
-
 
 if __name__ == '__main__':
     main_logger.info("HELLO Logger")

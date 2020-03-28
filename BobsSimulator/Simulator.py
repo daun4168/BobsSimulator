@@ -1,9 +1,12 @@
-from PySide2.QtCore import Signal, QObject
-
-from BobsSimulator.HSType import Battle, Minion, Zone
-from BobsSimulator.HSLogging import simulator_logger
 import copy
 import random
+from typing import List, Dict, Optional
+
+from PySide2.QtCore import Signal, QObject
+
+from BobsSimulator.HSType import Battle, Minion, Zone, Player
+from BobsSimulator.HSLogging import simulator_logger
+
 
 
 class Simulator(QObject):
@@ -98,3 +101,55 @@ class Simulator(QObject):
     def attack_once(self, attacker: Minion):
         if self.battle.dfn_player().empty():
             return
+
+        defender = None  # type: Optional[Minion]
+        if attacker.atk_lowest_atk_minion:
+            defender = self.random_lowest_atk_minion(self.battle.dfn_player())
+        else:
+            defender = self.random_defense_minion(self.battle.dfn_player())
+
+
+    def random_lowest_atk_minion(self, player: Player) -> Optional[Minion]:
+        if player.empty():
+            return None
+        lowest_atk = None
+        lowest_atk_minions = []  # type: List[Minion]
+
+        for minion in player.minions():
+            if not lowest_atk_minions:
+                lowest_atk = minion.attack
+                lowest_atk_minions.append(minion)
+                continue
+
+            if minion.attack == lowest_atk:
+                lowest_atk_minions.append(minion)
+            elif minion.attack < lowest_atk:
+                lowest_atk_minions.clear()
+                lowest_atk_minions.append(minion)
+
+        return random.choice(lowest_atk_minions)
+
+    def random_defense_minion(self, player: Player) -> Optional[Minion]:
+        if player.empty():
+            return None
+        taunt_minions = []  # type: List[Minion]
+
+        for minion in player.minions():
+            if minion.taunt:
+                taunt_minions.append(minion)
+
+        if taunt_minions:
+            return random.choice(taunt_minions)
+        else:
+            return random.choice(player.minions())
+
+
+
+
+
+
+
+
+
+
+

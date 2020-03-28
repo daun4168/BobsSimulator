@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
-from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, Rarity, Mulligan, \
-    Step, PlayState, CardClass
+from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
+    Rarity, Mulligan, Step, PlayState, CardClass, PowerType
 import logging
 
 
@@ -72,10 +72,27 @@ class Player:
             minion.print_log(logger, is_me)
 
     def minion_num(self):
-        return self.board.count(None)
+        return len(self.board) - self.board.count(None)
 
-    def empty(self):
+    def empty(self) -> bool:
         return self.board.count(None) == len(self.board)
+
+    def minions(self) -> List['Minion']:
+        minion_list = []
+        for minion in self.board:
+            if minion:
+                minion_list.append(minion)
+        return minion_list
+
+    def append_minion(self, minion: 'Minion', pos: Optional[int] = None):
+        if self.minion_num() >= 7:
+            return False
+        if pos is None:
+            pos = self.minion_num() + 1
+
+
+        # for i in range()
+
 
     def sum_damage(self):
         damage = 0
@@ -105,7 +122,8 @@ class Hero:
             start_text = "PlayerHero"
         else:
             start_text = "EnemyHero"
-        logger.info(f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
+        logger.info(
+            f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
 
 
 class HeroPower:
@@ -187,7 +205,6 @@ class Minion:
         self.atk_lowest_atk_minion = False  # type: bool
         self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
-        self.TAG_SCRIPT_DATA_NUM_3 = 0  # type: int  # sth...
         self.enchantments = []  # type: List[Enchantment]
 
         self.pos = 0  # type: int
@@ -259,5 +276,3 @@ BOB_NAMES = [
     "鲍勃的酒馆",
     "鮑伯的旅店",
 ]
-
-

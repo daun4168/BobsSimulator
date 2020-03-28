@@ -1,6 +1,6 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtGui import QImage, QPixmap
+from PySide2.QtWidgets import QWidget, QApplication
 
 from BobsSimulator.UI.HomeWidgetUI import Ui_HomeWidget
 
@@ -23,7 +23,7 @@ class HomeWidget(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication()
     ex = HomeWidget()
     ex.show()
     sys.exit(app.exec_())

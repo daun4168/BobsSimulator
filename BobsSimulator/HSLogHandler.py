@@ -1,10 +1,11 @@
 import os
 import logging
+from typing import List, Dict, Optional
 from PySide2.QtCore import Signal, QObject
 
 from BobsSimulator.Util import card_name_by_id, tag_value_to_int
 from BobsSimulator.HSType import Game, Battle, Hero, Minion, Secret, \
-    ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS, BOB_NAMES, Enchantment, \
+    ENTITY_TYPES, BOB_NAMES, Enchantment, \
     GameTag, CardType, Faction, Race, Zone, State
 from BobsSimulator.Regex import *
 from BobsSimulator.HSLogging import hsloghandler_logger
@@ -36,10 +37,10 @@ class HSLogHandler(QObject):
 
     def init_game(self):
         self.game = Game()
-
-        self.entities = {}  # entity id -> tag/value dict -> value
-        self.entity_names = {}  # entity name -> entity id
-        self.is_hero_contain = {}  # key: level, value: bool
+        self.entities = {}  # type: Dict[int, Dict[int, int]]  # entity id -> tag/value dict
+        self.card_ids = {}  # type: Dict[int, str]
+        self.entity_names = {}  # type: Dict[str, int]  # entity name -> entity id
+        self.is_hero_contain = {}   # type: Dict[int, bool] # key: level, value: bool
 
         self.game_entity = None
         self.baconshop8playerenchant = None
@@ -89,9 +90,8 @@ class HSLogHandler(QObject):
         cardtype = ""
         card_id = ""
 
-        if 'CardID' in self.entities[entity_id]:
-            card_id = self.entities[entity_id]['CardID']
-            card_name = card_name_by_id(card_id)
+        card_id = self.card_ids.get(entity_id, "")
+        card_name = card_name_by_id(card_id)
 
         if GameTag.ZONE.value in self.entities[entity_id]:
             zone = self.entities[entity_id][GameTag.ZONE.value]
@@ -102,8 +102,7 @@ class HSLogHandler(QObject):
 
         if card_name and \
                 zone == Zone.PLAY.value and \
-                (cardtype in [CardType.HERO.value, CardType.HERO_POWER.value, CardType.MINION.value] or
-                 card_id in DEATHRATTLE_BUFF_CARDIDS):
+                (cardtype in [CardType.HERO.value, CardType.HERO_POWER.value, CardType.MINION.value]):
             print(f"{entity_id} - Name: {card_name}, CardID: {card_id} Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
 
             gametags = ["CONTROLLER", "ZONE_POSITION", "PLAYER_TECH_LEVEL", "ATK", "HEALTH", "COST", "TAG_LAST_KNOWN_COST_IN_HAND",
@@ -160,9 +159,8 @@ class HSLogHandler(QObject):
             cardtype = ""
             card_id = ""
 
-            if 'CardID' in self.entities[entity_id]:
-                card_id = self.entities[entity_id]['CardID']
-                card_name = card_name_by_id(card_id)
+            card_id = self.card_ids.get(entity_id, "")
+            card_name = card_name_by_id(card_id)
             if GameTag.ZONE.value in self.entities[entity_id]:
                 zone = self.entities[entity_id][GameTag.ZONE.value]
             if GameTag.CARDTYPE.value in self.entities[entity_id]:
@@ -261,8 +259,6 @@ class HSLogHandler(QObject):
                         minion.TAG_SCRIPT_DATA_NUM_1 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_1"].value]
                     if GameTag["TAG_SCRIPT_DATA_NUM_2"].value in self.entities[entity_id]:
                         minion.TAG_SCRIPT_DATA_NUM_2 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_2"].value]
-                    if GameTag["TAG_SCRIPT_DATA_NUM_3"].value in self.entities[entity_id]:
-                        minion.TAG_SCRIPT_DATA_NUM_3 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_3"].value]
                     if GameTag["CARDRACE"].value in self.entities[entity_id]:
                         minion.race = Race(self.entities[entity_id][GameTag["CARDRACE"].value])
                     if GameTag["FACTION"].value in self.entities[entity_id]:
@@ -316,9 +312,8 @@ class HSLogHandler(QObject):
             cardtype = ""
             card_id = ""
 
-            if 'CardID' in self.entities[entity_id]:
-                card_id = self.entities[entity_id]['CardID']
-                card_name = card_name_by_id(card_id)
+            card_id = self.card_ids.get(entity_id, "")
+            card_name = card_name_by_id(card_id)
             if GameTag.ZONE.value in self.entities[entity_id]:
                 zone = self.entities[entity_id][GameTag.ZONE.value]
             if GameTag.CARDTYPE.value in self.entities[entity_id]:
@@ -359,9 +354,8 @@ class HSLogHandler(QObject):
             cardtype = ""
             card_id = ""
 
-            if 'CardID' in self.entities[entity_id]:
-                card_id = self.entities[entity_id]['CardID']
-                card_name = card_name_by_id(card_id)
+            card_id = self.card_ids.get(entity_id, "")
+            card_name = card_name_by_id(card_id)
             if GameTag.ZONE.value in self.entities[entity_id]:
                 zone = self.entities[entity_id][GameTag.ZONE.value]
             if GameTag.CARDTYPE.value in self.entities[entity_id]:
@@ -471,25 +465,31 @@ class HSLogHandler(QObject):
             self.contexts[level].append(context)
             return
         words = context.split()
-        if words[0] in ENTITY_TYPES:
-            if words[0] == "BLOCK_END" or words[0] == "SUB_SPELL_END":
-                if level < len(self.contexts):
-                    self.contexts[level].append(context)
-                    self.call_handler(level)
-            elif words[0] == "CREATE_GAME" or words[0] == "BLOCK_START" or words[0] == "FULL_ENTITY" or words[0] == "CHANGE_ENTITY" \
-                    or words[0] == "SHOW_ENTITY" or words[0] == "META_DATA" or words[0] == "SUB_SPELL_START":
-                self.call_handler(context_level)
-                if len(self.contexts) != level:
-                    hsloghandler_logger.error(f"entity_parser() error: level not correct, context: {context}, level: {level}")
-                self.contexts.append(list())
-                self.contexts[level].append(context)
-            elif words[0] == "TAG_CHANGE" or words[0] == "HIDE_ENTITY":
-                self.call_handler(level)
-                self.contexts.append(list())
+        from BobsSimulator.HSType import PowerType
+
+        try:
+            power_type = PowerType[words[0]]
+        except KeyError:
+            hsloghandler_logger.exception(f"entity_parser() error: unknown entity type: {words[0]}")
+            return
+
+        if power_type in (PowerType.BLOCK_END, PowerType.SUB_SPELL_END):
+            if level < len(self.contexts):
                 self.contexts[level].append(context)
                 self.call_handler(level)
-        else:
-            hsloghandler_logger.error(f"entity_parser() error: unknown entity type: {words[0]}")
+        elif power_type in (PowerType.CREATE_GAME, PowerType.BLOCK_START, PowerType.FULL_ENTITY, PowerType.CHANGE_ENTITY,
+                            PowerType.SHOW_ENTITY, PowerType.META_DATA, PowerType.SUB_SPELL_START):
+            self.call_handler(context_level)
+            if len(self.contexts) != level:
+                hsloghandler_logger.error(f"entity_parser() error: level not correct, context: {context}, level: {level}")
+            self.contexts.append(list())
+            self.contexts[level].append(context)
+        elif power_type in (PowerType.TAG_CHANGE, PowerType.HIDE_ENTITY):
+            self.call_handler(level)
+            self.contexts.append(list())
+            self.contexts[level].append(context)
+            self.call_handler(level)
+
 
     def call_handler(self, level):
         start_idx = len(self.contexts) - 1
@@ -584,7 +584,7 @@ class HSLogHandler(QObject):
         entity_id, card_id = FULL_ENTITY_CREATING_RE.match(text).group("ID", "CardID")
         entity_id = int(entity_id)
         self.entities[entity_id] = {}
-        self.entities[entity_id]["CardID"] = card_id
+        self.card_ids[entity_id] = card_id
 
         if card_id == "TB_BaconShopBob":
             for bob_name in BOB_NAMES:
@@ -602,8 +602,12 @@ class HSLogHandler(QObject):
             else:
                 hsloghandler_logger.error(f"full_entity_handler Error - tag/value: {text}")
 
-        if self.entities[entity_id]["CardID"].upper().find('HERO') != -1:
-            self.is_hero_contain[level - 1] = True
+#        if self.entities[entity_id]["CardID"].upper().find('HERO') != -1:
+
+        if GameTag.CARDTYPE.value in self.entities[entity_id]:
+            cardtype = self.entities[entity_id][GameTag.CARDTYPE.value]
+            if cardtype == CardType.HERO.value:
+                self.is_hero_contain[level - 1] = True
 
     def tag_change_handler(self, level):
         if len(self.contexts[level]) != 1:
@@ -640,7 +644,7 @@ class HSLogHandler(QObject):
 
         entity_id = self.get_entity_id_by_entity(entity)
         if card_id:
-            self.entities[entity_id]['CardID'] = card_id
+            self.card_ids[entity_id] = card_id
 
         for text in self.contexts[level][1:]:
             text = text.lstrip()

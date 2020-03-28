@@ -1,12 +1,12 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtGui import QImage, QPixmap, QFont
+from PySide2.QtWidgets import QWidget, QApplication
 
 from BobsSimulator.UI.ErrorWidgetUI import Ui_ErrorWidget
 
 
 class ErrorWidget(QWidget):
-    def __init__(self, parent, error_msg=None):
+    def __init__(self, parent=None, error_msg=None):
         QWidget.__init__(self, parent)
 
         self.ui = Ui_ErrorWidget()
@@ -41,7 +41,7 @@ class ErrorWidget(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication()
     ex = ErrorWidget()
     ex.show()
     sys.exit(app.exec_())

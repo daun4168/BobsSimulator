@@ -1,6 +1,6 @@
-from PySide2.QtCore import Qt, QSize, QRect, QPoint
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt, QRect
+from PySide2.QtGui import QPixmap, QFont, QPainter, QFontDatabase, QPen
+from PySide2.QtWidgets import QWidget, QApplication, QLabel
 
 
 def draw_hero(widget, card_id):
@@ -21,6 +21,7 @@ def draw_hero(widget, card_id):
     pic.resize(widget.size())
     pic.setPixmap(pixmap)
     pic.show()
+
 
 def draw_minion(widget, card_id, attack=0, health=0, is_legendary=False, is_golden=False):
     pic = QLabel(widget)
@@ -94,9 +95,9 @@ if __name__ == "__main__":
             self.top = 100
             self.width = 712
             self.height = 712
-            self.initUI()
+            self.init_ui()
 
-        def initUI(self):
+        def init_ui(self):
             self.setWindowTitle(self.title)
             self.setGeometry(self.left, self.top, self.width, self.height)
 
@@ -110,5 +111,3 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = App()
     sys.exit(app.exec_())
-
-

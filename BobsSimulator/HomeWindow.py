@@ -1,6 +1,5 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtWidgets import QApplication
 
 from BobsSimulator.DefaultWindow import DefaultWindow
 
@@ -17,5 +16,3 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = HomeWindow()
     sys.exit(app.exec_())
-
-

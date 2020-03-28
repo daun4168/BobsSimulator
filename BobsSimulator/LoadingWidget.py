@@ -1,6 +1,6 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtGui import QImage, QPixmap
+from PySide2.QtWidgets import QWidget, QApplication
 
 from BobsSimulator.UI.LoadingWidgetUI import Ui_LoadingWidget
 
@@ -53,8 +53,7 @@ class LoadingWidget(QWidget):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication()
     ex = LoadingWidget()
     ex.show()
     sys.exit(app.exec_())
-

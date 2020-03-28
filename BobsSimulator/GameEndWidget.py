@@ -1,12 +1,9 @@
 import sys
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-from PySide2.QtCore import Qt, QSize, QRect, QPoint
+from PySide2.QtGui import QFont
+from PySide2.QtWidgets import QWidget, QApplication
 
-from BobsSimulator.HSType import Battle, Minion
 from BobsSimulator.Draw import draw_hero
 from BobsSimulator.UI.GameEndWidgetUI import Ui_GameEndWidget
-
 
 
 class GameEndWidget(QWidget):
