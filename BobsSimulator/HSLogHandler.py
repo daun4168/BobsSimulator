@@ -378,6 +378,8 @@ class HSLogHandler(QObject):
         elif CHOICE_CARD_MGR_SHOW_RE.match(line):
             pass
         else:
+            if not self.recent_parsing_line:
+                return
             short_len = min(len(self.recent_parsing_line), len(line))
 
             new_line = None

@@ -192,7 +192,7 @@ class HSGame(QObject):
 
         if card_name and \
                 zone == Zone.PLAY.value and \
-                cardtype in [CardType.HERO.value, CardType.MINION.value]:
+                cardtype in [CardType.HERO.value, CardType.MINION.value, CardType.HERO_POWER.value]:
             # # zone in [Zone.PLAY.value, Zone.DECK.value, Zone.HAND.value, Zone.SETASIDE.value]:
             # print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
             #
@@ -221,6 +221,9 @@ class HSGame(QObject):
                 if GameTag['ZONE_POSITION'].value in self.entities[entity_id]:
                     pos = self.entities[entity_id][GameTag['ZONE_POSITION'].value]
                 print(f"{entity_id} - {attack}/{health} {card_name}, CardType: {CardType(cardtype).name} Pos: {pos}")
+
+            if cardtype == CardType.HERO_POWER.value:
+                print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
 
             if cardtype == CardType.HERO.value:
                 health = 0
@@ -738,6 +741,7 @@ class HSGame(QObject):
         elif CHOICE_CARD_MGR_SHOW_RE.match(line):
             pass
         else:
+
             short_len = min(len(self.recent_parsing_line), len(line))
 
             new_line = None
@@ -793,6 +797,7 @@ if __name__ == '__main__':
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_21 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
     log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
+    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
     log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
 
     # game = HSGame(log_file_2020_02_05_22_51_53)
@@ -804,7 +809,7 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(log_file_2020_02_29_20_44_13)
+    game = HSGame(log_file_2020_03_29_22_38_02)
     game.line_reader()
     game.print_trigger()
     #
