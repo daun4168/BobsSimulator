@@ -17,7 +17,7 @@ class Game:
         self.leaderboard_place = 1  # type: int
 
         self.battle = Battle()  # type: Battle
-        self.battle_history = {}  # type: Dict[Battle] # key: battle_num, value: board
+        self.battle_history = {}  # type: Dict[int, Battle] # key: battle_num, value: board
 
 
 class Battle:
@@ -60,6 +60,7 @@ class Player:
 
         self.atk_minion_pos = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
+        self.is_deathrattle_first = False  # type: bool
 
     def print_log(self, logger: logging.Logger, is_me=True):
         self.hero.print_log(logger, is_me)
@@ -84,15 +85,19 @@ class Player:
                 minion_list.append(minion)
         return minion_list
 
-    def append_minion(self, minion: 'Minion', pos: Optional[int] = None):
+    def append_minion(self, new_minion: 'Minion', pos: Optional[int] = None):
         if self.minion_num() >= 7:
             return False
         if pos is None:
             pos = self.minion_num() + 1
 
+        for minion in self.minions():
+            if minion.pos >= pos:
+                minion.pos += 1
 
-        # for i in range()
-
+        new_minion.zone = Zone.PLAY
+        new_minion.pos = pos
+        self.board[pos] = new_minion
 
     def sum_damage(self):
         damage = 0
@@ -125,6 +130,10 @@ class Hero:
         logger.info(
             f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
 
+    def name(self):
+        from BobsSimulator.Util import card_name_by_id
+        return card_name_by_id(self.card_id)
+
 
 class HeroPower:
     def __init__(self):
@@ -145,6 +154,10 @@ class HeroPower:
             log_text += "-exhausted "
         logger.info(log_text)
 
+    def name(self):
+        from BobsSimulator.Util import card_name_by_id
+        return card_name_by_id(self.card_id)
+
 
 class Secret:
     def __init__(self):
@@ -162,12 +175,20 @@ class Secret:
         log_text = f"""* {start_text} -name "{name}@{self.card_id}" """
         logger.info(log_text)
 
+    def name(self):
+        from BobsSimulator.Util import card_name_by_id
+        return card_name_by_id(self.card_id)
+
 
 class Enchantment:
     def __init__(self):
         self.entity_id = 0  # type: int
         self.card_id = ""  # type: str
         self.attached_id = 0  # type: int
+
+    def name(self):
+        from BobsSimulator.Util import card_name_by_id
+        return card_name_by_id(self.card_id)
 
 
 class Minion:
@@ -179,13 +200,8 @@ class Minion:
         self.elite = False  # type: bool  # is legendary?
         self.tech_level = 1  # type: int
         self.cost = 0  # type: int
-
         self.race = None  # type: Optional[Race]
         self.faction = None  # type: Optional[Faction]
-        self.zone = None  # type: Optional[Zone]
-
-        self.exhausted = False  # type: bool
-
         self.attack = 0  # type: int
         self.health = 0  # type: int
         self.damage = 0  # type: int
@@ -207,8 +223,20 @@ class Minion:
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
         self.enchantments = []  # type: List[Enchantment]
 
+        self.zone = None  # type: Optional[Zone]
         self.pos = 0  # type: int
-        self.is_mine = False  # type: bool  # if card is player's, True
+        self.exhausted = False  # type: bool
+        # self.is_mine = False  # type: bool  # if card is player's, True
+
+    def hp(self):
+        return self.health - self.damage
+
+    def name(self):
+        from BobsSimulator.Util import card_name_by_id
+        return card_name_by_id(self.card_id)
+
+    def info(self):
+        return f'{self.name()} {self.attack}/{self.hp()}'
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id
@@ -240,39 +268,22 @@ class Minion:
         logger.info(log_text)
 
 
-ENTITY_TYPES = ["CREATE_GAME",
-                "FULL_ENTITY",
-                "TAG_CHANGE",
-                "BLOCK_START",
-                "BLOCK_END",
-                "SHOW_ENTITY",
-                "HIDE_ENTITY",
-                "META_DATA",
-                "CHANGE_ENTITY",
-                "RESET_GAME",
-                "SUB_SPELL_START",
-                "SUB_SPELL_END",
-                ]
-
-DEATHRATTLE_BUFF_CARDIDS = [
-    "BOT_312e",
-    "TB_BaconUps_032e",
-    "UNG_999t2e",
-]
-
-BOB_NAMES = [
-    "Bobs Gasthaus",
-    "Bob's Tavern",
-    "Taberna de Bob",
-    "Taberna de Bob",
-    "Taverne de Bob",
-    "Locanda di Bob",
-    "ボブの酒場",
-    "밥의 선술집",
-    "Karczma Boba",
-    "Taverna do Bob",
-    "Таверна Боба",
-    "โรงเตี๊ยมของบ็อบ",
-    "鲍勃的酒馆",
-    "鮑伯的旅店",
-]
+# ENTITY_TYPES = ["CREATE_GAME",
+#                 "FULL_ENTITY",
+#                 "TAG_CHANGE",
+#                 "BLOCK_START",
+#                 "BLOCK_END",
+#                 "SHOW_ENTITY",
+#                 "HIDE_ENTITY",
+#                 "META_DATA",
+#                 "CHANGE_ENTITY",
+#                 "RESET_GAME",
+#                 "SUB_SPELL_START",
+#                 "SUB_SPELL_END",
+#                 ]
+#
+# DEATHRATTLE_BUFF_CARDIDS = [
+#     "BOT_312e",
+#     "TB_BaconUps_032e",
+#     "UNG_999t2e",
+# ]

@@ -5,13 +5,15 @@ from typing import List, Dict, Optional
 from PySide2.QtCore import Signal, QObject
 
 from BobsSimulator.HSType import Battle, Minion, Zone, Player
-from BobsSimulator.HSLogging import simulator_logger
+from BobsSimulator.HSLogging import simulator_logger, console_logger
+from BobsSimulator.Util import card_name_by_id
 
 
+DEBUG = True
 
 class Simulator(QObject):
     def __init__(self):
-        QObject.__init__()
+        super().__init__()
         self.battle = Battle()
 
     def simulate(self, battle: Battle, simulate_num=1) -> list:
@@ -22,6 +24,10 @@ class Simulator(QObject):
         simulator_logger.info("# Battle Info")
         battle.print_log(simulator_logger)
         simulator_logger.info("-" * 50)
+
+        if DEBUG:
+            console_logger.info("# Simulate Start")
+            battle.print_log(console_logger)
 
         for i in range(simulate_num):
             simulator_logger.info("-" * 50)
@@ -49,7 +55,7 @@ class Simulator(QObject):
             elif self.battle.enemy.empty():  # Win
                 return self.battle.me.sum_damage()
 
-            if self.battle.seq > 10000:
+            if self.battle.seq > 1000:
                 simulator_logger.error("INFINITE LOOP")
                 return 0
 
@@ -72,6 +78,7 @@ class Simulator(QObject):
             player.atk_minion_pos = None
 
     def simulate_hero_power(self):
+        # TODO: make function
         pass
 
     def next_attacker(self):
@@ -107,7 +114,22 @@ class Simulator(QObject):
             defender = self.random_lowest_atk_minion(self.battle.dfn_player())
         else:
             defender = self.random_defense_minion(self.battle.dfn_player())
+        print(f'# {attacker.info()} attack {defender.info()}')
 
+        self.simulate_damage_by_minion(attacker, defender)
+        self.simulate_damage_by_minion(defender, attacker)
+
+        if attacker.card_id in ("GVG_113", "LOOT_078"):
+            if defender.pos > 1 and self.battle.dfn_player().board[defender.pos - 1] is not None:
+                self.simulate_damage_by_minion(attacker, self.battle.dfn_player().board[defender.pos - 1])
+            if defender.pos < 7 and self.battle.dfn_player().board[defender.pos + 1] is not None:
+                self.simulate_damage_by_minion(attacker, self.battle.dfn_player().board[defender.pos + 1])
+
+
+
+
+    def simulate_damage_by_minion(self, attacker: Minion, defender: Minion):
+        pass
 
     def random_lowest_atk_minion(self, player: Player) -> Optional[Minion]:
         if player.empty():

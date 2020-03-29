@@ -18,6 +18,13 @@
       "stream": "ext://sys.stdout"
     },
 
+    "console_only_message": {
+      "class": "logging.StreamHandler",
+      "level": "INFO",
+      "formatter": "only_message",
+      "stream": "ext://sys.stdout"
+    },
+
     "console_err": {
       "class": "logging.StreamHandler",
       "level": "ERROR",
@@ -68,7 +75,6 @@
       "propagate": "no"
     },
 
-
     "hsbattle": {
       "level": "INFO",
       "handlers": ["hsbattle_file_handler"],
@@ -84,6 +90,12 @@
     "simulator": {
       "level": "INFO",
       "handlers": ["simulator_file_handler"],
+      "propagate": "no"
+    },
+
+    "console": {
+      "level": "INFO",
+      "handlers": ["console_only_message"],
       "propagate": "no"
     }
   }

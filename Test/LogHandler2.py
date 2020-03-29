@@ -5,7 +5,7 @@ from PySide2.QtCore import Signal, QObject
 from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step, State
 
 from BobsSimulator.Util import card_name_by_id
-from BobsSimulator.HSType import Hero, Minion, Battle, ENTITY_TYPES, DEATHRATTLE_BUFF_CARDIDS
+from BobsSimulator.HSType import Hero, Minion, Battle
 from BobsSimulator.Regex import *
 
 HS_LOG_FILE_DIR = os.path.join(os.getcwd(), "Test/logs")
@@ -58,6 +58,7 @@ class HSGame(QObject):
     battle_start = Signal(int)
 
     def __init__(self, log_file):
+        self.trigger_keywords = set()
         super().__init__()
         self.log_file = log_file
 
@@ -96,6 +97,10 @@ class HSGame(QObject):
         # self.line_reader()
 
         self.is_hero_contain = {}  # key: level, value: bool
+
+
+    def print_trigger(self):
+        print(self.trigger_keywords)
 
     def init_game(self):
         self.entities = {}
@@ -187,57 +192,126 @@ class HSGame(QObject):
 
         if card_name and \
                 zone == Zone.PLAY.value and \
-                cardtype in [CardType.HERO.value, CardType.HERO_POWER.value, CardType.MINION.value]:
-            # zone in [Zone.PLAY.value, Zone.DECK.value, Zone.HAND.value, Zone.SETASIDE.value]:
-            print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
+                cardtype in [CardType.HERO.value, CardType.MINION.value]:
+            # # zone in [Zone.PLAY.value, Zone.DECK.value, Zone.HAND.value, Zone.SETASIDE.value]:
+            # print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
+            #
+            # gametags = ["CONTROLLER", "ZONE_POSITION", "PLAYER_TECH_LEVEL", "ATK", "HEALTH", "COST", "TAG_LAST_KNOWN_COST_IN_HAND",
+            #             "CARDRACE", "RARITY",
+            #             "TECH_LEVEL", "DIVINE_SHIELD", "TAUNT", "POISONOUS", "WINDFURY",
+            #             "REBORN", "ELITE", "FROZEN", "LINKED_ENTITY", "CREATOR", "STEALTH", "EXHAUSTED",
+            #             "DEATHRATTLE", "ATTACHED", "PLAYER_LEADERBOARD_PLACE"]
+            # # GameTag.
+            # for gametag in gametags:
+            #     if GameTag[gametag].value in self.entities[entity_id]:
+            #         print(f"{gametag}:{self.entities[entity_id][GameTag[gametag].value]}", end=" | ")
+            # print()
 
-            gametags = ["CONTROLLER", "ZONE_POSITION", "PLAYER_TECH_LEVEL", "ATK", "HEALTH", "COST", "TAG_LAST_KNOWN_COST_IN_HAND",
-                        "CARDRACE", "RARITY",
-                        "TECH_LEVEL", "DIVINE_SHIELD", "TAUNT", "POISONOUS", "WINDFURY",
-                        "REBORN", "ELITE", "FROZEN", "LINKED_ENTITY", "CREATOR", "STEALTH", "EXHAUSTED",
-                        "DEATHRATTLE", "ATTACHED", "PLAYER_LEADERBOARD_PLACE"]
-            # GameTag.
-            for gametag in gametags:
-                if GameTag[gametag].value in self.entities[entity_id]:
-                    print(f"{gametag}:{self.entities[entity_id][GameTag[gametag].value]}", end=" | ")
-            print()
-        if cardtype == CardType.ENCHANTMENT.value and zone == Zone.PLAY.value:
-            if not GameTag["ATTACHED"].value in self.entities[entity_id]:
-                return
-            attached_id = self.entities[entity_id][GameTag["ATTACHED"].value]
 
-            if attached_id not in self.entities:
-                return
-            if self.entities[attached_id][GameTag.ZONE.value] != Zone.PLAY.value:
-                return
-            if self.entities[attached_id][GameTag.CARDTYPE.value] != CardType.MINION.value:
-                return
 
-            is_entity_tag_value = False
-            for tag, value in self.entities[entity_id].items():
-                if tag in GameTag.__members__.values():
-                    tag = GameTag(tag).name
-                    if tag in ['ZONE', 'ENTITY_ID', 'CARDTYPE', 'ZONE_POSITION', 'CONTROLLER', 'CREATOR_DBID', 'TAG_LAST_KNOWN_COST_IN_HAND',
-                               ]:
+            if cardtype == CardType.MINION.value:
+
+                health = 0
+                attack = 0
+                pos = 0
+                if GameTag['HEALTH'].value in self.entities[entity_id]:
+                    health = self.entities[entity_id][GameTag['HEALTH'].value]
+                if GameTag['ATK'].value in self.entities[entity_id]:
+                    attack = self.entities[entity_id][GameTag['ATK'].value]
+                if GameTag['ZONE_POSITION'].value in self.entities[entity_id]:
+                    pos = self.entities[entity_id][GameTag['ZONE_POSITION'].value]
+                print(f"{entity_id} - {attack}/{health} {card_name}, CardType: {CardType(cardtype).name} Pos: {pos}")
+
+            if cardtype == CardType.HERO.value:
+                health = 0
+                tech_level = 1
+
+                if GameTag['HEALTH'].value in self.entities[entity_id]:
+                    health = self.entities[entity_id][GameTag['HEALTH'].value]
+                if GameTag['PLAYER_TECH_LEVEL'].value in self.entities[entity_id]:
+                    tech_level = self.entities[entity_id][GameTag['PLAYER_TECH_LEVEL'].value]
+
+                print(f"{entity_id} - {card_name}, HP: {health}, tech_level: {tech_level}, CardType: {CardType(cardtype).name}")
+
+                for tag, value in self.entities[entity_id].items():
+                    if tag in GameTag.__members__.values():
+                        tag = GameTag(tag).name
+                        if tag in ['COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                                   'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                                   'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                                   'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                                   'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                                   'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
+                            continue
+                    if tag == 'CardID':
                         continue
-                    if tag == 'DAMAGE' and value == 0:
-                        continue
-                    if tag in ['CREATOR', ]:
-                        continue
-                    if tag == 'ATTACHED':
-                        att_card_name = card_name_by_id(self.entities[attached_id]['CardID'])
-                        print(f'↓ Attached minion: {att_card_name}')
+                    print(f"    TAG: {tag}, VALUE: {value}")
+                no_tags = ['CONTROLLER', 'COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                           'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                           'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                           'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                           'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                           'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'hi', 'lo', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED',
+                            'MAXHANDSIZE', 'STARTHANDSIZE', 'CANT_DRAW',
+                           'OVERRIDE_EMOTE_0', 'OVERRIDE_EMOTE_1', 'OVERRIDE_EMOTE_2', 'OVERRIDE_EMOTE_3', 'OVERRIDE_EMOTE_4', 'OVERRIDE_EMOTE_5',
+                           'NUM_FRIENDLY_MINIONS_THAT_ATTACKED_THIS_TURN', 'NUM_MINIONS_PLAYER_KILLED_THIS_TURN', 'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_TURN',
+                           'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_GAME', 'BATTLEGROUNDS_PREMIUM_EMOTES', 'COMBO_ACTIVE', 'RESOURCES', 'RESOURCES_USED', 'MAXRESOURCES']
+                if self.entities[entity_id][GameTag.CONTROLLER] == self.entities[self.player_me]['PlayerID']:
+                    print("--player_me--")
+                    for tag, value in self.entities[self.player_me].items():
+                        if tag in GameTag.__members__.values():
+                            tag = GameTag(tag).name
+                            if tag in no_tags:
+                                continue
+                        print(f"    TAG: {tag}, VALUE: {value}")
+                else:
+                    print("--player other--")
+                    for tag, value in self.entities[self.player_other].items():
+                        if tag in GameTag.__members__.values():
+                            tag = GameTag(tag).name
+                            if tag in no_tags:
+                                continue
+                        print(f"    TAG: {tag}, VALUE: {value}")
 
 
-                    if card_name == '연마된 무기' and tag == 'TAG_SCRIPT_DATA_NUM_1':
-                        continue
 
-                    # if tag ==  and value != 0:
-                    print(f"TAG: {tag}, VALUE: {value}")
-                    is_entity_tag_value = True
-            # if is_entity_tag_value:
-            print(f"↑{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
-            print()
+
+        # if cardtype == CardType.ENCHANTMENT.value and zone == Zone.PLAY.value:
+        #     if not GameTag["ATTACHED"].value in self.entities[entity_id]:
+        #         return
+        #     attached_id = self.entities[entity_id][GameTag["ATTACHED"].value]
+        #
+        #     if attached_id not in self.entities:
+        #         return
+        #     if self.entities[attached_id][GameTag.ZONE.value] != Zone.PLAY.value:
+        #         return
+        #     if self.entities[attached_id][GameTag.CARDTYPE.value] != CardType.MINION.value:
+        #         return
+            # is_entity_tag_value = False
+            # for tag, value in self.entities[entity_id].items():
+            #     if tag in GameTag.__members__.values():
+            #         tag = GameTag(tag).name
+            #         if tag in ['ZONE', 'ENTITY_ID', 'CARDTYPE', 'ZONE_POSITION', 'CONTROLLER', 'CREATOR_DBID', 'TAG_LAST_KNOWN_COST_IN_HAND',
+            #                    ]:
+            #             continue
+            #         if tag == 'DAMAGE' and value == 0:
+            #             continue
+            #         if tag in ['CREATOR', ]:
+            #             continue
+            #         if tag == 'ATTACHED':
+            #             att_card_name = card_name_by_id(self.entities[attached_id]['CardID'])
+            #             print(f'↓ Attached minion: {att_card_name}')
+            #
+            #
+            #         if card_name == '연마된 무기' and tag == 'TAG_SCRIPT_DATA_NUM_1':
+            #             continue
+            #
+            #         # if tag ==  and value != 0:
+            #         print(f"TAG: {tag}, VALUE: {value}")
+            #         is_entity_tag_value = True
+            # # if is_entity_tag_value:
+            # print(f"↑{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
+            # print()
 
 
 
@@ -362,6 +436,7 @@ class HSGame(QObject):
             # self.entity_parser((" "*4*level) + "BLOCK_END", level + 1)
         self.call_handler(level + 1)
 
+
         if blocktype == "TRIGGER" and entity_id == self.baconshop8playerenchant:
             if self.is_hero_contain[level]:
                 print('-' * 50)
@@ -372,6 +447,17 @@ class HSGame(QObject):
                 print('-' * 50)
 
                 self.battle_start.emit(self.game_turn // 2)
+        if blocktype == "TRIGGER":
+            for word in text.split():
+                idx = word.find('TriggerKeyword=')
+                if idx == -1:
+                    continue
+                tkeyword = word[idx+len('TriggerKeyword='):]
+                self.trigger_keywords.add(tkeyword)
+                if tkeyword == 'DEATHRATTLE':
+                    print(f"""Deathrattle by {card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id}""")
+
+
 
     def full_entity_handler(self, level):
         self.full_entity_num += 1
@@ -442,10 +528,30 @@ class HSGame(QObject):
         value = match_data.group("value")
         entity_id = self.get_entity_id_by_entity(entity)
 
+        prevalue = self.entities[entity_id].get(tag, 0)
+
         tag, value = self.tag_value_to_int(tag, value)
         self.entities[entity_id][tag] = value
 
         self.activate_game(entity_id)
+
+        if entity_id == self.game_entity and tag == GameTag.PROPOSED_ATTACKER:
+
+            if not value:
+                return
+            print('.'*50)
+            print(f"""{card_name_by_id(self.entities[value]['CardID'])}@{value} -> """, end='')
+
+        if entity_id == self.game_entity and tag == GameTag.PROPOSED_DEFENDER:
+            if not value:
+                return
+            print(f"""{card_name_by_id(self.entities[value]['CardID'])}@{value}""")
+
+        if tag == GameTag.DAMAGE:
+            if not value:
+                return
+            if self.entities[entity_id][GameTag.ZONE] == Zone.PLAY and self.entities[entity_id][GameTag.CARDTYPE] == CardType.MINION:
+                print(f"""{card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id} damaged {value - prevalue}""")
 
     def show_entity_handler(self, level):
         self.show_entity_num += 1
@@ -567,25 +673,24 @@ class HSGame(QObject):
             self.contexts[level].append(context)
             return
         words = context.split()
-        if words[0] in ENTITY_TYPES:
-            if words[0] == "BLOCK_END" or words[0] == "SUB_SPELL_END":
-                if level < len(self.contexts):
-                    self.contexts[level].append(context)
-                    self.call_handler(level)
-            elif words[0] == "CREATE_GAME" or words[0] == "BLOCK_START" or words[0] == "FULL_ENTITY" or words[
-                0] == "CHANGE_ENTITY" \
-                    or words[0] == "SHOW_ENTITY" or words[0] == "META_DATA" or words[0] == "SUB_SPELL_START":
-                self.call_handler(context_level)
-                if len(self.contexts) != level:
-                    logging.error(f"entity_parser()  error: level not correct")
-                    raise IndexError
-                self.contexts.append(list())
-                self.contexts[level].append(context)
-            elif words[0] == "TAG_CHANGE" or words[0] == "HIDE_ENTITY":
-                self.call_handler(level)
-                self.contexts.append(list())
+        if words[0] == "BLOCK_END" or words[0] == "SUB_SPELL_END":
+            if level < len(self.contexts):
                 self.contexts[level].append(context)
                 self.call_handler(level)
+        elif words[0] == "CREATE_GAME" or words[0] == "BLOCK_START" or words[0] == "FULL_ENTITY" or words[
+            0] == "CHANGE_ENTITY" \
+                or words[0] == "SHOW_ENTITY" or words[0] == "META_DATA" or words[0] == "SUB_SPELL_START":
+            self.call_handler(context_level)
+            if len(self.contexts) != level:
+                logging.error(f"entity_parser()  error: level not correct")
+                raise IndexError
+            self.contexts.append(list())
+            self.contexts[level].append(context)
+        elif words[0] == "TAG_CHANGE" or words[0] == "HIDE_ENTITY":
+            self.call_handler(level)
+            self.contexts.append(list())
+            self.contexts[level].append(context)
+            self.call_handler(level)
         else:
             logging.error(f"entity_parser() error: unknown entity type: {words[0]}")
         return
@@ -684,23 +789,30 @@ if __name__ == '__main__':
     log_file_2020_02_29_20_44_13 = open(os.path.join(HS_LOG_FILE_DIR, "2020-02-29 20-44-13.log"), 'r', encoding="UTF8")
     log_file_2020_02_29_21_06_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-02-29 21-06-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
+    log_file_2020_03_29_20_39_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 20-39-42.log"), 'r', encoding="UTF8")
+    log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_21 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
     log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
+    log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
 
-    game = HSGame(log_file_2020_02_05_22_51_53)
-    game.line_reader()
+    # game = HSGame(log_file_2020_02_05_22_51_53)
+    # game.line_reader()
 
-    game = HSGame(log_file_2020_02_29_12_56_31)
-    game.line_reader()
+    # game = HSGame(log_file_2020_03_29_20_39_42)
+    # game.line_reader()
 
+    # game = HSGame(log_file_2020_02_29_20_44_13)
+    # game.line_reader()
+    #
     game = HSGame(log_file_2020_02_29_20_44_13)
     game.line_reader()
+    game.print_trigger()
+    #
+    # game = HSGame(log_file_power_new)
+    # game.line_reader()
 
-    game = HSGame(log_file_2020_02_29_21_06_42)
-    game.line_reader()
-
-    game = HSGame(log_file_2020_03_01_21_19_18)
-    game.line_reader()
+    # game = HSGame(log_file_2020_03_01_21_19_18)
+    # game.line_reader()
 
     # HSGame(log_file_2020_03_01_21_19_18)
     # HSGame(log_file_2020_03_01_21_19_18)

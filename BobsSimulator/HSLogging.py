@@ -25,6 +25,7 @@ main_logger = logging.getLogger('main')
 hsbattle_logger = logging.getLogger('hsbattle')
 hsloghandler_logger = logging.getLogger('hsloghandler')
 simulator_logger = logging.getLogger('simulator')
+console_logger = logging.getLogger('console')
 
 hsloghandler_logger.addFilter(HSLogBugFilter())
 

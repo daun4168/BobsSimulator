@@ -4,7 +4,7 @@ from typing import Dict
 from PySide2.QtCore import QEventLoop, QTimer
 
 from BobsSimulator.HSLogging import main_logger
-from BobsSimulator.Main import VERSION_NUMBER
+from BobsSimulator.Main import VERSION_NUMBER, LOCALE
 from BobsSimulator.HSType import GameTag, CardType, Faction, Race, Rarity, Zone, Mulligan, Step, State, CardClass, PlayState
 import hearthstone_data
 
@@ -51,7 +51,7 @@ def _init_card_name_dict():
     is_card_name_dict_init = True
 
 
-def card_name_by_id(card_id, locale='koKR'):
+def card_name_by_id(card_id, locale=LOCALE):
     if not is_card_name_dict_init:
         _init_card_name_dict()
 

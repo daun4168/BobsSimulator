@@ -37,23 +37,21 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     new_battle = Battle()
 
-    for i in range(1, 6):
+    for i in range(5):
         new_minion = Minion()
-        new_battle.me.board[i] = new_minion
         new_minion.card_id = "EX1_062"
-        new_minion.attack = 103
+        new_minion.attack = i * 3
         new_minion.health = 7
         new_minion.golden = True
         new_minion.elite = True
-        new_minion.pos = i
+        new_battle.me.append_minion(new_minion)
 
-    for i in range(1, 5):
+    for i in range(4):
         new_minion = Minion()
-        new_battle.enemy.board[i] = new_minion
         new_minion.card_id = "EX1_507"
-        new_minion.attack = 55
-        new_minion.health = 330
-        new_minion.pos = i
+        new_minion.attack = 77
+        new_minion.health = i * 6
+        new_battle.enemy.append_minion(new_minion)
 
     ex = BattleInfoWidget(new_battle)
     ex.show()
