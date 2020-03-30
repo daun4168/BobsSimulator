@@ -150,6 +150,14 @@ class HSLogHandler(QObject):
 
         battle = Battle()
 
+        me_player_id = self.entities[self.me_entity_id][GameTag.PLAYER_ID.value]
+        enemy_player_id = self.entities[self.me_entity_id][GameTag.NEXT_OPPONENT_PLAYER_ID.value]
+
+        if me_player_id < enemy_player_id:
+            battle.is_me_trigger_first = True
+        else:
+            battle.is_me_trigger_first = False
+
         entity_id_to_minion_dict = {}
         key_list = list(self.entities.keys())
         key_list.sort()

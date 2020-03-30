@@ -797,7 +797,7 @@ if __name__ == '__main__':
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_21 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
     log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
-    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
+#    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
     log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
 
     # game = HSGame(log_file_2020_02_05_22_51_53)

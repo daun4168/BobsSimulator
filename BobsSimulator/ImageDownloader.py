@@ -16,7 +16,7 @@ print(f'version: {carddefs_version}')
 
 ROOT_DIR = os.getcwd()
 
-card_name_dict = {}
+card_dict = {}
 
 card_defs = open(carddefs_path, 'r', encoding='UTF8')
 card_dict = xmltodict.parse(card_defs.read())

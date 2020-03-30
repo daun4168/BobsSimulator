@@ -2,6 +2,8 @@ from PySide2.QtCore import Qt, QRect
 from PySide2.QtGui import QPixmap, QFont, QPainter, QFontDatabase, QPen
 from PySide2.QtWidgets import QWidget, QApplication, QLabel
 
+from BobsSimulator.HSType import Minion
+
 
 def draw_hero(widget, card_id):
     pic = QLabel(widget)
@@ -23,28 +25,36 @@ def draw_hero(widget, card_id):
     pic.show()
 
 
-def draw_minion(widget, card_id, attack=0, health=0, is_legendary=False, is_golden=False):
+def draw_minion(widget, minion: Minion):
     pic = QLabel(widget)
     pixmap = QPixmap(712, 712)
     pixmap.fill(Qt.transparent)
     painter = QPainter(pixmap)
-    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/512x/{card_id}.jpg"))
 
+    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/512x/{minion.card_id}.jpg"))
     painter.setCompositionMode(QPainter.CompositionMode_DestinationIn)
     painter.drawPixmap(0, 0, 712, 712, QPixmap("res/img/minion_mask.png"))
     painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
-    if not is_legendary and not is_golden:
+    painter.setCompositionMode(QPainter.CompositionMode_DestinationAtop)
+    if minion.taunt:
+        if minion.golden:
+            painter.drawPixmap(60, 30, 600, 700, QPixmap(f"res/img/images/inplay_minion_taunt_premium.png"))
+        else:
+            painter.drawPixmap(60, 30, 600, 700, QPixmap(f"res/img/images/inplay_minion_taunt.png"))
+    painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
+
+    if not minion.elite and not minion.golden:
         painter.drawPixmap(166, 100, 390, 512, QPixmap(f"res/img/minion_common.png"))
-    elif not is_legendary and is_golden:
+    elif not minion.elite and minion.golden:
         painter.drawPixmap(135, 95, 450, 522, QPixmap(f"res/img/minion_golden_common.png"))
-    elif is_legendary and not is_golden:
+    elif minion.elite and not minion.golden:
         painter.drawPixmap(166, 50, 508, 562, QPixmap(f"res/img/minion_legendary.png"))
-    elif is_legendary and is_golden:
+    elif minion.elite and minion.golden:
         painter.drawPixmap(135, 40, 570, 576, QPixmap(f"res/img/minion_golden_legendary.png"))
 
     painter.drawPixmap(150, 410, 154, 173, QPixmap(f"res/img/attack_minion.png"))
-    painter.drawPixmap(435, 405, 130, 191, QPixmap(f"res/img/cost_health.png"))
+    painter.drawPixmap(435, 405, 130, 191, QPixmap(f"res/img/cost_health2.png"))
 
     QFontDatabase.addApplicationFont('res/font/BelweMediumBT.ttf')
     number_font = QFont()
@@ -52,11 +62,24 @@ def draw_minion(widget, card_id, attack=0, health=0, is_legendary=False, is_gold
     number_font.setPointSize(80)
     painter.setFont(number_font)
 
-    draw_outlined_text(painter, str(attack), 110, 405)
-    draw_outlined_text(painter, str(health), 380, 405)
+    draw_outlined_text(painter, str(minion.attack), 110, 405)
+    if minion.damage == 0:
+        draw_outlined_text(painter, str(minion.health), 380, 405)
+    else:
+        draw_outlined_text(painter, str(minion.health - minion.damage), 380, 405, text_color=Qt.red)
+
+    if minion.poisonous and minion.deathrattle:
+        painter.drawPixmap(120, 30, 600, 700, QPixmap(f"res/img/images/icon_deathrattle.png"))
+        painter.drawPixmap(0, 30, 600, 700, QPixmap(f"res/img/images/icon_poisonous.png"))
+    elif minion.poisonous:
+        painter.drawPixmap(60, 30, 600, 700, QPixmap(f"res/img/images/icon_poisonous.png"))
+    elif minion.deathrattle:
+        painter.drawPixmap(60, 30, 600, 700, QPixmap(f"res/img/images/icon_deathrattle.png"))
+
+    if minion.divine_shield:
+        painter.drawPixmap(60, 30, 600, 700, QPixmap(f"res/img/images/inplay_minion_divine_shield.png"))
 
     painter.end()
-
     pixmap = pixmap.scaled(widget.size(), mode=Qt.SmoothTransformation)
     pic.resize(widget.size())
     pic.setPixmap(pixmap)

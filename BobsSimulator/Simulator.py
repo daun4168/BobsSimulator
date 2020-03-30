@@ -75,16 +75,18 @@ class Simulator(QObject):
         else:
             self.battle.is_me_attack = bool(random.getrandbits(1))
         for player in self.battle.players():
-            player.atk_minion_pos = None
+            player.atk_minion = None
 
     def simulate_hero_power(self):
         # TODO: make function
         pass
 
-    def next_attacker(self):
-        player = self.battle.atk_player()
-        if player.atk_minion_pos is None:
-            player.atk_minion_pos = 1
+    def next_attacker(self, player):
+        if player.empty():
+            return None
+        pos = 0
+        if player.atk_minion is None:
+            player.atk_minion = player.minions()[0]
         for i in range(player.minion_num()):
             if player.board[player.atk_minion_pos].attack != 0:
                 return player.board[player.atk_minion_pos]
@@ -114,22 +116,71 @@ class Simulator(QObject):
             defender = self.random_lowest_atk_minion(self.battle.dfn_player())
         else:
             defender = self.random_defense_minion(self.battle.dfn_player())
-        print(f'# {attacker.info()} attack {defender.info()}')
+        print(f"# {self.battle.atk_player().hero.name()}'s {attacker.info()} attack {self.battle.dfn_player().hero.name()}'s {defender.info()}")
 
-        self.simulate_damage_by_minion(attacker, defender)
-        self.simulate_damage_by_minion(defender, attacker)
+        self.simulate_damage_by_minion(defender, self.battle.dfn_player(), attacker, self.battle.atk_player())
+        self.simulate_damage_by_minion(attacker, self.battle.atk_player(), defender, self.battle.dfn_player())
 
-        if attacker.card_id in ("GVG_113", "LOOT_078"):
+        # cleave
+        if attacker.card_id in ("GVG_113", "LOOT_078"):  # Foe Reaper 4000, Cave Hydra
             if defender.pos > 1 and self.battle.dfn_player().board[defender.pos - 1] is not None:
-                self.simulate_damage_by_minion(attacker, self.battle.dfn_player().board[defender.pos - 1])
+                self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos - 1], self.battle.dfn_player(), attacker, self.battle.atk_player())
             if defender.pos < 7 and self.battle.dfn_player().board[defender.pos + 1] is not None:
-                self.simulate_damage_by_minion(attacker, self.battle.dfn_player().board[defender.pos + 1])
+                self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos + 1], self.battle.dfn_player(), attacker, self.battle.atk_player())
+        self.check_deaths()
+
+
+    def check_deaths(self):
+        print('*'*50)
+        print('check death start')
+        self.battle.print_log(console_logger)
+        for player in self.battle.players():
+            for minion in player.minions():
+                print(f'check deaths: {minion.info()}')
+                # Do Deaths
+                if minion.damage >= minion.health:
+
+                    print(f'remove minion start: {minion.info()}')
+                    player.remove_minion(minion)
+        print('*' * 50)
+        print('check death end')
+        self.battle.print_log(console_logger)
 
 
 
 
-    def simulate_damage_by_minion(self, attacker: Minion, defender: Minion):
+
         pass
+
+    def simulate_damage_by_minion(self, defender: Minion, defender_player: Player, attacker: Minion, attacker_player: Player):
+        self.simulate_damage(defender, defender_player, attacker.attack, attacker.poisonous)
+
+        if attacker.overkill:
+            # TODO: overkill something
+            pass
+
+    def simulate_damage(self, defender: Minion, defender_player: Player, amount: int, poisonous: bool = False):
+        if amount <= 0:
+            return False
+        # print(f"# {defender_player.hero.name()}'s {defender.info()} damaged {amount} {'poisonous' if poisonous else ''}")
+        if defender.divine_shield:
+            defender.divine_shield = False
+            self.frendly_minion_break_divine_shield(defender_player)
+            return False
+        else:
+            defender.damage += amount
+            if defender.hp() > 0 and poisonous:
+                defender.damage = defender.health
+            self.minion_damaged(defender, defender_player)
+            return True
+
+    def frendly_minion_break_divine_shield(self, player: Player):
+        pass
+
+    def minion_damaged(self, minion: Minion, player: Player):
+        pass
+
+
 
     def random_lowest_atk_minion(self, player: Player) -> Optional[Minion]:
         if player.empty():

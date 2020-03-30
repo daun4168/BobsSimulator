@@ -1,0 +1,50 @@
+# ==================================================
+# Game Start
+# Build: 40734
+# Game Type: GT_BATTLEGROUNDS
+# Format Type: FT_WILD
+# Scenario ID: 3459
+# Battle tag: pathétique#11835
+# --------------------------------------------------
+# Battle 1
+# Battle Info
+* PlayerHero -name "에드윈 밴클리프@TB_BaconShop_HERO_01" -hp 40 -tech 1 
+* PlayerHeroPower -name "무기 연마@TB_BaconShop_HP_001" 
+* PlayerMinion -name "헌신적인 영웅@OG_221" -atk 2 -hp 1 -pos 1 
+# versus
+* PlayerHero -name "켈투자드@TB_BaconShop_HERO_KelThuzad" -hp 40 -tech 0 
+* PlayerHeroPower -name "@" 
+# Battle 1 End
+# Player Win
+# Player Give Damage: 2
+# PlayerHP: 40, EnemyHP: 38
+# PlayerRank: 3
+# --------------------------------------------------
+# Battle 2
+# Battle Info
+* PlayerHero -name "에드윈 밴클리프@TB_BaconShop_HERO_01" -hp 40 -tech 2 
+* PlayerHeroPower -name "무기 연마@TB_BaconShop_HP_001" 
+* PlayerMinion -name "헌신적인 영웅@OG_221" -atk 2 -hp 1 -pos 1 
+# versus
+* PlayerHero -name "실바나스 윈드러너@TB_BaconShop_HERO_44" -hp 40 -tech 2 
+* PlayerHeroPower -name "밴시의 축복@TB_BaconShop_HP_050" 
+* PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 2 -hp 1 -pos 1 
+* PlayerMinion -name "멀록 정찰병@EX1_506a" -atk 1 -hp 1 -pos 2 
+# Battle 2 End
+# Enemy Win
+# Player Take Damage: 3
+# PlayerHP: 37, EnemyHP: 40
+# PlayerRank: 3
+# --------------------------------------------------
+# Battle 3
+# Battle Info
+* PlayerHero -name "에드윈 밴클리프@TB_BaconShop_HERO_01" -hp 37 -tech 2 
+* PlayerHeroPower -name "무기 연마@TB_BaconShop_HP_001" 
+* PlayerMinion -name "늙은 거먹눈 멀록@EX1_062" -atk 5 -hp 4 -pos 1 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 전투대장@EX1_507" -atk 3 -hp 3 -pos 2 
+# versus
+* PlayerHero -name "군주 자락서스@TB_BaconShop_HERO_37" -hp 34 -tech 1 
+* PlayerHeroPower -name "피의 격노@TB_BaconShop_HP_036" 
+* PlayerMinion -name "악독한 시종@YOD_026" -atk 3 -hp 2 -pos 1 -enchant "악마의 갈증@TB_BaconShop_HP_036e2" 
+* PlayerMinion -name "야비한 소악마@LOOT_013" -atk 3 -hp 5 -pos 2 -taunt -enchant "악마의 갈증@TB_BaconShop_HP_036e2" 
+* PlayerMinion -name "야비한 소악마@LOOT_013" -atk 3 -hp 5 -pos 3 -taunt -enchant "악마의 갈증@TB_BaconShop_HP_036e2" 

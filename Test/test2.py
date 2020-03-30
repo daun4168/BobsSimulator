@@ -1,5 +1,5 @@
 
-from BobsSimulator.HSType import Hero, Minion, Battle, ENTITY_TYPES, Enchantment
+from BobsSimulator.HSType import Hero, Minion, Battle, Enchantment
 
 
 entity_id_to_minion_dict = {}

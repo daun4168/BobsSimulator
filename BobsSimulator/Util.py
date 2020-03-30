@@ -23,41 +23,65 @@ def qsleep(ms):
     loop.exec_()
 
 
-card_name_dict = {}  # type: Dict
-is_card_name_dict_init = False
+card_dict = {}  # type: Dict
+is_card_dict_init = False
 
 
 def _init_card_name_dict():
-    global card_name_dict
-    global is_card_name_dict_init
+    global card_dict
+    global is_card_dict_init
     card_defs = open(carddefs_path, 'r', encoding='UTF8')
-    card_dict = xmltodict.parse(card_defs.read())
+    xml_card_dict = xmltodict.parse(card_defs.read())
     card_defs.close()
 
-    card_dict = json.dumps(card_dict)
-    card_dict = json.loads(card_dict)
+    xml_card_dict = json.dumps(xml_card_dict)
+    xml_card_dict = json.loads(xml_card_dict)
 
     lang_list = [
         'koKR',
         'enUS',
     ]
 
-    card_data_list = card_dict["CardDefs"]["Entity"]
+    card_data_list = xml_card_dict["CardDefs"]["Entity"]
     for card_data in card_data_list:
         card_id = card_data["@CardID"]
-        card_name_dict[card_id] = {}
+        card_dict[card_id] = {}
         for lang in lang_list:
-            card_name_dict[card_id][lang] = card_data['Tag'][0][lang]
-    is_card_name_dict_init = True
+            card_dict[card_id][lang] = card_data['Tag'][0][lang]
+        tag_value_list = card_data['Tag']
+        for tag_value_dict in tag_value_list:
+            if '@value' in tag_value_dict and '@type' in tag_value_dict and tag_value_dict['@type'] == 'Int':
+                if '@name' in tag_value_dict:
+                    card_dict[tag_value_dict['@name']] = int(tag_value_dict['@value'])
+                if '@enumID' in tag_value_dict:
+                    card_dict[int(tag_value_dict['@enumID'])] = int(tag_value_dict['@value'])
+    is_card_dict_init = True
 
+
+def default_health_by_id(card_id):
+    if not is_card_dict_init:
+        _init_card_name_dict()
+
+    if not card_id:
+        return 0
+    return card_dict[card_id]['HEALTH']
+
+
+def default_attack_by_id(card_id):
+    if not is_card_dict_init:
+        _init_card_name_dict()
+
+    if not card_id:
+        return 0
+    return card_dict[card_id]['ATTACK']
 
 def card_name_by_id(card_id, locale=LOCALE):
-    if not is_card_name_dict_init:
+    if not is_card_dict_init:
         _init_card_name_dict()
 
     if not card_id:
         return ""
-    return card_name_dict[card_id][locale]
+    return card_dict[card_id][locale]
 
 
 def tag_value_to_int(tag, value):
@@ -108,3 +132,5 @@ if __name__ == "__main__":
     print(hearthstone.__version__)
     print(hearthstone_data.__version__)
     print(hearthstone_data.get_carddefs_path())
+
+    card_name_by_id('LOOT_078')

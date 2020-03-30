@@ -25,6 +25,7 @@ class Battle:
         self.me = Player()  # type: Player
         self.enemy = Player()  # type: Player
 
+        self.is_me_trigger_first = True  # type: bool
         self.is_me_attack = None  # type: Optional[bool]
         self.seq = 0  # type: int
 
@@ -41,7 +42,10 @@ class Battle:
             return self.me
 
     def players(self):
-        return self.me, self.enemy
+        if self.is_me_trigger_first:
+            return self.me, self.enemy
+        else:
+            return self.enemy, self.me
 
     def print_log(self, logger: logging.Logger):
         logger.info(f"# Battle Info")
@@ -58,7 +62,7 @@ class Player:
         self.secrets = []  # type: List[Secret]
         self.graveyard = []  # type: List[Minion]
 
-        self.atk_minion_pos = None  # type: Optional[int]
+        self.atk_minion = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
         self.is_deathrattle_first = False  # type: bool
 
@@ -98,6 +102,23 @@ class Player:
         new_minion.zone = Zone.PLAY
         new_minion.pos = pos
         self.board[pos] = new_minion
+
+    def remove_minion(self, removed_minion: 'Minion'):
+        if self.board[removed_minion.pos] is not removed_minion:
+            print('remove minion failed')
+            return False
+
+        # pos change
+        self.board[removed_minion.pos] = None
+        for change_pos_minion in self.minions():
+            if change_pos_minion.pos > removed_minion.pos:
+                self.board[change_pos_minion.pos] = None
+                change_pos_minion.pos -= 1
+                self.board[change_pos_minion.pos] = change_pos_minion
+        removed_minion.pos = 0
+        removed_minion.zone = Zone.GRAVEYARD
+        self.graveyard.append(removed_minion)
+        print('remove minion sucess')
 
     def sum_damage(self):
         damage = 0
