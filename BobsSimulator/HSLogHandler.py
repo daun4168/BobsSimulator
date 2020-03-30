@@ -258,10 +258,10 @@ class HSLogHandler(QObject):
                     minion.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:
-                        # minion.is_mine = True
+                        minion.player = battle.me
                         battle.me.board[minion.pos] = minion
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:
-                        # minion.is_mine = False
+                        minion.player = battle.enemy
                         battle.enemy.board[minion.pos] = minion
                 elif cardtype == CardType.ENCHANTMENT.value:
                     if not GameTag["ATTACHED"].value in self.entities[entity_id]:

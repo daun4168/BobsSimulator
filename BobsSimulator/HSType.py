@@ -53,6 +53,28 @@ class Battle:
         logger.info(f"# versus")
         self.enemy.print_log(logger, is_me=True)
 
+    def info(self):
+
+        text = ""
+        text += self.enemy.hero.info()
+        for i in range(1, 8):
+            if self.enemy.board[i] is None:
+                text += "[                 ]"
+            else:
+                text += self.enemy.board[i].info()
+
+        text += '\n'
+
+        text += self.me.hero.info()
+        for i in range(1, 8):
+            if self.me.board[i] is None:
+                text += "[                 ]"
+            else:
+                text += self.me.board[i].info()
+
+        text += '\n'
+        return text
+
 
 class Player:
     def __init__(self):
@@ -62,7 +84,7 @@ class Player:
         self.secrets = []  # type: List[Secret]
         self.graveyard = []  # type: List[Minion]
 
-        self.atk_minion = None  # type: Optional[int]
+        self.next_atk_minion_pos = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
         self.is_deathrattle_first = False  # type: bool
 
@@ -95,15 +117,23 @@ class Player:
         if pos is None:
             pos = self.minion_num() + 1
 
+        # pos change
         for minion in self.minions():
             if minion.pos >= pos:
                 minion.pos += 1
 
+        # player.next_atk_minion_pos change
+        if self.next_atk_minion_pos is not None:
+            if new_minion.pos < self.next_atk_minion_pos:
+                self.next_atk_minion_pos += 1
+
         new_minion.zone = Zone.PLAY
         new_minion.pos = pos
+        new_minion.player = self
         self.board[pos] = new_minion
 
     def remove_minion(self, removed_minion: 'Minion'):
+        from BobsSimulator.Util import default_attack_by_id, default_health_by_id
         if self.board[removed_minion.pos] is not removed_minion:
             print('remove minion failed')
             return False
@@ -115,10 +145,18 @@ class Player:
                 self.board[change_pos_minion.pos] = None
                 change_pos_minion.pos -= 1
                 self.board[change_pos_minion.pos] = change_pos_minion
+
+        # player.next_atk_minion_pos change
+        if self.next_atk_minion_pos is not None:
+            if removed_minion.pos < self.next_atk_minion_pos:
+                self.next_atk_minion_pos -= 1
+
         removed_minion.pos = 0
         removed_minion.zone = Zone.GRAVEYARD
+        removed_minion.attack = default_attack_by_id(removed_minion.card_id)
+        removed_minion.health = default_health_by_id(removed_minion.card_id)
         self.graveyard.append(removed_minion)
-        print('remove minion sucess')
+
 
     def sum_damage(self):
         damage = 0
@@ -155,6 +193,14 @@ class Hero:
         from BobsSimulator.Util import card_name_by_id
         return card_name_by_id(self.card_id)
 
+    def info(self):
+        text = f"{self.name() + '(' + str(self.tech_level) + ')'}"
+        non_ascii = 0
+        for c in text:
+            if ord(c) < 0 or ord(c) > 127:
+                non_ascii += 1
+
+        return f"{text:<{20-non_ascii}}"
 
 class HeroPower:
     def __init__(self):
@@ -247,6 +293,8 @@ class Minion:
         self.zone = None  # type: Optional[Zone]
         self.pos = 0  # type: int
         self.exhausted = False  # type: bool
+
+        self.player = None  # type: Optional[Player]
         # self.is_mine = False  # type: bool  # if card is player's, True
 
     def hp(self):
@@ -257,7 +305,23 @@ class Minion:
         return card_name_by_id(self.card_id)
 
     def info(self):
-        return f'{self.name()} {self.attack}/{self.hp()}'
+        text = f'{self.name()} {self.attack}/{self.hp()}'
+
+        if self.deathrattle:
+            text += '💀'
+        if self.divine_shield:
+            text += '🟡'
+        if self.taunt:
+            text += '🛡️'
+        if self.reborn:
+            text += '🎗️'
+
+        non_ascii = 0
+        for c in text:
+            if ord(c) < 0 or ord(c) > 127:
+                non_ascii += 1
+
+        return f'[{text:^{20-non_ascii}}]'
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import card_name_by_id

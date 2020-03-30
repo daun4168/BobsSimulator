@@ -793,12 +793,14 @@ if __name__ == '__main__':
     log_file_2020_02_29_20_44_13 = open(os.path.join(HS_LOG_FILE_DIR, "2020-02-29 20-44-13.log"), 'r', encoding="UTF8")
     log_file_2020_02_29_21_06_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-02-29 21-06-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
+    log_file_2020_03_01_21_06_47 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-06-47.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_20_39_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 20-39-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_21 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
     log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
 #    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
     log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
+    log_file_2020_03_30_20_49_20 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-30 20-49-20.log"), 'r', encoding="UTF8")
 
     # game = HSGame(log_file_2020_02_05_22_51_53)
     # game.line_reader()
@@ -809,7 +811,7 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(log_file_2020_03_29_22_38_02)
+    game = HSGame(log_file_2020_03_21)
     game.line_reader()
     game.print_trigger()
     #

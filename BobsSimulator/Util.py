@@ -52,9 +52,9 @@ def _init_card_name_dict():
         for tag_value_dict in tag_value_list:
             if '@value' in tag_value_dict and '@type' in tag_value_dict and tag_value_dict['@type'] == 'Int':
                 if '@name' in tag_value_dict:
-                    card_dict[tag_value_dict['@name']] = int(tag_value_dict['@value'])
+                    card_dict[card_id][tag_value_dict['@name']] = int(tag_value_dict['@value'])
                 if '@enumID' in tag_value_dict:
-                    card_dict[int(tag_value_dict['@enumID'])] = int(tag_value_dict['@value'])
+                    card_dict[card_id][int(tag_value_dict['@enumID'])] = int(tag_value_dict['@value'])
     is_card_dict_init = True
 
 
@@ -62,7 +62,9 @@ def default_health_by_id(card_id):
     if not is_card_dict_init:
         _init_card_name_dict()
 
-    if not card_id:
+    if card_id not in card_dict:
+        return 0
+    if 'HEALTH' not in card_dict[card_id]:
         return 0
     return card_dict[card_id]['HEALTH']
 
@@ -71,9 +73,11 @@ def default_attack_by_id(card_id):
     if not is_card_dict_init:
         _init_card_name_dict()
 
-    if not card_id:
+    if card_id not in card_dict:
         return 0
-    return card_dict[card_id]['ATTACK']
+    if 'ATK' not in card_dict[card_id]:
+        return 0
+    return card_dict[card_id]['ATK']
 
 def card_name_by_id(card_id, locale=LOCALE):
     if not is_card_dict_init:
