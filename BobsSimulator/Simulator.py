@@ -4,10 +4,9 @@ from typing import List, Dict, Optional
 
 from PySide2.QtCore import Signal, QObject
 
-from BobsSimulator.HSType import Battle, Minion, Zone, Player
+from BobsSimulator.HSType import Battle, Minion, Zone, Player, Race
 from BobsSimulator.HSLogging import simulator_logger, console_logger
-from BobsSimulator.Util import card_name_by_id
-
+from BobsSimulator.Util import Util
 
 
 class Simulator(QObject):
@@ -23,7 +22,6 @@ class Simulator(QObject):
         simulator_logger.info("# Battle Info")
         battle.print_log(simulator_logger)
         simulator_logger.info("-" * 50)
-
 
         print('='*50)
         print("# Simulate Start")
@@ -136,16 +134,21 @@ class Simulator(QObject):
 
 
     def check_deaths(self):
-
         for player in self.battle.players():
             for minion in player.minions():
                 # Do Deaths
                 if minion.damage >= minion.health:
                     print(f'REMOVE: {minion.info()}')
+                    self.buff_when_minion_death(minion)
                     player.remove_minion(minion)
+
                 # 하이에나류 버프
         # 곡예사, 죽메
 
+    def buff_when_minion_death(self, death_minion: Minion):
+        if death_minion.race == Race.BEAST:
+
+            pass
 
     def simulate_damage_by_minion(self, defender: Minion, attacker: Minion):
         self.simulate_damage(defender, attacker.attack, attacker.poisonous)
@@ -167,9 +170,13 @@ class Simulator(QObject):
             if defender.hp() > 0 and poisonous:
                 defender.damage = defender.health
             self.minion_damaged(defender)
+            self.simulate_get_damage_after(defender)
             return True
 
     def frendly_minion_break_divine_shield(self, player: Player):
+        pass
+
+    def simulate_get_damage_after(self, defender: Minion):
         pass
 
     def minion_damaged(self, minion: Minion):
@@ -186,11 +193,11 @@ class Simulator(QObject):
                 lowest_atk = minion.attack
                 lowest_atk_minions.append(minion)
                 continue
-
             if minion.attack == lowest_atk:
                 lowest_atk_minions.append(minion)
             elif minion.attack < lowest_atk:
                 lowest_atk_minions.clear()
+                lowest_atk = minion.attack
                 lowest_atk_minions.append(minion)
 
         return random.choice(lowest_atk_minions)

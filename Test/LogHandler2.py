@@ -4,7 +4,7 @@ import hearthstone.enums as hsenums
 from PySide2.QtCore import Signal, QObject
 from hearthstone.enums import GameTag, CardType, Faction, Race, Rarity, Zone, Step, State
 
-from BobsSimulator.Util import card_name_by_id
+from BobsSimulator.Util import Util
 from BobsSimulator.HSType import Hero, Minion, Battle
 from BobsSimulator.Regex import *
 
@@ -182,7 +182,7 @@ class HSGame(QObject):
 
         if 'CardID' in self.entities[entity_id]:
             card_id = self.entities[entity_id]['CardID']
-            card_name = card_name_by_id(card_id)
+            card_name = Util.card_name_by_id(card_id)
 
         if GameTag.ZONE.value in self.entities[entity_id]:
             zone = self.entities[entity_id][GameTag.ZONE.value]
@@ -450,15 +450,15 @@ class HSGame(QObject):
                 print('-' * 50)
 
                 self.battle_start.emit(self.game_turn // 2)
-        if blocktype == "TRIGGER":
-            for word in text.split():
-                idx = word.find('TriggerKeyword=')
-                if idx == -1:
-                    continue
-                tkeyword = word[idx+len('TriggerKeyword='):]
-                self.trigger_keywords.add(tkeyword)
-                if tkeyword == 'DEATHRATTLE':
-                    print(f"""Deathrattle by {card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id}""")
+        # if blocktype == "TRIGGER":
+        #     for word in text.split():
+        #         idx = word.find('TriggerKeyword=')
+        #         if idx == -1:
+        #             continue
+        #         tkeyword = word[idx+len('TriggerKeyword='):]
+        #         self.trigger_keywords.add(tkeyword)
+        #         if tkeyword == 'DEATHRATTLE':
+        #             print(f"""Deathrattle by {card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id}""")
 
 
 
@@ -543,18 +543,18 @@ class HSGame(QObject):
             if not value:
                 return
             print('.'*50)
-            print(f"""{card_name_by_id(self.entities[value]['CardID'])}@{value} -> """, end='')
+            print(f"""{Util.card_name_by_id(self.entities[value]['CardID'])}@{value} -> """, end='')
 
         if entity_id == self.game_entity and tag == GameTag.PROPOSED_DEFENDER:
             if not value:
                 return
-            print(f"""{card_name_by_id(self.entities[value]['CardID'])}@{value}""")
+            print(f"""{Util.card_name_by_id(self.entities[value]['CardID'])}@{value}""")
 
         if tag == GameTag.DAMAGE:
             if not value:
                 return
             if self.entities[entity_id][GameTag.ZONE] == Zone.PLAY and self.entities[entity_id][GameTag.CARDTYPE] == CardType.MINION:
-                print(f"""{card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id} damaged {value - prevalue}""")
+                print(f"""{Util.card_name_by_id(self.entities[entity_id]['CardID'])}@{entity_id} damaged {value - prevalue}""")
 
     def show_entity_handler(self, level):
         self.show_entity_num += 1
@@ -800,7 +800,7 @@ if __name__ == '__main__':
     log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
 #    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
     log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
-    log_file_2020_03_30_20_49_20 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-30 20-49-20.log"), 'r', encoding="UTF8")
+    # log_file_2020_03_30_20_49_20 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-30 20-49-20.log"), 'r', encoding="UTF8")
 
     # game = HSGame(log_file_2020_02_05_22_51_53)
     # game.line_reader()
@@ -811,7 +811,7 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(log_file_2020_03_21)
+    game = HSGame(log_file_power_new)
     game.line_reader()
     game.print_trigger()
     #

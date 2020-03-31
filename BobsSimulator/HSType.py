@@ -133,7 +133,7 @@ class Player:
         self.board[pos] = new_minion
 
     def remove_minion(self, removed_minion: 'Minion'):
-        from BobsSimulator.Util import default_attack_by_id, default_health_by_id
+        from BobsSimulator.Util import Util
         if self.board[removed_minion.pos] is not removed_minion:
             print('remove minion failed')
             return False
@@ -153,8 +153,8 @@ class Player:
 
         removed_minion.pos = 0
         removed_minion.zone = Zone.GRAVEYARD
-        removed_minion.attack = default_attack_by_id(removed_minion.card_id)
-        removed_minion.health = default_health_by_id(removed_minion.card_id)
+        removed_minion.attack = Util.default_attack_by_id(removed_minion.card_id)
+        removed_minion.health = Util.default_health_by_id(removed_minion.card_id)
         self.graveyard.append(removed_minion)
 
 
@@ -179,9 +179,9 @@ class Hero:
         self.tech_level = 0  # type: int
 
     def print_log(self, logger: logging.Logger, is_me=True):
-        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Util import Util
         from BobsSimulator.Main import LOCALE
-        name = card_name_by_id(self.card_id, locale=LOCALE)
+        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerHero"
         else:
@@ -190,8 +190,8 @@ class Hero:
             f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
 
     def name(self):
-        from BobsSimulator.Util import card_name_by_id
-        return card_name_by_id(self.card_id)
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
 
     def info(self):
         text = f"{self.name() + '(' + str(self.tech_level) + ')'}"
@@ -209,9 +209,9 @@ class HeroPower:
         self.exhausted = False  # type: bool
 
     def print_log(self, logger: logging.Logger, is_me=True):
-        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Util import Util
         from BobsSimulator.Main import LOCALE
-        name = card_name_by_id(self.card_id, locale=LOCALE)
+        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerHeroPower"
         else:
@@ -222,8 +222,8 @@ class HeroPower:
         logger.info(log_text)
 
     def name(self):
-        from BobsSimulator.Util import card_name_by_id
-        return card_name_by_id(self.card_id)
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
 
 
 class Secret:
@@ -232,9 +232,9 @@ class Secret:
         self.card_id = ""  # type: str
 
     def print_log(self, logger: logging.Logger, is_me=True):
-        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Util import Util
         from BobsSimulator.Main import LOCALE
-        name = card_name_by_id(self.card_id, locale=LOCALE)
+        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerSecret"
         else:
@@ -243,8 +243,8 @@ class Secret:
         logger.info(log_text)
 
     def name(self):
-        from BobsSimulator.Util import card_name_by_id
-        return card_name_by_id(self.card_id)
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
 
 
 class Enchantment:
@@ -254,13 +254,12 @@ class Enchantment:
         self.attached_id = 0  # type: int
 
     def name(self):
-        from BobsSimulator.Util import card_name_by_id
-        return card_name_by_id(self.card_id)
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
 
 
 class Minion:
     def __init__(self):
-        self.entity_id = 0  # type: int
         self.card_id = ""  # type: str
         self.golden = False  # type: bool  # PREMIUM
         self.level2 = False  # type: bool  # BACON_MINION_IS_LEVEL_TWO
@@ -268,7 +267,6 @@ class Minion:
         self.tech_level = 1  # type: int
         self.cost = 0  # type: int
         self.race = None  # type: Optional[Race]
-        self.faction = None  # type: Optional[Faction]
         self.attack = 0  # type: int
         self.health = 0  # type: int
         self.damage = 0  # type: int
@@ -277,11 +275,7 @@ class Minion:
         self.poisonous = False  # type: bool
         self.windfury = 0  # attack n times more!
         self.reborn = False  # type: bool
-        self.charge = False  # type: bool
-        self.modular = False  # type: bool
         self.deathrattle = False  # type: bool
-        self.battlecry = False  # type: bool
-        self.discover = False  # type: bool
         self.aura = False  # type: bool
         self.overkill = False  # type: bool
         self.start_of_combat = False  # type: bool
@@ -297,12 +291,14 @@ class Minion:
         self.player = None  # type: Optional[Player]
         # self.is_mine = False  # type: bool  # if card is player's, True
 
+
+
     def hp(self):
         return self.health - self.damage
 
     def name(self):
-        from BobsSimulator.Util import card_name_by_id
-        return card_name_by_id(self.card_id)
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
 
     def info(self):
         text = f'{self.name()} {self.attack}/{self.hp()}'
@@ -324,9 +320,9 @@ class Minion:
         return f'[{text:^{20-non_ascii}}]'
 
     def print_log(self, logger: logging.Logger, is_me=True):
-        from BobsSimulator.Util import card_name_by_id
+        from BobsSimulator.Util import Util
         from BobsSimulator.Main import LOCALE
-        name = card_name_by_id(self.card_id, locale=LOCALE)
+        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerMinion"
         else:
@@ -348,7 +344,7 @@ class Minion:
 
         for enchant in self.enchantments:
             enchant_cardid = enchant.card_id
-            enchant_name = card_name_by_id(enchant_cardid, locale=LOCALE)
+            enchant_name = Util.card_name_by_id(enchant_cardid, locale=LOCALE)
             log_text += f"""-enchant "{enchant_name}@{enchant_cardid}" """
         logger.info(log_text)
 
