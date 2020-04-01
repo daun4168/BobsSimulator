@@ -284,6 +284,8 @@ class Minion:
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
         self.enchantments = []  # type: List[Enchantment]
 
+        self.to_be_destroyed = False  # type: bool
+
         self.zone = None  # type: Optional[Zone]
         self.pos = 0  # type: int
         self.exhausted = False  # type: bool

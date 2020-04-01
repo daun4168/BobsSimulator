@@ -1,0 +1,308 @@
+# ==================================================
+# Game Start
+# Build: 42174
+# Game Type: GT_BATTLEGROUNDS
+# Format Type: FT_WILD
+# Scenario ID: 3459
+# Battle tag: 여관주인#31393
+# --------------------------------------------------
+# Battle 1
+# Battle Info
+* PlayerHero -name "신드라고사@TB_BaconShop_HERO_27" -hp 40 -tech 1 
+* PlayerHeroPower -name "싸늘하게@TB_BaconShop_HP_014" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 2 -hp 3 -pos 1 -taunt 
+# versus
+* PlayerHero -name "희망의 끝 요그사론@TB_BaconShop_HERO_35" -hp 40 -tech 1 
+* PlayerHeroPower -name "수수께끼 상자@TB_BaconShop_HP_039" 
+* PlayerMinion -name "헌신적인 영웅@OG_221" -atk 3 -hp 2 -pos 1 -enchant "수수께끼@TB_BaconShop_HP_039e" 
+# Battle 1 End
+# DRAW
+# PlayerHP: 40, EnemyHP: 40
+# PlayerRank: 1
+# --------------------------------------------------
+# Battle 2
+# Battle Info
+* PlayerHero -name "신드라고사@TB_BaconShop_HERO_27" -hp 40 -tech 2 
+* PlayerHeroPower -name "싸늘하게@TB_BaconShop_HP_014" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 2 -hp 3 -pos 1 -taunt 
+# versus
+* PlayerHero -name "티리온 폴드링@TB_BaconShop_HERO_47" -hp 40 -tech 1 
+* PlayerHeroPower -name "명예로운 전투원들@TB_BaconShop_HP_051" 
+* PlayerMinion -name "정의로운 수호자@ICC_038" -atk 2 -hp 2 -pos 1 -taunt -divine_shield -enchant "명예@TB_BaconShop_HP_051e" 
+* PlayerMinion -name "길고양이@CFM_315" -atk 1 -hp 1 -pos 2 
+* PlayerMinion -name "얼룩고양이@CFM_315t" -atk 1 -hp 1 -pos 3 
+# Battle 2 End
+# Enemy Win
+# Player Take Damage: 3
+# PlayerHP: 37, EnemyHP: 40
+# PlayerRank: 5
+# --------------------------------------------------
+# Battle 3
+# Battle Info
+* PlayerHero -name "신드라고사@TB_BaconShop_HERO_27" -hp 37 -tech 2 
+* PlayerHeroPower -name "싸늘하게@TB_BaconShop_HP_014" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 4 -hp 5 -pos 1 -taunt -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 2 -hp 3 -pos 2 -taunt 
+# versus
+* PlayerHero -name "엘리스 스타시커@TB_BaconShop_HERO_42" -hp 37 -tech 2 
+* PlayerHeroPower -name "선임 탐험가@TB_BaconShop_HP_047" 
+* PlayerMinion -name "악마 간수@BGS_014" -atk 5 -hp 5 -pos 1 -taunt -enchant "감독@BGS_001e" 
+* PlayerMinion -name "나스레짐 감독관@BGS_001" -atk 2 -hp 4 -pos 2 
+* PlayerMinion -name "길고양이@CFM_315" -atk 1 -hp 1 -pos 3 
+# Battle 3 End
+# Enemy Win
+# Player Take Damage: 6
+# PlayerHP: 31, EnemyHP: 37
+# PlayerRank: 8
+# --------------------------------------------------
+# Battle 4
+# Battle Info
+* PlayerHero -name "신드라고사@TB_BaconShop_HERO_27" -hp 30 -tech 2 
+* PlayerHeroPower -name "싸늘하게@TB_BaconShop_HP_014" 
+* PlayerMinion -name "나스레짐 감독관@BGS_001" -atk 6 -hp 5 -pos 1 -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "분노의 명인@BGS_004" -atk 9 -hp 6 -pos 2 -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "명인의 솜씨@BGS_004e" -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 7 -hp 5 -pos 3 -taunt -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 5 -hp 3 -pos 4 -taunt -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# versus
+* PlayerHero -name "데스윙@TB_BaconShop_HERO_52" -hp 35 -tech 2 
+* PlayerHeroPower -name "모두 불타리라!@TB_BaconShop_HP_061" 
+* PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 5 -hp 1 -pos 1 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "멀록 정찰병@EX1_506a" -atk 4 -hp 1 -pos 2 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "길고양이@CFM_315" -atk 4 -hp 1 -pos 3 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "인자한 할머니@KAR_005" -atk 4 -hp 1 -pos 4 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "쥐 떼@CFM_316" -atk 5 -hp 2 -pos 5 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# Battle 4 End
+# Enemy Win
+# Player Take Damage: 6
+# PlayerHP: 24, EnemyHP: 35
+# PlayerRank: 8
+# --------------------------------------------------
+# Battle 5
+# Battle Info
+* PlayerHero -name "신드라고사@TB_BaconShop_HERO_27" -hp 24 -tech 3 
+* PlayerHeroPower -name "싸늘하게@TB_BaconShop_HP_014" 
+* PlayerMinion -name "분노의 명인@BGS_004" -atk 6 -hp 6 -pos 1 -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "명인의 솜씨@BGS_004e" 
+* PlayerMinion -name "푸른비늘혈족 맹독전사@ICC_029" -atk 5 -hp 5 -pos 2 
+* PlayerMinion -name "나스레짐 감독관@BGS_001" -atk 3 -hp 5 -pos 3 -enchant "싸늘@TB_BaconShop_HP_014e" 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 12 -hp 11 -pos 4 -level2 -taunt -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "싸늘@TB_BaconShop_HP_014e" -enchant "용비늘@ICC_029e" 
+# versus
+* PlayerHero -name "희망의 끝 요그사론@TB_BaconShop_HERO_35" -hp 40 -tech 3 
+* PlayerHeroPower -name "수수께끼 상자@TB_BaconShop_HP_039" 
+* PlayerMinion -name "느조스의 피조물@OG_256" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "헌신적인 영웅@OG_221" -atk 3 -hp 2 -pos 2 -enchant "수수께끼@TB_BaconShop_HP_039e" 
+* PlayerMinion -name "인자한 할머니@KAR_005" -atk 2 -hp 2 -pos 3 -enchant "포만감@KAR_095e" 
+* PlayerMinion -name "동물원로봇@KAR_095" -atk 3 -hp 3 -pos 4 
+* PlayerMinion -name "용혈족 부관@BGS_039" -atk 4 -hp 5 -pos 5 -taunt -enchant "수수께끼@TB_BaconShop_HP_039e" -enchant "포만감@KAR_095e" 
+* PlayerMinion -name "청소부 하이에나@EX1_531" -atk 3 -hp 3 -pos 6 -enchant "수수께끼@TB_BaconShop_HP_039e" 
+# ==================================================
+# Game Start
+# Build: 44222
+# Game Type: GT_BATTLEGROUNDS
+# Format Type: FT_WILD
+# Scenario ID: 3459
+# Battle tag: 여관주인#31393
+# --------------------------------------------------
+# Battle 1
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 40 -tech 1 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 3 -hp 2 -pos 1 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# versus
+* PlayerHero -name "데스윙@TB_BaconShop_HERO_52" -hp 40 -tech 1 
+* PlayerHeroPower -name "모두 불타리라!@TB_BaconShop_HP_061" 
+* PlayerMinion -name "길고양이@CFM_315" -atk 3 -hp 1 -pos 1 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "얼룩고양이@CFM_315t" -atk 3 -hp 1 -pos 2 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# Battle 1 End
+# DRAW
+# PlayerHP: 40, EnemyHP: 40
+# PlayerRank: 1
+# --------------------------------------------------
+# Battle 2
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 40 -tech 2 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 1 
+# versus
+* PlayerHero -name "전시 관리인@TB_BaconShop_HERO_33" -hp 40 -tech 2 
+* PlayerHeroPower -name "박물관지기@TB_BaconShop_HP_033" 
+* PlayerMinion -name "융합체@TB_BaconShop_HP_033t" -atk 2 -hp 1 -pos 1 -enchant "무리의 힘@EX1_162o" 
+* PlayerMinion -name "광포한 늑대 우두머리@EX1_162" -atk 2 -hp 2 -pos 2 
+# Battle 2 End
+# Enemy Win
+# Player Take Damage: 3
+# PlayerHP: 37, EnemyHP: 40
+# PlayerRank: 2
+# --------------------------------------------------
+# Battle 3
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 37 -tech 2 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 2 
+# versus
+* PlayerHero -name "피라마드@TB_BaconShop_HERO_39" -hp 38 -tech 2 
+* PlayerHeroPower -name "벽돌 쌓기@TB_BaconShop_HP_040" 
+* PlayerMinion -name "느조스의 피조물@OG_256" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "허수아비골렘@EX1_556" -atk 2 -hp 3 -pos 2 
+* PlayerMinion -name "길고양이@CFM_315" -atk 1 -hp 1 -pos 3 
+# Battle 3 End
+# Enemy Win
+# Player Take Damage: 4
+# PlayerHP: 33, EnemyHP: 38
+# PlayerRank: 6
+# --------------------------------------------------
+# Battle 4
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 33 -tech 2 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 2 
+* PlayerMinion -name "늙은 거먹눈 멀록@EX1_062" -atk 2 -hp 4 -pos 3 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 4 
+# versus
+* PlayerHero -name "엘리스 스타시커@TB_BaconShop_HERO_42" -hp 31 -tech 2 
+* PlayerHeroPower -name "선임 탐험가@TB_BaconShop_HP_047" 
+* PlayerMinion -name "분노의 명인@TB_BaconUps_079" -atk 6 -hp 6 -pos 1 -level2 -enchant "명인의 솜씨@TB_BaconUps_079e" 
+* PlayerMinion -name "문양 수호자@BGS_045" -atk 2 -hp 4 -pos 2 
+* PlayerMinion -name "악마 간수@BGS_014" -atk 3 -hp 3 -pos 3 -taunt 
+# Battle 4 End
+# DRAW
+# PlayerHP: 33, EnemyHP: 31
+# PlayerRank: 7
+# --------------------------------------------------
+# Battle 5
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 33 -tech 3 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "문양 수호자@BGS_045" -atk 2 -hp 4 -pos 1 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 2 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 3 
+* PlayerMinion -name "늙은 거먹눈 멀록@EX1_062" -atk 2 -hp 4 -pos 4 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 5 
+# versus
+* PlayerHero -name "A. F. 케이@TB_BaconShop_HERO_16" -hp 27 -tech 3 
+* PlayerHeroPower -name "밍기적@TB_BaconShop_HP_044" 
+* PlayerMinion -name "괴수@EX1_577" -atk 12 -hp 7 -pos 1 -enchant "야성의 부름@BGS_017e" 
+* PlayerMinion -name "무리의 지도자@BGS_017" -atk 3 -hp 3 -pos 2 
+* PlayerMinion -name "청동 감시자@BGS_034" -atk 2 -hp 1 -pos 3 -divine_shield -reborn 
+* PlayerMinion -name "임프 두목@BRM_006" -atk 2 -hp 4 -pos 4 
+* PlayerMinion -name "얼룩고양이@CFM_315t" -atk 1 -hp 1 -pos 5 
+# Battle 5 End
+# DRAW
+# PlayerHP: 33, EnemyHP: 27
+# PlayerRank: 5
+# --------------------------------------------------
+# Battle 6
+# Battle Info
+* PlayerHero -name "리노 잭슨@TB_BaconShop_HERO_41" -hp 33 -tech 3 
+* PlayerHeroPower -name "부자가 될 거야!@TB_BaconShop_HP_046" 
+* PlayerMinion -name "반사로봇@BGS_071" -atk 5 -hp 4 -pos 1 -divine_shield -enchant "나사 풀린 깡통@GVG_055e" 
+* PlayerMinion -name "문양 수호자@BGS_045" -atk 2 -hp 4 -pos 2 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 3 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 4 
+* PlayerMinion -name "늙은 거먹눈 멀록@EX1_062" -atk 6 -hp 4 -pos 5 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 6 
+* PlayerMinion -name "깡통나사 고물로봇@GVG_055" -atk 2 -hp 5 -pos 7 
+# versus
+* PlayerHero -name "전시 관리인@TB_BaconShop_HERO_33" -hp 31 -tech 3 
+* PlayerHeroPower -name "박물관지기@TB_BaconShop_HP_033" 
+* PlayerMinion -name "느조스의 피조물@OG_256" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "늙은 거먹눈 멀록@EX1_062" -atk 8 -hp 4 -pos 2 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "악마 간수@BGS_014" -atk 6 -hp 6 -pos 3 -taunt -enchant "감독@BGS_001e" -enchant "뾰족한 그림자@CFM_610e" 
+* PlayerMinion -name "수정술사@CFM_610" -atk 5 -hp 4 -pos 4 
+* PlayerMinion -name "융합체@TB_BaconShop_HP_033t" -atk 4 -hp 2 -pos 5 -enchant "뾰족한 그림자@CFM_610e" -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 4 -hp 1 -pos 6 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 전투대장@EX1_507" -atk 3 -hp 3 -pos 7 
+# ==================================================
+# Game Start
+# Build: 44222
+# Game Type: GT_BATTLEGROUNDS
+# Format Type: FT_WILD
+# Scenario ID: 3459
+# Battle tag: pathétique#11835
+# --------------------------------------------------
+# Battle 1
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 40 -tech 1 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 1 
+# versus
+* PlayerHero -name "무한의 토키@TB_BaconShop_HERO_28" -hp 40 -tech 1 
+* PlayerHeroPower -name "시간의 선술집@TB_BaconShop_HP_028" 
+* PlayerMinion -name "헌신적인 영웅@OG_221" -atk 2 -hp 1 -pos 1 
+# Battle 1 End
+# Player Win
+# Player Give Damage: 2
+# PlayerHP: 40, EnemyHP: 38
+# PlayerRank: 1
+# --------------------------------------------------
+# Battle 2
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 40 -tech 1 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 1 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 2 
+# versus
+* PlayerHero -name "네파리안@TB_BaconShop_HERO_30" -hp 40 -tech 1 
+* PlayerHeroPower -name "네파리안의 화염@TB_BaconShop_HP_043" 
+* PlayerMinion -name "멀록 파도술사@EX1_509" -atk 3 -hp 3 -pos 1 -enchant "블라옳옳옳@EX1_509e" -enchant "훈련@UNG_073e" 
+* PlayerMinion -name "바위웅덩이 사냥꾼@UNG_073" -atk 2 -hp 3 -pos 2 
+# Battle 2 End
+# Enemy Win
+# Player Take Damage: 2
+# PlayerHP: 38, EnemyHP: 40
+# PlayerRank: 4
+# --------------------------------------------------
+# Battle 3
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 38 -tech 2 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 3 -hp 2 -pos 1 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 3 -hp 2 -pos 2 -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# versus
+* PlayerHero -name "데스윙@TB_BaconShop_HERO_52" -hp 36 -tech 2 
+* PlayerHeroPower -name "모두 불타리라!@TB_BaconShop_HP_061" 
+* PlayerMinion -name "악마 간수@BGS_014" -atk 5 -hp 3 -pos 1 -taunt -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+* PlayerMinion -name "분노의 명인@BGS_004" -atk 5 -hp 3 -pos 2 -enchant "명인의 솜씨@BGS_004e" -enchant "모두 불타리라!@TB_BaconShop_HP_061e" 
+# Battle 3 End
+# Enemy Win
+# Player Take Damage: 3
+# PlayerHP: 35, EnemyHP: 36
+# PlayerRank: 4
+# --------------------------------------------------
+# Battle 4
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 35 -tech 2 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "새끼 붉은용@TB_BaconUps_102" -atk 2 -hp 4 -pos 1 -level2 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 2 
+# versus
+* PlayerHero -name "전시 관리인@TB_BaconShop_HERO_33" -hp 40 -tech 2 
+* PlayerHeroPower -name "박물관지기@TB_BaconShop_HP_033" 
+* PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 4 -hp 1 -pos 1 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 4 -hp 1 -pos 2 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "융합체@TB_BaconShop_HP_033t" -atk 3 -hp 1 -pos 3 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 정찰병@EX1_506a" -atk 3 -hp 1 -pos 4 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 정찰병@EX1_506a" -atk 3 -hp 1 -pos 5 -enchant "므라아옳옳옳!@EX1_507e" 
+* PlayerMinion -name "멀록 전투대장@EX1_507" -atk 3 -hp 3 -pos 6 
+# Battle 4 End
+# DRAW
+# PlayerHP: 35, EnemyHP: 40
+# PlayerRank: 4
+# --------------------------------------------------
+# Battle 5
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 35 -tech 2 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "문양 수호자@BGS_045" -atk 2 -hp 4 -pos 1 
+* PlayerMinion -name "무쇠가죽 공포뿔@TB_BaconUps_051" -atk 7 -hp 7 -pos 2 
+* PlayerMinion -name "새끼 붉은용@TB_BaconUps_102" -atk 2 -hp 4 -pos 3 -level2 
+* PlayerMinion -name "새끼 붉은용@BGS_019" -atk 1 -hp 2 -pos 4 
+# versus
+* PlayerHero -name "타락한 조지@TB_BaconShop_HERO_15" -hp 30 -tech 2 
+* PlayerHeroPower -name "빛의 은혜@TB_BaconShop_HP_010" 
+* PlayerMinion -name "악독한 시종@YOD_026" -atk 4 -hp 3 -pos 1 -enchant "감독@BGS_001e" 
+* PlayerMinion -name "나스레짐 감독관@BGS_001" -atk 2 -hp 3 -pos 2 
+* PlayerMinion -name "야비한 소악마@LOOT_013" -atk 2 -hp 4 -pos 3 -taunt 
+* PlayerMinion -name "야비한 소악마@LOOT_013" -atk 2 -hp 4 -pos 4 -taunt -divine_shield 
+* PlayerMinion -name "분노의 명인@BGS_004" -atk 9 -hp 9 -pos 5 -enchant "명인의 솜씨@BGS_004e" 

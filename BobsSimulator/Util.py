@@ -14,6 +14,7 @@ import hearthstone_data
 
 class Util:
     card_dict = {}  # type: Dict[str, Dict]
+    enum_id_to_card_id_dict = {}  # type: Dict
     bp_cost_dict = defaultdict(list)  # type: Dict[int, List[str]]
     bp_tech_dict = defaultdict(list)  # type: Dict[int, List[str]]
     bp_race_dict = defaultdict(list)  # type: Dict[Race, List[str]]
@@ -49,6 +50,8 @@ class Util:
         card_data_list = xml_card_dict["CardDefs"]["Entity"]
         for card_data in card_data_list:
             card_id = card_data["@CardID"]
+            enum_id = int(card_data["@ID"])
+            cls.enum_id_to_card_id_dict[enum_id] = card_id
             cls.card_dict[card_id] = {}
             for lang in lang_list:
                 cls.card_dict[card_id][lang] = card_data['Tag'][0][lang]
@@ -203,6 +206,14 @@ class Util:
 
         return minion
 
+    @classmethod
+    def enum_id_to_card_id(cls, enum_id: int) -> str:
+        if enum_id in cls.enum_id_to_card_id_dict:
+            return cls.enum_id_to_card_id_dict[enum_id]
+        else:
+            return ''
+
+
     @staticmethod
     def tag_value_to_int(tag, value):
         if not tag.isdigit():
@@ -251,8 +262,10 @@ if __name__ == "__main__":
     import hearthstone
     import hearthstone_data
 
-    for card_id in Util.bp_minion_list:
-        print(Util.card_name_by_id(card_id))
+    # for card_id in Util.bp_minion_list:
+    #     print(Util.card_name_by_id(card_id))
+
+    print(Util.enum_id_to_card_id(58412))
 
     # print(hearthstone.__version__)
     # print(hearthstone_data.__version__)

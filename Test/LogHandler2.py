@@ -221,6 +221,13 @@ class HSGame(QObject):
                 if GameTag['ZONE_POSITION'].value in self.entities[entity_id]:
                     pos = self.entities[entity_id][GameTag['ZONE_POSITION'].value]
                 print(f"{entity_id} - {attack}/{health} {card_name}, CardType: {CardType(cardtype).name} Pos: {pos}")
+                if card_name == '변신수 제루스':
+                    for tag, value in self.entities[entity_id].items():
+                        if tag in GameTag.__members__.values():
+                            tag = GameTag(tag).name
+                        print(f"    TAG: {tag}, VALUE: {value}")
+
+
 
             if cardtype == CardType.HERO_POWER.value:
                 print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
@@ -236,45 +243,45 @@ class HSGame(QObject):
 
                 print(f"{entity_id} - {card_name}, HP: {health}, tech_level: {tech_level}, CardType: {CardType(cardtype).name}")
 
-                for tag, value in self.entities[entity_id].items():
-                    if tag in GameTag.__members__.values():
-                        tag = GameTag(tag).name
-                        if tag in ['COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
-                                   'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
-                                   'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
-                                   'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
-                                   'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
-                                   'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
-                            continue
-                    if tag == 'CardID':
-                        continue
-                    print(f"    TAG: {tag}, VALUE: {value}")
-                no_tags = ['CONTROLLER', 'COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
-                           'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
-                           'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
-                           'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
-                           'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
-                           'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'hi', 'lo', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED',
-                            'MAXHANDSIZE', 'STARTHANDSIZE', 'CANT_DRAW',
-                           'OVERRIDE_EMOTE_0', 'OVERRIDE_EMOTE_1', 'OVERRIDE_EMOTE_2', 'OVERRIDE_EMOTE_3', 'OVERRIDE_EMOTE_4', 'OVERRIDE_EMOTE_5',
-                           'NUM_FRIENDLY_MINIONS_THAT_ATTACKED_THIS_TURN', 'NUM_MINIONS_PLAYER_KILLED_THIS_TURN', 'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_TURN',
-                           'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_GAME', 'BATTLEGROUNDS_PREMIUM_EMOTES', 'COMBO_ACTIVE', 'RESOURCES', 'RESOURCES_USED', 'MAXRESOURCES']
-                if self.entities[entity_id][GameTag.CONTROLLER] == self.entities[self.player_me]['PlayerID']:
-                    print("--player_me--")
-                    for tag, value in self.entities[self.player_me].items():
-                        if tag in GameTag.__members__.values():
-                            tag = GameTag(tag).name
-                            if tag in no_tags:
-                                continue
-                        print(f"    TAG: {tag}, VALUE: {value}")
-                else:
-                    print("--player other--")
-                    for tag, value in self.entities[self.player_other].items():
-                        if tag in GameTag.__members__.values():
-                            tag = GameTag(tag).name
-                            if tag in no_tags:
-                                continue
-                        print(f"    TAG: {tag}, VALUE: {value}")
+                # for tag, value in self.entities[entity_id].items():
+                #     if tag in GameTag.__members__.values():
+                #         tag = GameTag(tag).name
+                #         if tag in ['COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                #                    'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                #                    'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                #                    'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                #                    'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                #                    'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
+                #             continue
+                #     if tag == 'CardID':
+                #         continue
+                #     print(f"    TAG: {tag}, VALUE: {value}")
+                # no_tags = ['CONTROLLER', 'COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                #            'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                #            'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                #            'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                #            'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                #            'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'hi', 'lo', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED',
+                #             'MAXHANDSIZE', 'STARTHANDSIZE', 'CANT_DRAW',
+                #            'OVERRIDE_EMOTE_0', 'OVERRIDE_EMOTE_1', 'OVERRIDE_EMOTE_2', 'OVERRIDE_EMOTE_3', 'OVERRIDE_EMOTE_4', 'OVERRIDE_EMOTE_5',
+                #            'NUM_FRIENDLY_MINIONS_THAT_ATTACKED_THIS_TURN', 'NUM_MINIONS_PLAYER_KILLED_THIS_TURN', 'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_TURN',
+                #            'NUM_FRIENDLY_MINIONS_THAT_DIED_THIS_GAME', 'BATTLEGROUNDS_PREMIUM_EMOTES', 'COMBO_ACTIVE', 'RESOURCES', 'RESOURCES_USED', 'MAXRESOURCES']
+                # if self.entities[entity_id][GameTag.CONTROLLER] == self.entities[self.player_me]['PlayerID']:
+                #     print("--player_me--")
+                #     for tag, value in self.entities[self.player_me].items():
+                #         if tag in GameTag.__members__.values():
+                #             tag = GameTag(tag).name
+                #             if tag in no_tags:
+                #                 continue
+                #         print(f"    TAG: {tag}, VALUE: {value}")
+                # else:
+                #     print("--player other--")
+                #     for tag, value in self.entities[self.player_other].items():
+                #         if tag in GameTag.__members__.values():
+                #             tag = GameTag(tag).name
+                #             if tag in no_tags:
+                #                 continue
+                #         print(f"    TAG: {tag}, VALUE: {value}")
 
 
 
@@ -796,11 +803,7 @@ if __name__ == '__main__':
     log_file_2020_03_01_21_06_47 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-06-47.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_20_39_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 20-39-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
-    log_file_2020_03_21 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
-    log_file_power_old = open(os.path.join(HS_LOG_FILE_DIR, "Power_old.log"), 'r', encoding="UTF8")
-#    log_file_power2 = open(os.path.join(HS_LOG_FILE_DIR, "Power2.log"), 'r', encoding="UTF8")
-    log_file_power_new = open(os.path.join(HS_LOG_FILE_DIR, "2020.3.29.log"), 'r', encoding="UTF8")
-    # log_file_2020_03_30_20_49_20 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-30 20-49-20.log"), 'r', encoding="UTF8")
+    log_file_2020_03_29_21_47_06 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-31 21-47-06.log"), 'r', encoding="UTF8")
 
     # game = HSGame(log_file_2020_02_05_22_51_53)
     # game.line_reader()
@@ -811,9 +814,23 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(log_file_power_new)
+    game = HSGame(log_file_2020_03_29_22_38_02)
     game.line_reader()
     game.print_trigger()
+
+    triggerkeyword_set = set()
+
+    while True:
+        line = log_file_2020_03_29_21_47_06.readline()
+        if not line:
+            break
+        words = line.split()
+        for word in words:
+            if word.startswith('TriggerKeyword'):
+                triggerkeyword_set.add(word)
+
+    print(triggerkeyword_set)
+
     #
     # game = HSGame(log_file_power_new)
     # game.line_reader()

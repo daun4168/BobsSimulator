@@ -197,6 +197,9 @@ class HSLogHandler(QObject):
                             battle.enemy.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
 
                 elif cardtype == CardType.MINION.value:
+                    if card_id in ['BGS_029', 'OG_123', 'TB_BaconUps_095']:  # if Shifter Zerus
+                        if 1429 in self.entities[entity_id]:
+                            card_id = Util.enum_id_to_card_id(self.entities[entity_id][1429])
                     minion = Minion()
                     entity_id_to_minion_dict[entity_id] = minion
                     minion.card_id = card_id

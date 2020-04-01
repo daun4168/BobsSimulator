@@ -129,15 +129,24 @@ class Simulator(QObject):
                 self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos - 1], attacker)
             if defender.pos < 7 and self.battle.dfn_player().board[defender.pos + 1] is not None:
                 self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos + 1], attacker)
+
+        # overkill
+        if attacker.overkill and defender.damage > defender.health:
+            self.simulate_overkill(attacker)
         self.check_deaths()
+
         print(self.battle.info())
 
+    def simulate_overkill(self, minion: Minion):
+        if minion.card_id == 'TRL_232':  # Ironhide Direhorn
+            new_minion = Util.make_default_minion('TRL_232t')
+            minion.player.append_minion(new_minion, minion.pos + 1)
 
     def check_deaths(self):
         for player in self.battle.players():
             for minion in player.minions():
                 # Do Deaths
-                if minion.damage >= minion.health:
+                if minion.to_be_destroyed or minion.damage >= minion.health:
                     print(f'REMOVE: {minion.info()}')
                     self.buff_when_minion_death(minion)
                     player.remove_minion(minion)
@@ -167,8 +176,8 @@ class Simulator(QObject):
             return False
         else:
             defender.damage += amount
-            if defender.hp() > 0 and poisonous:
-                defender.damage = defender.health
+            if poisonous:
+                defender.to_be_destroyed = True
             self.minion_damaged(defender)
             self.simulate_get_damage_after(defender)
             return True
