@@ -71,6 +71,7 @@ class DefaultWindow(QMainWindow):
 
     def home(self):
         self.init()
+        self.setWindowTitle(f'Bobs Simulator')
 
         main_logger.info("Bob's Simulator Home.")
         homeWidget = HomeWidget(self)
@@ -147,6 +148,7 @@ class DefaultWindow(QMainWindow):
         self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
         from BobsSimulator.HSLogHandler import HSLogHandler
         self.log_handler = HSLogHandler(self.log_file)
+        self.setWindowTitle(f'Bobs Simulator    Log File Simulate: {os.path.basename(self.log_file_name)}')
 
         self.log_handler.sig_game_start.connect(self.game_start_handler)
         self.log_handler.sig_game_info.connect(self.game_info_handler)

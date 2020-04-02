@@ -54,7 +54,6 @@ class Battle:
         self.enemy.print_log(logger, is_me=True)
 
     def info(self):
-
         text = ""
         text += self.enemy.hero.info()
         for i in range(1, 8):
@@ -111,6 +110,13 @@ class Player:
                 minion_list.append(minion)
         return minion_list
 
+    def left_minion(self) -> Optional['Minion']:
+        for minion in self.minions():
+            if minion.hp() > 0:
+                return minion
+        return None
+
+
     def append_minion(self, new_minion: 'Minion', pos: Optional[int] = None):
         if self.minion_num() >= 7:
             return False
@@ -131,32 +137,6 @@ class Player:
         new_minion.pos = pos
         new_minion.player = self
         self.board[pos] = new_minion
-
-    def remove_minion(self, removed_minion: 'Minion'):
-        from BobsSimulator.Util import Util
-        if self.board[removed_minion.pos] is not removed_minion:
-            print('remove minion failed')
-            return False
-
-        # pos change
-        self.board[removed_minion.pos] = None
-        for change_pos_minion in self.minions():
-            if change_pos_minion.pos > removed_minion.pos:
-                self.board[change_pos_minion.pos] = None
-                change_pos_minion.pos -= 1
-                self.board[change_pos_minion.pos] = change_pos_minion
-
-        # player.next_atk_minion_pos change
-        if self.next_atk_minion_pos is not None:
-            if removed_minion.pos < self.next_atk_minion_pos:
-                self.next_atk_minion_pos -= 1
-
-        removed_minion.pos = 0
-        removed_minion.zone = Zone.GRAVEYARD
-        removed_minion.attack = Util.default_attack_by_id(removed_minion.card_id)
-        removed_minion.health = Util.default_health_by_id(removed_minion.card_id)
-        self.graveyard.append(removed_minion)
-
 
     def sum_damage(self):
         damage = 0
@@ -303,7 +283,10 @@ class Minion:
         return Util.card_name_by_id(self.card_id)
 
     def info(self):
-        text = f'{self.name()} {self.attack}/{self.hp()}'
+        text = ''
+        if self.pos > 0:
+            text += f'({self.pos})'
+        text += f'{self.name()} {self.attack}/{self.hp()}'
 
         if self.deathrattle:
             text += '💀'
