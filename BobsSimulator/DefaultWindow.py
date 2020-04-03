@@ -354,7 +354,7 @@ class DefaultWindow(QMainWindow):
     def simulate(self):
         from BobsSimulator.Simulator import Simulator
         simulator = Simulator()
-        result = simulator.simulate(self.log_handler.game.battle)
+        result = simulator.simulate(self.log_handler.game.battle, simulate_num=1)
 
         simulate_num = len(result)
         if not simulate_num:

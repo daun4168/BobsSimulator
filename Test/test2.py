@@ -1,22 +1,23 @@
 
-from BobsSimulator.HSType import Hero, Minion, Battle, Enchantment
+from collections import defaultdict
 
 
-entity_id_to_minion_dict = {}
-
-battle = Battle()
-minion = Minion()
+dd = defaultdict(list)
 
 
-battle.me.board[2] = minion
-entity_id_to_minion_dict[10] = minion
+dd[1].append(1)
 
+dd[3].append(4)
+dd[4].append(4)
+dd[3].append(2)
 
-enchant = Enchantment()
+idx = 0
+while dd:
+    this_idx = idx
+    for value in dd[this_idx]:
+        print(this_idx, value)
+    del dd[this_idx]
+    idx += 1
 
-enchant.entity_id = 200
-
-entity_id_to_minion_dict[10].enchantments.append(enchant)
-
-
-print(1)
+# print(dd)
+# print(bool(dd))

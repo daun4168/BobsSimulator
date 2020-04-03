@@ -1,6 +1,7 @@
 import copy
 import random
 from typing import List, Dict, Optional
+from collections import defaultdict, OrderedDict, deque
 
 from PySide2.QtCore import Signal, QObject
 
@@ -65,6 +66,7 @@ class Simulator(QObject):
         for player in self.battle.players():
             player.not_attack_last_seq = False
             player.next_atk_minion_pos = None
+            player.death_triggers = defaultdict(list)
 
     def set_attack_player(self):
         if self.battle.me.minion_num() > self.battle.enemy.minion_num():
@@ -139,16 +141,25 @@ class Simulator(QObject):
             if defender.hp() < 0:
                 self.simulate_overkill(attacker)
 
-
     def simulate_deaths(self):
         while True:
+            for player in self.battle.players():
+                player.death_triggers = defaultdict(deque)
             is_minion_dead = self.check_deaths()
             if not is_minion_dead:
                 return
             self.simulate_death_triggers()
 
     def simulate_death_triggers(self):
-        pass
+        for player in self.battle.players():
+            player.trigger_pos = 0
+            while player.death_triggers:
+                this_pos = player.trigger_pos
+                player.trigger_pos += 1
+                while player.death_triggers[this_pos]:
+                    player.death_triggers[this_pos].popleft()
+                    print('pop!')
+                del player.death_triggers[this_pos]
 
     def check_deaths(self):
         is_minion_dead = False
@@ -156,16 +167,11 @@ class Simulator(QObject):
             for minion in player.minions():
                 # Do Deaths
                 if minion.to_be_destroyed or minion.damage >= minion.health:
-                    self.buff_when_minion_death(minion)
+                    is_minion_dead = True
+                    if minion.deathrattle:
+                        player.death_triggers[minion.pos].append(minion.card_id)
                     self.simulate_remove_minion(minion, minion.player)
-
-        # 하이에나류 버프
-        # 곡예사, 죽메
-
-    def buff_when_minion_death(self, death_minion: Minion):
-        if death_minion.race == Race.BEAST:
-
-            pass
+        return is_minion_dead
 
     def simulate_overkill(self, minion: Minion):
         print(f'OVERKILL: {minion.info()}')
@@ -229,6 +235,12 @@ class Simulator(QObject):
                 player.board[change_pos_minion.pos] = None
                 change_pos_minion.pos -= 1
                 player.board[change_pos_minion.pos] = change_pos_minion
+
+        # trigger pos change
+        od = OrderedDict(sorted(player.death_triggers.items()))
+        for pos, death_triggers in player.death_triggers.items():
+            if pos > removed_minion.pos:
+
 
         # player.next_atk_minion_pos change
         if player.next_atk_minion_pos is not None:

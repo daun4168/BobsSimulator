@@ -1,5 +1,5 @@
-from typing import List, Dict, Optional, DefaultDict
-from collections import defaultdict
+from typing import List, Dict, Optional, DefaultDict, Deque
+from collections import defaultdict, deque
 from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
     Rarity, Mulligan, Step, PlayState, CardClass, PowerType
 import logging
@@ -86,8 +86,9 @@ class Player:
 
         self.next_atk_minion_pos = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
-        self.is_deathrattle_first = False  # type: bool
-        self.death_triggers = defaultdict(list)  # type: DefaultDict[int, List[Minion]]
+        self.is_death_first = False  # type: bool
+        self.death_triggers = defaultdict(deque)  # type: DefaultDict[int, Deque[str]]
+        self.trigger_pos = 0  # type: int
 
     def print_log(self, logger: logging.Logger, is_me=True):
         self.hero.print_log(logger, is_me)
