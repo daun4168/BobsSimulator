@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, DefaultDict
+from collections import defaultdict
 from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
     Rarity, Mulligan, Step, PlayState, CardClass, PowerType
 import logging
@@ -86,6 +87,7 @@ class Player:
         self.next_atk_minion_pos = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
         self.is_deathrattle_first = False  # type: bool
+        self.death_triggers = defaultdict(list)  # type: DefaultDict[int, List[Minion]]
 
     def print_log(self, logger: logging.Logger, is_me=True):
         self.hero.print_log(logger, is_me)
@@ -115,7 +117,6 @@ class Player:
             if minion.hp() > 0:
                 return minion
         return None
-
 
     def append_minion(self, new_minion: 'Minion', pos: Optional[int] = None):
         if self.minion_num() >= 7:

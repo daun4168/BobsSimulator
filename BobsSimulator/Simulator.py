@@ -64,6 +64,7 @@ class Simulator(QObject):
         self.battle.seq = 0
         for player in self.battle.players():
             player.not_attack_last_seq = False
+            player.next_atk_minion_pos = None
 
     def set_attack_player(self):
         if self.battle.me.minion_num() > self.battle.enemy.minion_num():
@@ -72,8 +73,6 @@ class Simulator(QObject):
             self.battle.is_me_attack = False
         else:
             self.battle.is_me_attack = bool(random.getrandbits(1))
-        for player in self.battle.players():
-            player.next_atk_minion_pos = None
 
     def simulate_hero_power(self):
         # TODO: make function
@@ -129,20 +128,30 @@ class Simulator(QObject):
             if defender.pos < 7 and self.battle.dfn_player().board[defender.pos + 1] is not None:
                 self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos + 1], attacker)
 
-        self.check_deaths()
+        self.simulate_deaths()
         print(self.battle.info())
 
     def simulate_damage_by_minion(self, defender: Minion, attacker: Minion, amount=None):
         if amount is None:
             amount = attacker.attack
-
         self.simulate_damage(defender, amount, attacker.poisonous)
-
         if attacker.overkill and attacker.player is self.battle.atk_player():  # attacker's turn
             if defender.hp() < 0:
                 self.simulate_overkill(attacker)
 
+
+    def simulate_deaths(self):
+        while True:
+            is_minion_dead = self.check_deaths()
+            if not is_minion_dead:
+                return
+            self.simulate_death_triggers()
+
+    def simulate_death_triggers(self):
+        pass
+
     def check_deaths(self):
+        is_minion_dead = False
         for player in self.battle.players():
             for minion in player.minions():
                 # Do Deaths
@@ -150,7 +159,7 @@ class Simulator(QObject):
                     self.buff_when_minion_death(minion)
                     self.simulate_remove_minion(minion, minion.player)
 
-                # 하이에나류 버프
+        # 하이에나류 버프
         # 곡예사, 죽메
 
     def buff_when_minion_death(self, death_minion: Minion):
@@ -182,6 +191,10 @@ class Simulator(QObject):
         if pos is None:
             pos = player.minion_num() + 1
 
+        if pos < 1 or pos > 7:
+            print(f"SUMMON Fail: {new_minion.info()}")
+            return False
+
         # pos change
         for minion in player.minions():
             if minion.pos >= pos:
@@ -194,7 +207,7 @@ class Simulator(QObject):
         player.board[pos] = new_minion
 
         # player.next_atk_minion_pos change
-        if player.next_atk_minion_pos is None:
+        if player.minion_num() == 1:
             player.next_atk_minion_pos = pos
         else:
             if player.next_atk_minion_pos == 1 and pos == player.minion_num():
