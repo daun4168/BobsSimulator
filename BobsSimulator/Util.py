@@ -1,12 +1,12 @@
 import xmltodict
 import json
 import random
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Iterable
 from collections import defaultdict
 
 from BobsSimulator.HSLogging import main_logger
 from BobsSimulator.Main import VERSION_NUMBER, LOCALE
-from BobsSimulator.HSType import GameTag, CardType, Faction, Race, Rarity, Zone, Mulligan, Step, State, CardClass, PlayState, Minion
+from BobsSimulator.HSType import GameTag, CardType, Faction, Race, Rarity, Zone, Mulligan, Step, State, CardClass, PlayState, Minion, RACE_ALL
 import hearthstone_data
 
 # carddefs_path = 'res/CardDefs.xml'
@@ -76,14 +76,8 @@ class Util:
                     race = Race(tag_value_dict[GameTag.CARDRACE])
                     cls.bp_race_dict[race].append(card_id)
                     if race == Race.ALL:
-                        cls.bp_race_dict[Race.ELEMENTAL].append(card_id)
-                        cls.bp_race_dict[Race.MECHANICAL].append(card_id)
-                        cls.bp_race_dict[Race.DEMON].append(card_id)
-                        cls.bp_race_dict[Race.MURLOC].append(card_id)
-                        cls.bp_race_dict[Race.DRAGON].append(card_id)
-                        cls.bp_race_dict[Race.BEAST].append(card_id)
-                        cls.bp_race_dict[Race.PIRATE].append(card_id)
-                        cls.bp_race_dict[Race.TOTEM].append(card_id)
+                        for race_all in RACE_ALL:
+                            cls.bp_race_dict[race_all].append(card_id)
                 if GameTag.ELITE in tag_value_dict and tag_value_dict[GameTag.ELITE]:
                     cls.bp_elite_list.append(card_id)
                 if GameTag.DEATHRATTLE in tag_value_dict and tag_value_dict[GameTag.DEATHRATTLE]:
@@ -120,47 +114,53 @@ class Util:
         return cls.card_dict[card_id][locale]
 
     @classmethod
-    def random_bp_minion_cost(cls, cost: int) -> Optional[Minion]:
+    def random_bp_minion_cost(cls, cost: int, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_cost_dict[cost], golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion_tech(cls, tech: int, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_tech_dict[tech], golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion_race(cls, race: Race, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_race_dict[race], golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion_elite(cls, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_elite_list, golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion_deathrattle(cls, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_deathrattle_list, golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion(cls, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        return Util.random_bp_minion_by_list(cls.bp_minion_list, golden, except_card_ids)
+
+    @classmethod
+    def random_bp_minion_by_list(cls, card_ids, golden=False, except_card_ids: Iterable[str] = None) -> Optional[Minion]:
+        choice_list: list
+        if type(except_card_ids) is str:
+            choice_list = [card_id for card_id in card_ids if card_id != except_card_ids]
+        elif except_card_ids:
+            choice_list = [card_id for card_id in card_ids if card_id not in except_card_ids]
+        else:
+            choice_list = card_ids
+
         try:
-            card_id = random.choice(cls.bp_cost_dict[cost])
+            card_id = random.choice(choice_list)
         except IndexError:
             return None
-        return cls.make_default_minion(card_id)
+
+        return cls.make_default_minion(card_id, golden=golden)
 
     @classmethod
-    def random_bp_minion_tech(cls, tech: int) -> Optional[Minion]:
-        try:
-            card_id = random.choice(cls.bp_tech_dict[tech])
-        except IndexError:
-            return None
-        return cls.make_default_minion(card_id)
-
-    @classmethod
-    def random_bp_minion_race(cls, race: Race) -> Minion:
-        card_id = random.choice(cls.bp_race_dict[race])
-        return cls.make_default_minion(card_id)
-
-    @classmethod
-    def random_bp_minion_elite(cls) -> Minion:
-        card_id = random.choice(cls.bp_elite_list)
-        return cls.make_default_minion(card_id)
-
-    @classmethod
-    def random_bp_minion_deathrattle(cls) -> Minion:
-        card_id = random.choice(cls.bp_deathrattle_list)
-        return cls.make_default_minion(card_id)
-
-    @classmethod
-    def random_bp_minion(cls) -> Minion:
-        card_id = random.choice(cls.bp_minion_list)
-        return cls.make_default_minion(card_id)
-
-    @classmethod
-    def make_default_minion(cls, card_id) -> Minion:
+    def make_default_minion(cls, card_id, golden=False, level2=None) -> Minion:
         minion = Minion()
         minion.card_id = card_id
         if GameTag["PREMIUM"].value in cls.card_dict[card_id]:
             minion.golden = bool(cls.card_dict[card_id][GameTag["PREMIUM"].value])
+        minion.golden = minion.golden or golden
         if GameTag["BACON_MINION_IS_LEVEL_TWO"].value in cls.card_dict[card_id]:
             minion.level2 = bool(cls.card_dict[card_id][GameTag["BACON_MINION_IS_LEVEL_TWO"].value])
         if GameTag["ELITE"].value in cls.card_dict[card_id]:
@@ -203,6 +203,16 @@ class Util:
             minion.race = Race(cls.card_dict[card_id][GameTag["CARDRACE"].value])
         if 1530 in cls.card_dict[card_id]:  # Zapp, Attack minion with the lowest Attack
             minion.atk_lowest_atk_minion = bool(cls.card_dict[card_id][1530])
+
+        if level2:
+            if not minion.card_id.startswith('TB_BaconUps'):
+                minion.attack *= 2
+                minion.health *= 2
+            minion.golden = True
+            minion.level2 = True
+
+        if minion.card_id in ("BGS_071", "TB_BaconUps_123"):  # Deflect-o-Bot
+            minion.divine_shield = True
 
         return minion
 
@@ -255,6 +265,16 @@ class Util:
 
         return tag, value
 
+    @staticmethod
+    def make_number_circle(num: int):
+        if num is None:
+            return ''
+        if num < 0 or num > 20:
+            return str(num)
+        if num == 0:
+            return '\u24ea'
+        return chr(0x245f + num)
+
 
 Util.init_util()
 
@@ -265,13 +285,19 @@ if __name__ == "__main__":
     # for card_id in Util.bp_minion_list:
     #     print(Util.card_name_by_id(card_id))
 
-    print(Util.enum_id_to_card_id(58412))
+    # print(Util.enum_id_to_card_id(58412))
 
     # print(hearthstone.__version__)
     # print(hearthstone_data.__version__)
     # print(hearthstone_data.get_carddefs_path())
     #
     # card_name_by_id('LOOT_078')
+
+    # print(Util.make_number_circle(1))
+
+    for i in range(50):
+        new_minion = Util.random_bp_minion_race(Race.BEAST)
+        print(new_minion.info())
 
 
 

@@ -173,7 +173,6 @@ class HSLogHandler(QObject):
                             self.game.leaderboard_place = self.entities[entity_id][GameTag.PLAYER_LEADERBOARD_PLACE.value]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
                         hero = battle.enemy.hero
-                    hero.entity_id = entity_id
                     hero.card_id = card_id
                     if GameTag["HEALTH"].value in self.entities[entity_id]:
                         hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
@@ -186,12 +185,10 @@ class HSLogHandler(QObject):
                     if GameTag["CONTROLLER"].value not in self.entities[entity_id]:
                         hsloghandler_logger.error(f"gametag controller not exist, battle: {self.game.battle_num}, entity_id: {entity_id}")
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
-                        battle.me.hero_power.entity_id = entity_id
                         battle.me.hero_power.card_id = card_id
                         if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
                             battle.me.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
-                        battle.enemy.hero_power.entity_id = entity_id
                         battle.enemy.hero_power.card_id = card_id
                         if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
                             battle.enemy.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
@@ -256,19 +253,25 @@ class HSLogHandler(QObject):
                         minion.player = battle.enemy
                         battle.enemy.board[minion.pos] = minion
                 elif cardtype == CardType.ENCHANTMENT.value:
-                    if not GameTag["ATTACHED"].value in self.entities[entity_id]:
+                    if (not GameTag["ATTACHED"].value in self.entities[entity_id]) or (not GameTag["CREATOR"].value in self.entities[entity_id]):
                         continue
-                    enchantment = Enchantment()
-                    enchantment.entity_id = entity_id
-                    enchantment.card_id = card_id
-                    enchantment.attached_id = self.entities[entity_id][GameTag["ATTACHED"].value]
+                    attached_id = self.entities[entity_id][GameTag["ATTACHED"].value]
+                    creator_id = self.entities[entity_id][GameTag["CREATOR"].value]
 
-                    if enchantment.attached_id in entity_id_to_minion_dict:
-                        entity_id_to_minion_dict[enchantment.attached_id].enchantments.append(enchantment)
+                    enchantment = Enchantment()
+                    enchantment.card_id = card_id
+
+
+                    if attached_id in entity_id_to_minion_dict:
+                        entity_id_to_minion_dict[attached_id].enchants.append(enchantment)
+                        enchantment.attached_minion = entity_id_to_minion_dict[attached_id]
+
+                    if creator_id in entity_id_to_minion_dict:
+                        entity_id_to_minion_dict[creator_id].created_enchants.append(enchantment)
+                        enchantment.creator = entity_id_to_minion_dict[creator_id]
 
             elif zone == Zone.SECRET.value:
                 secret = Secret()
-                secret.entity_id = entity_id
                 secret.card_id = card_id
                 if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
                     battle.me.secrets.append(secret)

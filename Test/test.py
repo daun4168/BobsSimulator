@@ -1,11 +1,24 @@
 
 
-import re
+def counting_sort(A: list, B: list, n: int):
+    minA = min(A)
+    maxA = max(A)
+    k = maxA - minA + 1
+    C = [0] * k
+    for j in range(n):
+        C[A[j]-minA] += 1
+    for i in range(1, k):
+        C[i] = C[i] + C[i - 1]
+    for j in range(n):
+        B[C[A[j] - minA] - 1] = A[j]
+        C[A[j]-minA] -= 1
 
-cardxml = open(r'C:\Program Files (x86)\Hearthstone\Data\Win\cards0.unity3d', 'r', encoding='UTF8').read()
-cards = re.findall(r'\<Entity.*?Entity\>', cardxml, re.DOTALL)
-with open('cards.xml', 'w') as f:
-    f.write('<?xml version="1.0" encoding="UTF-8"?>')
-    for card in cards:
-        f.write(card)
-        f.write('\n')
+
+
+
+if __name__ == "__main__":
+    n = 10
+    A = [0, 7, 1, 6, 7, 7, 6, 6, 5, 4]
+    B = [None] * len(A)
+    counting_sort(A, B, n)
+    print(B)

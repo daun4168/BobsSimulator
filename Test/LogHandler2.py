@@ -801,6 +801,7 @@ if __name__ == '__main__':
     log_file_2020_02_29_21_06_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-02-29 21-06-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_01_21_19_18 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-19-18.log"), 'r', encoding="UTF8")
     log_file_2020_03_01_21_06_47 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-01 21-06-47.log"), 'r', encoding="UTF8")
+    log_file_2020_03_21_23_33_29 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_20_39_42 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 20-39-42.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_21_47_06 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-31 21-47-06.log"), 'r', encoding="UTF8")
@@ -814,22 +815,22 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(log_file_2020_03_29_22_38_02)
+    game = HSGame(open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8"))
     game.line_reader()
     game.print_trigger()
 
-    triggerkeyword_set = set()
+    # triggerkeyword_set = set()
 
-    while True:
-        line = log_file_2020_03_29_21_47_06.readline()
-        if not line:
-            break
-        words = line.split()
-        for word in words:
-            if word.startswith('TriggerKeyword'):
-                triggerkeyword_set.add(word)
-
-    print(triggerkeyword_set)
+    # while True:
+    #     line = log_file_2020_03_29_21_47_06.readline()
+    #     if not line:
+    #         break
+    #     words = line.split()
+    #     for word in words:
+    #         if word.startswith('TriggerKeyword'):
+    #             triggerkeyword_set.add(word)
+    #
+    # print(triggerkeyword_set)
 
     #
     # game = HSGame(log_file_power_new)

@@ -1,7 +1,9 @@
 from typing import List, Dict, Optional, DefaultDict, Deque
 from collections import defaultdict, deque
+from abc import ABCMeta, abstractmethod
 from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
     Rarity, Mulligan, Step, PlayState, CardClass, PowerType
+import random
 import logging
 
 
@@ -25,6 +27,9 @@ class Battle:
     def __init__(self):
         self.me = Player()  # type: Player
         self.enemy = Player()  # type: Player
+
+        self.me.opponent = self.enemy
+        self.enemy.opponent = self.me
 
         self.is_me_trigger_first = True  # type: bool
         self.is_me_attack = None  # type: Optional[bool]
@@ -72,7 +77,6 @@ class Battle:
             else:
                 text += self.me.board[i].info()
 
-        text += '\n'
         return text
 
 
@@ -84,11 +88,25 @@ class Player:
         self.secrets = []  # type: List[Secret]
         self.graveyard = []  # type: List[Minion]
 
+        self.opponent = None  # type: Optional[Player]
+
         self.next_atk_minion_pos = None  # type: Optional[int]
         self.not_attack_last_seq = False  # type: bool
-        self.is_death_first = False  # type: bool
-        self.death_triggers = defaultdict(deque)  # type: DefaultDict[int, Deque[str]]
+
+        self.death_triggers = defaultdict(deque)  # type: DefaultDict[int, Deque[Minion]]
         self.trigger_pos = 0  # type: int
+        self.death_num_this_turn_by_race = defaultdict(int)  # type: DefaultDict[Race, int]
+
+        self.reborn_triggers = defaultdict(deque)  # type: DefaultDict[int, Deque[str]]
+        self.reborn_trigger_pos = 0  # type: int
+
+    def death_init(self):
+        self.death_triggers = defaultdict(deque)
+        self.trigger_pos = 0
+        self.death_num_this_turn_by_race = defaultdict(int)
+
+        self.reborn_triggers = defaultdict(deque)
+        self.reborn_trigger_pos = 0
 
     def print_log(self, logger: logging.Logger, is_me=True):
         self.hero.print_log(logger, is_me)
@@ -151,25 +169,27 @@ class Player:
         return damage
 
 
-class Hero:
+class HSObject(metaclass=ABCMeta):
     def __init__(self):
-        self.entity_id = 0  # type: int
         self.card_id = ""  # type: str
+        self.created_enchants = []  # type: List[Enchantment]
+
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @abstractmethod
+    def info(self) -> str:
+        pass
+
+
+class Hero(HSObject):
+    def __init__(self):
+        super().__init__()
         self.health = 40  # type: int
         self.damage = 0  # type: int
         self.taken_damage = 0  # type: int
         self.tech_level = 0  # type: int
-
-    def print_log(self, logger: logging.Logger, is_me=True):
-        from BobsSimulator.Util import Util
-        from BobsSimulator.Main import LOCALE
-        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
-        if is_me:
-            start_text = "PlayerHero"
-        else:
-            start_text = "EnemyHero"
-        logger.info(
-            f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
 
     def name(self):
         from BobsSimulator.Util import Util
@@ -184,11 +204,29 @@ class Hero:
 
         return f"{text:<{20-non_ascii}}"
 
-class HeroPower:
+    def print_log(self, logger: logging.Logger, is_me=True):
+        from BobsSimulator.Util import Util
+        from BobsSimulator.Main import LOCALE
+        name = Util.card_name_by_id(self.card_id, locale=LOCALE)
+        if is_me:
+            start_text = "PlayerHero"
+        else:
+            start_text = "EnemyHero"
+        logger.info(
+            f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
+
+
+class HeroPower(HSObject):
     def __init__(self):
-        self.entity_id = 0  # type: int
-        self.card_id = ""  # type: str
+        super().__init__()
         self.exhausted = False  # type: bool
+
+    def name(self):
+        from BobsSimulator.Util import Util
+        return Util.card_name_by_id(self.card_id)
+
+    def info(self):
+        return f"{self.name()}, exhausted: {self.exhausted}"
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -203,15 +241,20 @@ class HeroPower:
             log_text += "-exhausted "
         logger.info(log_text)
 
+
+class Secret(HSObject):
+    def __init__(self):
+        super().__init__()
+
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)
 
+    def info(self):
+        text = ""
+        text += f"name: {self.name()}"
 
-class Secret:
-    def __init__(self):
-        self.entity_id = 0  # type: int
-        self.card_id = ""  # type: str
+        return text
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -224,25 +267,28 @@ class Secret:
         log_text = f"""* {start_text} -name "{name}@{self.card_id}" """
         logger.info(log_text)
 
+
+class Enchantment(HSObject):
+    def __init__(self):
+        super().__init__()
+        self.attached_minion = None  # type: Optional[Minion]
+        self.creator = None  # type: Optional[Minion, Hero, HeroPower]
+
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)
 
+    def info(self):
+        text = ""
+        text += f"name: {self.name()}  "
+        text += f"attached_minion: {self.attached_minion.info()} "
+        text += f"creator: {self.creator.info()} "
+        return text
 
-class Enchantment:
+
+class Minion(HSObject):
     def __init__(self):
-        self.entity_id = 0  # type: int
-        self.card_id = ""  # type: str
-        self.attached_id = 0  # type: int
-
-    def name(self):
-        from BobsSimulator.Util import Util
-        return Util.card_name_by_id(self.card_id)
-
-
-class Minion:
-    def __init__(self):
-        self.card_id = ""  # type: str
+        super().__init__()
         self.golden = False  # type: bool  # PREMIUM
         self.level2 = False  # type: bool  # BACON_MINION_IS_LEVEL_TWO
         self.elite = False  # type: bool  # is legendary?
@@ -264,9 +310,10 @@ class Minion:
         self.atk_lowest_atk_minion = False  # type: bool
         self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
-        self.enchantments = []  # type: List[Enchantment]
+        self.enchants = []  # type: List[Enchantment]
 
         self.to_be_destroyed = False  # type: bool
+        self.last_damaged_by = None  # type: Optional[HSObject]
 
         self.zone = None  # type: Optional[Zone]
         self.pos = 0  # type: int
@@ -275,25 +322,23 @@ class Minion:
         self.player = None  # type: Optional[Player]
         # self.is_mine = False  # type: bool  # if card is player's, True
 
-
-
-    def hp(self):
-        return self.health - self.damage
-
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)
 
     def info(self):
+        from BobsSimulator.Util import Util
         text = ''
-        if self.pos > 0:
-            text += f'({self.pos})'
+        if self.golden:
+            text += '🌟'
         text += f'{self.name()} {self.attack}/{self.hp()}'
 
         if self.deathrattle:
             text += '💀'
         if self.divine_shield:
             text += '🟡'
+        if self.poisonous:
+            text += '🧪'
         if self.taunt:
             text += '🛡️'
         if self.reborn:
@@ -304,7 +349,10 @@ class Minion:
             if ord(c) < 0 or ord(c) > 127:
                 non_ascii += 1
 
-        return f'[{text:^{20-non_ascii}}]'
+        return f'{Util.make_number_circle(self.pos)}[{text:^{20-non_ascii}}]'
+
+    def hp(self):
+        return self.health - self.damage
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -329,11 +377,23 @@ class Minion:
         if self.reborn:
             log_text += "-reborn "
 
-        for enchant in self.enchantments:
+        for enchant in self.enchants:
             enchant_cardid = enchant.card_id
             enchant_name = Util.card_name_by_id(enchant_cardid, locale=LOCALE)
             log_text += f"""-enchant "{enchant_name}@{enchant_cardid}" """
         logger.info(log_text)
+
+
+RACE_ALL = (
+    Race.ELEMENTAL,
+    Race.MECHANICAL,
+    Race.DEMON,
+    Race.MURLOC,
+    Race.DRAGON,
+    Race.PET,
+    Race.PIRATE,
+    Race.TOTEM,
+)
 
 
 # ENTITY_TYPES = ["CREATE_GAME",
