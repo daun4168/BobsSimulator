@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict, deque
 
 from PySide2.QtCore import Signal, QObject
 
-from BobsSimulator.HSType import HSObject, Battle, Minion, Zone, Player, Race, Enchantment, RACE_ALL, DEATHRATTLE_ENCHANT_CARD_IDS
+from BobsSimulator.HSType import HSObject, Battle, Minion, HeroPower, Zone, Player, Race, Enchantment, RACE_ALL, DEATHRATTLE_ENCHANT_CARD_IDS
 from BobsSimulator.HSLogging import simulator_logger, console_logger
 from BobsSimulator.Util import Util
 
@@ -130,8 +130,6 @@ class Simulator(QObject):
         #
         #     else:
         #         if self.check_start_of_combat(player2_minions)
-
-
 
     def check_start_of_combat(self, st_minion: Minion, player: Player) -> bool:
         print(f"START OF COMBAT: {st_minion.info()}")
@@ -277,7 +275,7 @@ class Simulator(QObject):
         card_id = trigger.card_id
         golden = trigger.golden
 
-        for i in range(deathrattle_num):
+        for deathrattle_num1 in range(deathrattle_num):
 
             """Imprisoner"""
             if card_id == 'BGS_014':  # Imprisoner
@@ -554,7 +552,7 @@ class Simulator(QObject):
                     new_minion.reborn = False
 
                     print(f"REBORN: {player.hero.name()} {new_minion.info()}")
-                    self.simulate_summon_minion(new_minion, player, pos=player.reborn_trigger_pos)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.reborn_trigger_pos, can_summon_by_khadgar=False)
 
                 del player.reborn_triggers[player.reborn_trigger_pos]
                 player.reborn_trigger_pos += 1
@@ -618,24 +616,31 @@ class Simulator(QObject):
             if self.battle.attack_player.opponent.left_minion():
                 self.simulate_damage_by_minion(defender=self.battle.attack_player.opponent.left_minion(), attacker=minion, amount=6)
 
-    def simulate_summon_minion_by(self, new_minion: Minion, player: Player, pos: Optional[int] = None, summoner: HSObject = None) -> Optional[Minion]:
-        summon_num = 1
-
-        """Khadgar"""
-        for minion in player.minions():
-            if minion.card_id == "DAL_575":
-                summon_num *= 2
-            elif minion.card_id == "TB_BaconUps_034":
-                summon_num *= 3
-
-
-
-
+    def simulate_summon_minion_by(self, new_minion: Minion, player: Player, pos: Optional[int] = None, summoner: HSObject = None,
+                                  can_summon_by_khadgar=True, khadgar: Minion = None) -> Optional[Minion]:
         new_minion = self.simulate_summon_minion(new_minion, player, pos)
 
-        if new_minion:
+        """Khadgar"""
+        if can_summon_by_khadgar and new_minion is not None:
             new_minion.creator = summoner
-            self.simulate_khadgar(new_minion, player)
+
+            next_khadgar = None  # type: Optional[Minion]
+            extra_summon_num = 0
+
+            for minion in player.minions():
+                if khadgar is not None:
+                    if minion.pos <= khadgar.pos:
+                        continue
+
+                if minion.card_id == "DAL_575":
+                    extra_summon_num = 1
+                    next_khadgar = minion
+                    break
+                elif minion.card_id == "TB_BaconUps_034":
+                    extra_summon_num = 2
+                    next_khadgar = minion
+                    break
+
         return new_minion
 
     def simulate_summon_minion(self, new_minion: Minion, player: Player, pos: Optional[int] = None) -> Optional[Minion]:
@@ -756,61 +761,77 @@ class Simulator(QObject):
         self.simulate_aura_add(new_minion, player)
 
     def simulate_aura_add(self, new_minion: Minion, player: Player):
-        card_id = new_minion.card_id
 
+        # aura minion
         for minion in player.minions():
             if minion is new_minion:
                 continue
+            self.simulate_aura_add_to_minion(new_minion, minion)
+            self.simulate_aura_add_to_minion(minion, new_minion)
 
-            if minion.race in (Race.MURLOC, Race.ALL):
-
-                """Murloc Warleader"""
-                """Mrgglaargl!"""
-                if card_id == "EX1_507":
-                    self.make_enchant_and_add("EX1_507e", new_minion, minion)
-                    minion.attack += 2
-                elif card_id == "TB_BaconUps_008":
-                    self.make_enchant_and_add("TB_BaconUps_008e", new_minion, minion)
-                    minion.attack += 4
-
-            if minion.race in (Race.DEMON, Race.ALL):
-
-                """Siegebreaker"""
-                """Siegebreaking!"""
-                if card_id == "EX1_185":
-                    self.make_enchant_and_add("EX1_185e", new_minion, minion)
-                    minion.attack += 1
-                elif card_id == "TB_BaconUps_053":
-                    self.make_enchant_and_add("TB_BaconUps_053e", new_minion, minion)
-                    minion.attack += 2
-
-                """Mal'Ganis"""
-                """Grasp of Mal'Ganis"""
-                if card_id == "GVG_021":
-                    self.make_enchant_and_add("GVG_021e", new_minion, minion)
-                    minion.attack += 2
-                    minion.health += 2
-                elif card_id == "TB_BaconUps_060":
-                    self.make_enchant_and_add("TB_BaconUps_060e", new_minion, minion)
-                    minion.attack += 4
-                    minion.health += 4
-
-            if minion.pos in (new_minion.pos - 1, new_minion.pos + 1):
-
-                """Dire Wolf Alpha"""
-                """Strength of the Pack"""
-                if card_id == "EX1_162":
-                    self.make_enchant_and_add("EX1_162o", new_minion, minion)
-                    minion.attack += 1
-                elif card_id == "TB_BaconUps_088":
-                    self.make_enchant_and_add("TB_BaconUps_088e", new_minion, minion)
-                    minion.attack += 2
-
+        # aura hero
         for each_player in self.battle.players():
+            self.simulate_aura_add_to_minion(each_player.hero_power, new_minion)
             if each_player.hero_power.card_id == "TB_BaconShop_HP_061":
+
                 self.make_enchant_and_add("TB_BaconShop_HP_061e", each_player.hero_power, new_minion)
                 new_minion.attack += 2
 
+    def simulate_aura_add_to_minion(self, giver: HSObject, get_minion: Minion):
+
+        if isinstance(giver, Minion):
+
+            if get_minion.race in (Race.MURLOC, Race.ALL):
+
+                """Murloc Warleader"""
+                """Mrgglaargl!"""
+                if giver.card_id == "EX1_507":
+                    self.make_enchant_and_add("EX1_507e", giver, get_minion)
+                    get_minion.attack += 2
+                elif giver.card_id == "TB_BaconUps_008":
+                    self.make_enchant_and_add("TB_BaconUps_008e", giver, get_minion)
+                    get_minion.attack += 4
+
+            if get_minion.race in (Race.DEMON, Race.ALL):
+
+                """Siegebreaker"""
+                """Siegebreaking!"""
+                if giver.card_id == "EX1_185":
+                    self.make_enchant_and_add("EX1_185e", giver, get_minion)
+                    get_minion.attack += 1
+                elif giver.card_id == "TB_BaconUps_053":
+                    self.make_enchant_and_add("TB_BaconUps_053e", giver, get_minion)
+                    get_minion.attack += 2
+
+                """Mal'Ganis"""
+                """Grasp of Mal'Ganis"""
+                if giver.card_id == "GVG_021":
+                    self.make_enchant_and_add("GVG_021e", giver, get_minion)
+                    get_minion.attack += 2
+                    get_minion.health += 2
+                elif giver.card_id == "TB_BaconUps_060":
+                    self.make_enchant_and_add("TB_BaconUps_060e", giver, get_minion)
+                    get_minion.attack += 4
+                    get_minion.health += 4
+
+            if get_minion.pos in (giver.pos - 1, giver.pos + 1):
+
+                """Dire Wolf Alpha"""
+                """Strength of the Pack"""
+                if giver.card_id == "EX1_162":
+                    self.make_enchant_and_add("EX1_162o", giver, get_minion)
+                    get_minion.attack += 1
+                elif giver.card_id == "TB_BaconUps_088":
+                    self.make_enchant_and_add("TB_BaconUps_088e", giver, get_minion)
+                    get_minion.attack += 2
+
+        if isinstance(giver, HeroPower):
+
+            "Deathwing"
+            """ALL Will Burn!"""
+            if giver.card_id == "TB_BaconShop_HP_061e":
+                self.make_enchant_and_add("TB_BaconShop_HP_061e", giver, get_minion)
+                get_minion.attack += 2
 
     def simulate_khadgar(self, summoned_minion: Minion, player: Player):
         """Khadgar"""
@@ -832,7 +853,7 @@ class Simulator(QObject):
                 self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 2, summoner=minion)
 
     def make_copy_of_minion(self, copy_minion: Minion, player: Player) -> Minion:
-        self.simulate_aura_remove(copy_minion, player)
+        self.simulate_aura_remove_for_creator(copy_minion)
 
         new_minion = copy.copy(copy_minion)
         new_minion.enchants = []
@@ -921,7 +942,7 @@ class Simulator(QObject):
         removed_minion.pos = 0
         removed_minion.zone = Zone.GRAVEYARD
 
-        self.simulate_remove_minion_after(removed_minion, player)
+        self.simulate_remove_minion_after(removed_minion)
 
         print(f'REMOVE: {removed_minion.player.hero.name()} {removed_minion.info()}')
         removed_minion.attack = Util.default_attack_by_id(removed_minion.card_id)
@@ -931,7 +952,7 @@ class Simulator(QObject):
         removed_minion.created_enchants.clear()
         player.graveyard.append(removed_minion)
 
-    def simulate_remove_minion_after(self, removed_minion: Minion, player: Player):
+    def simulate_remove_minion_after(self, removed_minion: Minion):
 
         for each_player in self.battle.players():
             for minion in each_player.minions():
@@ -944,46 +965,54 @@ class Simulator(QObject):
                     elif card_id == "TB_BaconUps_036":
                         minion.attack -= 2
 
-        self.simulate_aura_remove(removed_minion, player)
+        self.simulate_aura_remove_for_creator(removed_minion)
 
-    def simulate_aura_remove(self, removed_minion: Minion, player: Player):
+    def simulate_aura_remove_for_minion(self, minion: Minion):
+        for enchant in minion.enchants:
+            self.simulate_aura_remove_for_each_enchant(minion, enchant)
+
+    def simulate_aura_remove_for_each_enchant(self, minion: Minion, enchant: Enchantment):
+        card_id = enchant.card_id
+
+        """Murloc Warleader"""
+        """Mrgglaargl!"""
+        if card_id == "EX1_507e":
+            minion.attack = max(minion.attack - 2, 0)
+        elif card_id == "TB_BaconUps_008e":
+            minion.attack -= 4
+
+        """Dire Wolf Alpha"""
+        """Strength of the Pack"""
+        if card_id == "EX1_162o":
+            minion.attack -= 1
+        elif card_id == "TB_BaconUps_088e":
+            minion.attack -= 2
+
+        """Siegebreaker"""
+        """Siegebreaking!"""
+        if card_id == "EX1_185e":
+            minion.attack -= 1
+        elif card_id == "TB_BaconUps_053e":
+            minion.attack -= 2
+
+        """Mal'Ganis"""
+        """Grasp of Mal'Ganis"""
+        if card_id == "GVG_021e":
+            minion.attack -= 2
+            minion.health -= 2
+        elif card_id == "TB_BaconUps_060e":
+            minion.attack -= 4
+            minion.health -= 4
+
+        minion.enchants.remove(enchant)
+
+    def simulate_aura_remove_for_creator(self, removed_minion: Minion):
         # if removed_minion.card_id == "EX1_507":
         for created_enchant in removed_minion.created_enchants:
             if created_enchant.attached_minion and created_enchant.attached_minion.zone == Zone.PLAY:
-                card_id = created_enchant.card_id
                 minion = created_enchant.attached_minion
 
-                """Murloc Warleader"""
-                """Mrgglaargl!"""
-                if card_id == "EX1_507e":
-                    minion.attack -= 2
-                elif card_id == "TB_BaconUps_008e":
-                    minion.attack -= 4
-
-                """Dire Wolf Alpha"""
-                """Strength of the Pack"""
-                if card_id == "EX1_162o":
-                    minion.attack -= 1
-                elif card_id == "TB_BaconUps_088e":
-                    minion.attack -= 2
-
-                """Siegebreaker"""
-                """Siegebreaking!"""
-                if card_id == "EX1_185e":
-                    minion.attack -= 1
-                elif card_id == "TB_BaconUps_053e":
-                    minion.attack -= 2
-
-                """Mal'Ganis"""
-                """Grasp of Mal'Ganis"""
-                if card_id == "GVG_021e":
-                    minion.attack -= 2
-                    minion.health -= 2
-                elif card_id == "TB_BaconUps_060e":
-                    minion.attack -= 4
-                    minion.health -= 4
-
-                created_enchant.attached_minion.enchants.remove(created_enchant)
+                self.simulate_aura_remove_for_each_enchant(minion, created_enchant)
 
     def simulate_damage(self, defender: Minion, amount: int, poisonous: bool = False):
         if amount <= 0:
