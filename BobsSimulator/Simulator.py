@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict, deque
 
 from PySide2.QtCore import Signal, QObject
 
-from BobsSimulator.HSType import HSObject, Battle, Minion, Zone, Player, Race, Enchantment, RACE_ALL
+from BobsSimulator.HSType import HSObject, Battle, Minion, Zone, Player, Race, Enchantment, RACE_ALL, DEATHRATTLE_ENCHANT_CARD_IDS
 from BobsSimulator.HSLogging import simulator_logger, console_logger
 from BobsSimulator.Util import Util
 
@@ -44,6 +44,7 @@ class Simulator(QObject):
 
         self.set_attack_player()
         self.simulate_hero_power()
+        self.simulate_start_of_combat()
 
         while True:
             self.battle.seq += 1
@@ -61,7 +62,7 @@ class Simulator(QObject):
                 return 0
 
             self.simulate_attack()
-            self.battle.is_me_attack = not self.battle.is_me_attack  # change atk player
+            self.battle.attack_player = self.battle.attack_player.opponent  # change atk player
 
     def simulate_init(self):
         self.battle.seq = 0
@@ -72,20 +73,74 @@ class Simulator(QObject):
 
     def set_attack_player(self):
         if self.battle.me.minion_num() > self.battle.enemy.minion_num():
-            self.battle.is_me_attack = True
+            self.battle.attack_player = self.battle.me
         elif self.battle.me.minion_num() < self.battle.enemy.minion_num():
-            self.battle.is_me_attack = False
+            self.battle.attack_player = self.battle.enemy
         else:
-            self.battle.is_me_attack = bool(random.getrandbits(1))
+            self.battle.attack_player = random.choice((self.battle.me, self.battle.enemy))
 
     def simulate_hero_power(self):
-        # TODO: make function
+        for player in self.battle.players():
+            hero_power = player.hero_power
+            card_id = hero_power.card_id
+            used = hero_power.used
+
+            """Nefarian"""
+            """Nefarious Fire"""
+            if card_id == "TB_BaconShop_HP_043":
+                print("Nefarious Fire")
+                if used:
+                    self.simulate_damage_to_every_minions(player.opponent, 1)
+                    self.simulate_deaths()
+
+            "Deathwing"
+            """ALL Will Burn!"""
+            if card_id == "TB_BaconShop_HP_061":
+                pass
+
+            """Illidan Stormrage"""
+            """Wingmen"""
+            if card_id == "TB_BaconShop_HP_069":
+                if player.minion_num() >= 1:
+                    self.simulate_attack_once(player.minions()[0])
+                if player.minion_num() >= 2:
+                    self.simulate_attack_once(player.minions()[-1])
+                self.battle.attack_player = player.opponent
+
+    def simulate_start_of_combat(self):
+        pass
+        # player1 = self.battle.atk_player()
+        # player2 = self.battle.dfn_player()
+        #
+        # player1_minions = player1.minions()
+        # player2_minions = player2.minions()
+        #
+        # player1_minion_pos = 0
+        # player2_minion_pos = 0
+        #
+        #
+        #
+        # is_player1_turn = True
+        #
+        # while player1_minion_pos < len(player1.minions()) and player2_minion_pos < len(player2.minions()):
+        #     if is_player1_turn:
+        #         if self.check_start_of_combat(player1_minions[player1_minion_pos], player1):
+        #             is_player1_turn = False
+        #         player1_minion_pos += 1
+        #
+        #     else:
+        #         if self.check_start_of_combat(player2_minions)
+
+
+
+    def check_start_of_combat(self, st_minion: Minion, player: Player) -> bool:
+        print(f"START OF COMBAT: {st_minion.info()}")
         pass
 
     def simulate_attack(self):
-        attacker = self.find_next_attacker(self.battle.atk_player())
+        attacker = self.find_next_attacker(self.battle.attack_player)
         if attacker is None:
-            self.battle.atk_player().not_attack_last_seq = True
+            self.battle.attack_player.not_attack_last_seq = True
             return
 
         num_of_atk = 1 + attacker.windfury
@@ -112,7 +167,10 @@ class Simulator(QObject):
         return None
 
     def simulate_attack_once(self, attacker: Minion):
-        if self.battle.dfn_player().empty():
+        if attacker.zone != Zone.PLAY:
+            return
+
+        if attacker.player.opponent.empty():
             return
 
         """Glyph Guardian"""
@@ -124,10 +182,10 @@ class Simulator(QObject):
         """Zapp Slywick"""
         defender = None  # type: Optional[Minion]
         if attacker.atk_lowest_atk_minion or attacker.card_id in ("BGS_022", "TB_BaconUps_091"):
-            defender = self.random_lowest_atk_minion(self.battle.dfn_player())
+            defender = self.random_lowest_atk_minion(attacker.player.opponent)
         else:
-            defender = self.random_defense_minion(self.battle.dfn_player())
-        print(f"ATTACK: {self.battle.atk_player().hero.name()} {attacker.info()} attack {defender.info()}")
+            defender = self.random_defense_minion(attacker.player.opponent)
+        print(f"ATTACK: {attacker.player.hero.name()} {attacker.info()} attack {defender.info()}")
 
         self.simulate_damage_by_minion(defender, attacker)
         self.simulate_damage_by_minion(attacker, defender)
@@ -135,10 +193,10 @@ class Simulator(QObject):
         """Foe Reaper 4000"""
         """Cave Hydra"""
         if attacker.card_id in ("GVG_113", "LOOT_078"):
-            if defender.pos > 1 and self.battle.dfn_player().board[defender.pos - 1] is not None:
-                self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos - 1], attacker)
-            if defender.pos < 7 and self.battle.dfn_player().board[defender.pos + 1] is not None:
-                self.simulate_damage_by_minion(self.battle.dfn_player().board[defender.pos + 1], attacker)
+            if defender.pos > 1 and attacker.player.opponent.board[defender.pos - 1] is not None:
+                self.simulate_damage_by_minion(attacker.player.opponent.board[defender.pos - 1], attacker)
+            if defender.pos < 7 and attacker.player.opponent.board[defender.pos + 1] is not None:
+                self.simulate_damage_by_minion(attacker.player.opponent.board[defender.pos + 1], attacker)
 
         self.simulate_deaths()
         print('-'*50)
@@ -167,6 +225,7 @@ class Simulator(QObject):
                 while player.death_triggers[player.trigger_pos]:
                     trigger = player.death_triggers[player.trigger_pos].popleft()
                     self.simulate_deathrattle(trigger, player)
+                    self.simulate_deathrattle_enchant(trigger, player)
 
                 if player.trigger_pos in player.death_triggers:
                     del player.death_triggers[player.trigger_pos]
@@ -206,182 +265,193 @@ class Simulator(QObject):
     def simulate_deathrattle(self, trigger: Minion, player: Player):
         print(f"DEATHRATTLE: {player.hero.name()} {trigger.info()}")
 
+        deathrattle_num = 1
+
+        """Baron Rivendare"""
+        for minion in player.minions():
+            if minion.card_id == "FP1_031":
+                deathrattle_num = max(2, deathrattle_num)
+            elif minion.card_id == "TB_BaconUps_055":
+                deathrattle_num = max(3, deathrattle_num)
+
         card_id = trigger.card_id
         golden = trigger.golden
 
-        """Imprisoner"""
-        if card_id == 'BGS_014':  # Imprisoner
-            new_minion = Util.make_default_minion('BRM_006t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_113':  # Imprisoner lv2
-            new_minion = Util.make_default_minion('TB_BaconUps_030t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+        for i in range(deathrattle_num):
 
-        """Harvest Golem"""
-        if card_id == 'EX1_556':  # Harvest Golem
-            new_minion = Util.make_default_minion('skele21', golden=golden)  # Damaged Golem
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_006':  # Harvest Golem lv2
-            new_minion = Util.make_default_minion('TB_BaconUps_006t', golden=golden)  # Damaged Golem lv2
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Imprisoner"""
+            if card_id == 'BGS_014':  # Imprisoner
+                new_minion = Util.make_default_minion('BRM_006t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_113':  # Imprisoner lv2
+                new_minion = Util.make_default_minion('TB_BaconUps_030t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Kindly Grandmother"""
-        if card_id == 'KAR_005':  # Kindly Grandmother
-            new_minion = Util.make_default_minion('KAR_005a', golden=golden)  # Big Bad Wolf
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_004':  # Kindly Grandmother lv2
-            new_minion = Util.make_default_minion('TB_BaconUps_004t', golden=golden)  # Big Bad Wolf lv2
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Harvest Golem"""
+            if card_id == 'EX1_556':  # Harvest Golem
+                new_minion = Util.make_default_minion('skele21', golden=golden)  # Damaged Golem
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_006':  # Harvest Golem lv2
+                new_minion = Util.make_default_minion('TB_BaconUps_006t', golden=golden)  # Damaged Golem lv2
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Infested Wolf"""
-        if card_id == 'OG_216':  # Infested Wolf
-            for i in range(2):
-                new_minion = Util.make_default_minion('OG_216a', golden=golden)  # Spider
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_026':  # Infested Wolf lv2
-            for i in range(2):
-                new_minion = Util.make_default_minion('TB_BaconUps_026t', golden=golden)  # Spider lv2
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Kindly Grandmother"""
+            if card_id == 'KAR_005':  # Kindly Grandmother
+                new_minion = Util.make_default_minion('KAR_005a', golden=golden)  # Big Bad Wolf
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_004':  # Kindly Grandmother lv2
+                new_minion = Util.make_default_minion('TB_BaconUps_004t', golden=golden)  # Big Bad Wolf lv2
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Voidlord"""
-        if card_id == 'LOOT_368':
-            for i in range(3):
-                new_minion = Util.make_default_minion('CS2_065', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_059':
-            for i in range(3):
-                new_minion = Util.make_default_minion('TB_BaconUps_059t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Infested Wolf"""
+            if card_id == 'OG_216':  # Infested Wolf
+                for i in range(2):
+                    new_minion = Util.make_default_minion('OG_216a', golden=golden)  # Spider
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_026':  # Infested Wolf lv2
+                for i in range(2):
+                    new_minion = Util.make_default_minion('TB_BaconUps_026t', golden=golden)  # Spider lv2
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Savannah Highmane"""
-        if card_id == 'EX1_534':
-            for i in range(2):
-                new_minion = Util.make_default_minion('EX1_534t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_049':
-            for i in range(2):
-                new_minion = Util.make_default_minion('TB_BaconUps_049t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Voidlord"""
+            if card_id == 'LOOT_368':
+                for i in range(3):
+                    new_minion = Util.make_default_minion('CS2_065', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_059':
+                for i in range(3):
+                    new_minion = Util.make_default_minion('TB_BaconUps_059t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Mecharoo"""
-        if card_id == 'BOT_445':
-            new_minion = Util.make_default_minion('BOT_445t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_002':
-            new_minion = Util.make_default_minion('TB_BaconUps_002t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Savannah Highmane"""
+            if card_id == 'EX1_534':
+                for i in range(2):
+                    new_minion = Util.make_default_minion('EX1_534t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_049':
+                for i in range(2):
+                    new_minion = Util.make_default_minion('TB_BaconUps_049t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Mechano-Egg"""
-        if card_id == 'BOT_537':
-            new_minion = Util.make_default_minion('BOT_537t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_039':
-            new_minion = Util.make_default_minion('TB_BaconUps_039t', golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Mecharoo"""
+            if card_id == 'BOT_445':
+                new_minion = Util.make_default_minion('BOT_445t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_002':
+                new_minion = Util.make_default_minion('TB_BaconUps_002t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Rat Pack"""
-        if card_id == 'CFM_316':
-            for i in range(trigger.attack):
-                new_minion = Util.make_default_minion('CFM_316t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_027':
-            for i in range(trigger.attack):
-                new_minion = Util.make_default_minion('TB_BaconUps_027t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Mechano-Egg"""
+            if card_id == 'BOT_537':
+                new_minion = Util.make_default_minion('BOT_537t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_039':
+                new_minion = Util.make_default_minion('TB_BaconUps_039t', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Sneed's Old Shredder"""
-        if card_id == 'BGS_006':
-            new_minion = Util.random_bp_minion_elite(golden=golden, except_card_ids='BGS_006')
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_080':
-            for i in range(2):
+            """Rat Pack"""
+            if card_id == 'CFM_316':
+                for i in range(trigger.attack):
+                    new_minion = Util.make_default_minion('CFM_316t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_027':
+                for i in range(trigger.attack):
+                    new_minion = Util.make_default_minion('TB_BaconUps_027t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+
+            """Sneed's Old Shredder"""
+            if card_id == 'BGS_006':
                 new_minion = Util.random_bp_minion_elite(golden=golden, except_card_ids='BGS_006')
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_080':
+                for i in range(2):
+                    new_minion = Util.random_bp_minion_elite(golden=golden, except_card_ids='BGS_006')
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Ghastcoiler"""
-        if card_id == 'BGS_008':
-            for i in range(2):
-                new_minion = Util.random_bp_minion_deathrattle(golden=golden, except_card_ids='BGS_008')
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_057':
-            for i in range(4):
-                new_minion = Util.random_bp_minion_deathrattle(golden=golden, except_card_ids='BGS_008')
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Ghastcoiler"""
+            if card_id == 'BGS_008':
+                for i in range(2):
+                    new_minion = Util.random_bp_minion_deathrattle(golden=golden, except_card_ids='BGS_008')
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_057':
+                for i in range(4):
+                    new_minion = Util.random_bp_minion_deathrattle(golden=golden, except_card_ids='BGS_008')
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Piloted Shredder"""
-        if card_id == 'BGS_023':
-            new_minion = Util.random_bp_minion_cost(cost=2, golden=golden)
-            self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_035':
-            for i in range(2):
+            """Piloted Shredder"""
+            if card_id == 'BGS_023':
                 new_minion = Util.random_bp_minion_cost(cost=2, golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_035':
+                for i in range(2):
+                    new_minion = Util.random_bp_minion_cost(cost=2, golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Kangor's Apprentice"""
-        if card_id == 'BGS_012':
-            summon_num = 0
-            for dead_minion in player.graveyard:
-                if dead_minion.race in (Race.MECHANICAL, Race.ALL):
-                    new_minion = Util.make_default_minion(dead_minion.card_id, golden=dead_minion.golden, level2=dead_minion.level2)
-                    self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-                    summon_num += 1
-                if summon_num >= 2:
-                    break
-        elif card_id == 'TB_BaconUps_087':
-            summon_num = 0
-            for dead_minion in player.graveyard:
-                if dead_minion.race in (Race.MECHANICAL, Race.ALL):
-                    new_minion = Util.make_default_minion(dead_minion.card_id, golden=dead_minion.golden, level2=dead_minion.level2)
-                    self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-                    summon_num += 1
-                if summon_num >= 4:
-                    break
+            """Piloted Sky Golem"""
+            if card_id == 'BGS_024':
+                new_minion = Util.random_bp_minion_cost(cost=4, golden=golden)
+                self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_050':
+                for i in range(2):
+                    new_minion = Util.random_bp_minion_cost(cost=4, golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
-        """Spawn of N'Zoth"""
-        if card_id == 'OG_256':
-            for minion in player.minions():
-                minion.attack += 1
-                minion.health += 1
-        elif card_id == 'TB_BaconUps_025':
-            for minion in player.minions():
-                minion.attack += 2
-                minion.health += 2
+            """Kangor's Apprentice"""
+            if card_id == 'BGS_012':
+                summon_num = 0
+                for dead_minion in player.graveyard:
+                    if dead_minion.race in (Race.MECHANICAL, Race.ALL):
+                        new_minion = Util.make_default_minion(dead_minion.card_id, golden=dead_minion.golden, level2=dead_minion.level2)
+                        self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+                        summon_num += 1
+                    if summon_num >= 2:
+                        break
+            elif card_id == 'TB_BaconUps_087':
+                summon_num = 0
+                for dead_minion in player.graveyard:
+                    if dead_minion.race in (Race.MECHANICAL, Race.ALL):
+                        new_minion = Util.make_default_minion(dead_minion.card_id, golden=dead_minion.golden, level2=dead_minion.level2)
+                        self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+                        summon_num += 1
+                    if summon_num >= 4:
+                        break
 
-        """Goldrinn, the Great Wolf"""
-        if card_id == 'BGS_018':
-            for minion in player.minions():
-                if minion.race in (Race.PET, Race.ALL):
-                    minion.attack += 4
-                    minion.health += 4
-        elif card_id == 'TB_BaconUps_085':
-            for minion in player.minions():
-                if minion.race in (Race.PET, Race.ALL):
-                    minion.attack += 8
-                    minion.health += 8
-
-        """King Bagurgle"""
-        if card_id == 'BGS_030':
-            for minion in player.minions():
-                if minion.race in (Race.MURLOC, Race.ALL):
+            """Spawn of N'Zoth"""
+            if card_id == 'OG_256':
+                for minion in player.minions():
+                    minion.attack += 1
+                    minion.health += 1
+            elif card_id == 'TB_BaconUps_025':
+                for minion in player.minions():
                     minion.attack += 2
                     minion.health += 2
-        elif card_id == 'TB_BaconUps_100':
-            for minion in player.minions():
-                if minion.race in (Race.MURLOC, Race.ALL):
-                    minion.attack += 4
-                    minion.health += 4
 
-        """Selfless Hero"""
-        if card_id == 'OG_221':
-            not_divine_shield_minions = []
-            for minion in player.minions():
-                if not minion.divine_shield:
-                    not_divine_shield_minions.append(minion)
-            if not_divine_shield_minions:
-                random_not_divine_shield_minion = random.choice(not_divine_shield_minions)  # type: Minion
-                random_not_divine_shield_minion.divine_shield = True
-        elif card_id == 'TB_BaconUps_014':
-            for i in range(2):
+            """Goldrinn, the Great Wolf"""
+            if card_id == 'BGS_018':
+                for minion in player.minions():
+                        if minion.race in (Race.PET, Race.ALL):
+                            minion.attack += 4
+                            minion.health += 4
+            elif card_id == 'TB_BaconUps_085':
+                for minion in player.minions():
+                    if minion.race in (Race.PET, Race.ALL):
+                        minion.attack += 8
+                        minion.health += 8
+
+            """King Bagurgle"""
+            if card_id == 'BGS_030':
+                for minion in player.minions():
+                    if minion.race in (Race.MURLOC, Race.ALL):
+                        minion.attack += 2
+                        minion.health += 2
+            elif card_id == 'TB_BaconUps_100':
+                for minion in player.minions():
+                    if minion.race in (Race.MURLOC, Race.ALL):
+                        minion.attack += 4
+                        minion.health += 4
+
+            """Selfless Hero"""
+            if card_id == 'OG_221':
                 not_divine_shield_minions = []
                 for minion in player.minions():
                     if not minion.divine_shield:
@@ -389,58 +459,89 @@ class Simulator(QObject):
                 if not_divine_shield_minions:
                     random_not_divine_shield_minion = random.choice(not_divine_shield_minions)  # type: Minion
                     random_not_divine_shield_minion.divine_shield = True
+            elif card_id == 'TB_BaconUps_014':
+                for i in range(2):
+                    not_divine_shield_minions = []
+                    for minion in player.minions():
+                        if not minion.divine_shield:
+                            not_divine_shield_minions.append(minion)
+                    if not_divine_shield_minions:
+                        random_not_divine_shield_minion = random.choice(not_divine_shield_minions)  # type: Minion
+                        random_not_divine_shield_minion.divine_shield = True
 
-        """Nadina the Red"""
-        if card_id == 'BGS_040':
-            for minion in player.minions():
-                if minion.race in (Race.DRAGON, Race.ALL):
-                    minion.divine_shield = True
+            """Nadina the Red"""
+            if card_id == 'BGS_040':
+                for minion in player.minions():
+                    if minion.race in (Race.DRAGON, Race.ALL):
+                        minion.divine_shield = True
 
-        """Kaboom Bot"""
-        if card_id == 'BOT_606':
-            self.simulate_damage_to_random_minion_by_minion(player.opponent, trigger, 4)
-        elif card_id == 'TB_BaconUps_028':
-            for i in range(2):
+            """Kaboom Bot"""
+            if card_id == 'BOT_606':
                 self.simulate_damage_to_random_minion_by_minion(player.opponent, trigger, 4)
+            elif card_id == 'TB_BaconUps_028':
+                for i in range(2):
+                    self.simulate_damage_to_random_minion_by_minion(player.opponent, trigger, 4)
 
-        """The Beast"""
-        if card_id == 'EX1_577':
-            new_minion = Util.make_default_minion('EX1_finkle', golden=golden)
-            self.simulate_summon_minion(new_minion, player.opponent)
-        elif card_id == 'TB_BaconUps_042':
-            new_minion = Util.make_default_minion('EX1_finkle', golden=golden)
-            self.simulate_summon_minion(new_minion, player.opponent)
+            """The Beast"""
+            if card_id == 'EX1_577':
+                new_minion = Util.make_default_minion('EX1_finkle', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player.opponent)
+            elif card_id == 'TB_BaconUps_042':
+                new_minion = Util.make_default_minion('EX1_finkle', golden=golden)
+                self.simulate_summon_minion_by(new_minion, player.opponent)
 
-        """Fiendish Servant"""
-        if card_id == 'YOD_026':
-            random_minion = self.random_alive_minion(player)
-            if random_minion is not None:
-                random_minion.attack += trigger.attack
-            random_minion.attack += trigger.attack
-        elif card_id == 'TB_BaconUps_112':
-            for i in range(2):
+            """Fiendish Servant"""
+            if card_id == 'YOD_026':
                 random_minion = self.random_alive_minion(player)
                 if random_minion is not None:
                     random_minion.attack += trigger.attack
+                random_minion.attack += trigger.attack
+            elif card_id == 'TB_BaconUps_112':
+                for i in range(2):
+                    random_minion = self.random_alive_minion(player)
+                    if random_minion is not None:
+                        random_minion.attack += trigger.attack
 
-        """Unstable Ghoul"""
-        if card_id == 'FP1_024':
-            self.simulate_damage_to_every_minions_by_minion(player, trigger, 1)
-            self.simulate_damage_to_every_minions_by_minion(player.opponent, trigger, 1)
-        elif card_id == 'TB_BaconUps_118':
-            for i in range(2):
+            """Unstable Ghoul"""
+            if card_id == 'FP1_024':
                 self.simulate_damage_to_every_minions_by_minion(player, trigger, 1)
-            self.simulate_damage_to_every_minions_by_minion(player.opponent, trigger, 1)
+                self.simulate_damage_to_every_minions_by_minion(player.opponent, trigger, 1)
+            elif card_id == 'TB_BaconUps_118':
+                for i in range(2):
+                    self.simulate_damage_to_every_minions_by_minion(player, trigger, 1)
+                self.simulate_damage_to_every_minions_by_minion(player.opponent, trigger, 1)
 
-        """Replicating Menace"""
-        if card_id == 'BOT_312':
-            for i in range(3):
-                new_minion = Util.make_default_minion('BOT_312t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
-        elif card_id == 'TB_BaconUps_032':
-            for i in range(3):
-                new_minion = Util.make_default_minion('TB_BaconUps_032t', golden=golden)
-                self.simulate_summon_minion(new_minion, player, pos=player.trigger_pos)
+            """Replicating Menace"""
+            if card_id == 'BOT_312':
+                for i in range(3):
+                    new_minion = Util.make_default_minion('BOT_312t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == 'TB_BaconUps_032':
+                for i in range(3):
+                    new_minion = Util.make_default_minion('TB_BaconUps_032t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+
+    def simulate_deathrattle_enchant(self, trigger: Minion, player: Player):
+
+        for enchant in trigger.enchants:
+            card_id = enchant.card_id
+            golden = trigger.golden
+
+            """Replicating Menace"""
+            if card_id == "BOT_312e":
+                for i in range(3):
+                    new_minion = Util.make_default_minion('BOT_312t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+            elif card_id == "TB_BaconUps_032e":
+                for i in range(3):
+                    new_minion = Util.make_default_minion('TB_BaconUps_032t', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
+
+            """Living Spores"""
+            if card_id == "UNG_999t2e":
+                for i in range(2):
+                    new_minion = Util.make_default_minion('UNG_999t2t1', golden=golden)
+                    self.simulate_summon_minion_by(new_minion, player, pos=player.trigger_pos)
 
     def simulate_reborn_triggers(self):
         for player in self.battle.players():
@@ -504,18 +605,38 @@ class Simulator(QObject):
         """Ironhide Direhorn"""
         if card_id == 'TRL_232':
             new_minion = Util.make_default_minion('TRL_232t', golden=golden)
-            self.simulate_summon_minion(new_minion, minion.player, minion.pos + 1)
+            self.simulate_summon_minion_by(new_minion, minion.player, minion.pos + 1)
         elif card_id == 'TB_BaconUps_051':
             new_minion = Util.make_default_minion('TB_BaconUps_051t', golden=golden)
-            self.simulate_summon_minion(new_minion, minion.player, minion.pos + 1)
+            self.simulate_summon_minion_by(new_minion, minion.player, minion.pos + 1)
 
         """Herald of Flame"""
         if card_id == 'BGS_032':
-            if self.battle.dfn_player().left_minion():
-                self.simulate_damage_by_minion(defender=self.battle.dfn_player().left_minion(), attacker=minion, amount=3)
+            if self.battle.attack_player.opponent.left_minion():
+                self.simulate_damage_by_minion(defender=self.battle.attack_player.opponent.left_minion(), attacker=minion, amount=3)
         elif card_id == 'TB_BaconUps_103':
-            if self.battle.dfn_player().left_minion():
-                self.simulate_damage_by_minion(defender=self.battle.dfn_player().left_minion(), attacker=minion, amount=6)
+            if self.battle.attack_player.opponent.left_minion():
+                self.simulate_damage_by_minion(defender=self.battle.attack_player.opponent.left_minion(), attacker=minion, amount=6)
+
+    def simulate_summon_minion_by(self, new_minion: Minion, player: Player, pos: Optional[int] = None, summoner: HSObject = None) -> Optional[Minion]:
+        summon_num = 1
+
+        """Khadgar"""
+        for minion in player.minions():
+            if minion.card_id == "DAL_575":
+                summon_num *= 2
+            elif minion.card_id == "TB_BaconUps_034":
+                summon_num *= 3
+
+
+
+
+        new_minion = self.simulate_summon_minion(new_minion, player, pos)
+
+        if new_minion:
+            new_minion.creator = summoner
+            self.simulate_khadgar(new_minion, player)
+        return new_minion
 
     def simulate_summon_minion(self, new_minion: Minion, player: Player, pos: Optional[int] = None) -> Optional[Minion]:
         if player.minion_num() >= 7:
@@ -574,6 +695,7 @@ class Simulator(QObject):
 
         self.simulate_summon_minion_after(new_minion, player)
         print(f"SUMMON: {player.hero.name()} {new_minion.info()}")
+
         return new_minion
 
     def simulate_summon_minion_after(self, new_minion: Minion, player: Player):
@@ -591,6 +713,17 @@ class Simulator(QObject):
                     minion.attack += 2
                     minion.divine_shield = True
 
+                "Cobalt Guardian"
+                if card_id == "GVG_062":
+                    minion.divine_shield = True
+
+            if new_minion.race in (Race.MURLOC, Race.ALL):
+                """Murloc Tidecaller"""
+                if card_id == "EX1_509":
+                    minion.attack += 1
+                elif card_id == "TB_BaconUps_011":
+                    minion.attack += 2
+
             if new_minion.race in (Race.BEAST, Race.ALL):
                 """Mama Bear"""
                 if card_id == "BGS_021":
@@ -606,9 +739,23 @@ class Simulator(QObject):
                 elif card_id == "TB_BaconUps_086":
                     new_minion.attack += 6
 
-        self.simulate_enchant_add(new_minion, player)
+        for each_player in self.battle.players():
 
-    def simulate_enchant_add(self, new_minion: Minion, player: Player):
+            for minion in each_player.minions():
+                if minion is new_minion:
+                    continue
+                card_id = minion.card_id
+
+                if new_minion.race in (Race.MURLOC, Race.ALL):
+                    """Old Murk-Eye"""
+                    if card_id == "EX1_062":
+                        minion.attack += 1
+                    elif card_id == "TB_BaconUps_036":
+                        minion.attack += 2
+
+        self.simulate_aura_add(new_minion, player)
+
+    def simulate_aura_add(self, new_minion: Minion, player: Player):
         card_id = new_minion.card_id
 
         for minion in player.minions():
@@ -626,6 +773,28 @@ class Simulator(QObject):
                     self.make_enchant_and_add("TB_BaconUps_008e", new_minion, minion)
                     minion.attack += 4
 
+            if minion.race in (Race.DEMON, Race.ALL):
+
+                """Siegebreaker"""
+                """Siegebreaking!"""
+                if card_id == "EX1_185":
+                    self.make_enchant_and_add("EX1_185e", new_minion, minion)
+                    minion.attack += 1
+                elif card_id == "TB_BaconUps_053":
+                    self.make_enchant_and_add("TB_BaconUps_053e", new_minion, minion)
+                    minion.attack += 2
+
+                """Mal'Ganis"""
+                """Grasp of Mal'Ganis"""
+                if card_id == "GVG_021":
+                    self.make_enchant_and_add("GVG_021e", new_minion, minion)
+                    minion.attack += 2
+                    minion.health += 2
+                elif card_id == "TB_BaconUps_060":
+                    self.make_enchant_and_add("TB_BaconUps_060e", new_minion, minion)
+                    minion.attack += 4
+                    minion.health += 4
+
             if minion.pos in (new_minion.pos - 1, new_minion.pos + 1):
 
                 """Dire Wolf Alpha"""
@@ -637,8 +806,59 @@ class Simulator(QObject):
                     self.make_enchant_and_add("TB_BaconUps_088e", new_minion, minion)
                     minion.attack += 2
 
+        for each_player in self.battle.players():
+            if each_player.hero_power.card_id == "TB_BaconShop_HP_061":
+                self.make_enchant_and_add("TB_BaconShop_HP_061e", each_player.hero_power, new_minion)
+                new_minion.attack += 2
 
 
+    def simulate_khadgar(self, summoned_minion: Minion, player: Player):
+        """Khadgar"""
+        for minion in player.minions():
+            if minion is summoned_minion:
+                continue
+
+            if summoned_minion.creator is minion:
+                continue
+
+            if minion.card_id == "DAL_575":
+                new_minion = self.make_copy_of_minion(summoned_minion, player)
+                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+            elif minion.card_id == "TB_BaconUps_034":
+                new_minion = self.make_copy_of_minion(summoned_minion, player)
+                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+
+                new_minion = self.make_copy_of_minion(summoned_minion, player)
+                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 2, summoner=minion)
+
+    def make_copy_of_minion(self, copy_minion: Minion, player: Player) -> Minion:
+        self.simulate_aura_remove(copy_minion, player)
+
+        new_minion = copy.copy(copy_minion)
+        new_minion.enchants = []
+        new_minion.created_enchants = []
+        new_minion.creator = None
+        new_minion.to_be_destroyed = False
+        new_minion.last_damaged_by = None
+        new_minion.zone = Zone.SETASIDE
+        new_minion.pos = 0
+        new_minion.player = player
+
+
+        self.copy_deathrattle_enchant_of_minion(copy_minion, new_minion)
+        self.simulate_aura_add(copy_minion, player)
+
+        return new_minion
+
+    def copy_deathrattle_enchant_of_minion(self, copy_minion: Minion, new_minion: Minion):
+        for enchant in copy_minion.enchants:
+            card_id = enchant.card_id
+
+            if card_id in DEATHRATTLE_ENCHANT_CARD_IDS:
+                new_enchant = Enchantment()
+                new_enchant.card_id = card_id
+                new_enchant.attached_minion = new_minion
+                new_minion.enchants.append(new_enchant)
 
     def make_enchant_and_add(self, card_id: str, creator: HSObject, attached_minion: Minion) -> Enchantment:
         new_enchant = Enchantment()
@@ -651,7 +871,6 @@ class Simulator(QObject):
         attached_minion.enchants.append(new_enchant)
 
         return new_enchant
-
 
     def simulate_remove_minion(self, removed_minion: Minion, player: Player):
         if player.board[removed_minion.pos] is not removed_minion:
@@ -713,9 +932,21 @@ class Simulator(QObject):
         player.graveyard.append(removed_minion)
 
     def simulate_remove_minion_after(self, removed_minion: Minion, player: Player):
-        self.simulate_enchant_remove(removed_minion, player)
 
-    def simulate_enchant_remove(self, removed_minion: Minion, player: Player):
+        for each_player in self.battle.players():
+            for minion in each_player.minions():
+                card_id = minion.card_id
+
+                if removed_minion.race in (Race.MURLOC, Race.ALL):
+                    """Old Murk-Eye"""
+                    if card_id == "EX1_062":
+                        minion.attack -= 1
+                    elif card_id == "TB_BaconUps_036":
+                        minion.attack -= 2
+
+        self.simulate_aura_remove(removed_minion, player)
+
+    def simulate_aura_remove(self, removed_minion: Minion, player: Player):
         # if removed_minion.card_id == "EX1_507":
         for created_enchant in removed_minion.created_enchants:
             if created_enchant.attached_minion and created_enchant.attached_minion.zone == Zone.PLAY:
@@ -736,7 +967,21 @@ class Simulator(QObject):
                 elif card_id == "TB_BaconUps_088e":
                     minion.attack -= 2
 
+                """Siegebreaker"""
+                """Siegebreaking!"""
+                if card_id == "EX1_185e":
+                    minion.attack -= 1
+                elif card_id == "TB_BaconUps_053e":
+                    minion.attack -= 2
 
+                """Mal'Ganis"""
+                """Grasp of Mal'Ganis"""
+                if card_id == "GVG_021e":
+                    minion.attack -= 2
+                    minion.health -= 2
+                elif card_id == "TB_BaconUps_060e":
+                    minion.attack -= 4
+                    minion.health -= 4
 
                 created_enchant.attached_minion.enchants.remove(created_enchant)
 
@@ -757,12 +1002,16 @@ class Simulator(QObject):
             self.simulate_get_damage_after(defender)
             return True
 
+    def simulate_damage_to_every_minions(self, defender_player: Player, amount: int, poisonous: bool = False):
+        for minion in defender_player.minions():
+            self.simulate_damage(minion, amount, poisonous)
+
     def simulate_damage_by_minion(self, defender: Minion, attacker: Minion, amount=None):
         if amount is None:
             amount = attacker.attack
         self.simulate_damage(defender, amount, attacker.poisonous)
         defender.last_damaged_by = attacker
-        if attacker.zone == Zone.PLAY and attacker.overkill and attacker.player is self.battle.atk_player():  # attacker's turn
+        if attacker.zone == Zone.PLAY and attacker.overkill and attacker.player is self.battle.attack_player:  # attacker's turn
             if defender.hp() < 0:
                 self.simulate_overkill(attacker)
 
@@ -805,28 +1054,28 @@ class Simulator(QObject):
         """Security Rover"""
         if card_id == 'BOT_218':
             new_minion = Util.make_default_minion('BOT_218t', golden=golden)
-            self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+            self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
         elif card_id == 'TB_BaconUps_041':
             new_minion = Util.make_default_minion('TB_BaconUps_041t', golden=golden)
             new_minion.golden = True
-            self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+            self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
 
         """Imp Gang Boss"""
         if card_id == 'BRM_006':
             new_minion = Util.make_default_minion('BRM_006t', golden=golden)
-            self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+            self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
         elif card_id == 'TB_BaconUps_030':
             new_minion = Util.make_default_minion('TB_BaconUps_030t', golden=golden)
-            self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+            self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
 
         """Imp Mama"""
         if card_id == "BGS_044":
             new_minion = Util.random_bp_minion_race(Race.DEMON, golden=golden, except_card_ids="BGS_044")
-            self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+            self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
         elif card_id == "TB_BaconUps_116":
             for i in range(2):
                 new_minion = Util.random_bp_minion_race(Race.DEMON, golden=golden, except_card_ids="BGS_044")
-                self.simulate_summon_minion(new_minion, defender.player, pos=defender.pos + 1)
+                self.simulate_summon_minion_by(new_minion, defender.player, pos=defender.pos + 1)
 
     def random_lowest_atk_minion(self, player: Player) -> Optional[Minion]:
         if player.empty():

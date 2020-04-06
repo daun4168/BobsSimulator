@@ -232,6 +232,21 @@ class HSGame(QObject):
             if cardtype == CardType.HERO_POWER.value:
                 print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
 
+                for tag, value in self.entities[entity_id].items():
+                    if tag in GameTag.__members__.values():
+                        tag = GameTag(tag).name
+                        # if tag in ['COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                        #            'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                        #            'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                        #            'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                        #            'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                        #            'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
+                        #     continue
+                    if tag == 'CardID':
+                        continue
+                    print(f"    TAG: {tag}, VALUE: {value}")
+
+
             if cardtype == CardType.HERO.value:
                 health = 0
                 tech_level = 1
@@ -806,18 +821,42 @@ if __name__ == '__main__':
     log_file_2020_03_29_22_38_02 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-29 22-38-02.log"), 'r', encoding="UTF8")
     log_file_2020_03_29_21_47_06 = open(os.path.join(HS_LOG_FILE_DIR, "2020-03-31 21-47-06.log"), 'r', encoding="UTF8")
 
-    # game = HSGame(log_file_2020_02_05_22_51_53)
-    # game.line_reader()
-
-    # game = HSGame(log_file_2020_03_29_20_39_42)
-    # game.line_reader()
-
+    # # game = HSGame(log_file_2020_02_05_22_51_53)
+    # # game.line_reader()
+    # #
+    # # game = HSGame(log_file_2020_02_29_12_56_31)
+    # # game.line_reader()
+    #
     # game = HSGame(log_file_2020_02_29_20_44_13)
     # game.line_reader()
     #
-    game = HSGame(open(os.path.join(HS_LOG_FILE_DIR, "2020-03-21 23-33-29.log"), 'r', encoding="UTF8"))
+    #
+    # game = HSGame(log_file_2020_02_29_21_06_42)
+    # game.line_reader()
+
+    # game = HSGame(log_file_2020_03_01_21_19_18)
+    # game.line_reader()
+    #
+    # game = HSGame(log_file_2020_03_01_21_06_47)
+    # game.line_reader()
+    #
+    #
+    # game = HSGame(log_file_2020_03_21_23_33_29)
+    # game.line_reader()
+
+    game = HSGame(log_file_2020_03_29_20_39_42)
     game.line_reader()
-    game.print_trigger()
+
+    # *******************
+    # game = HSGame(log_file_2020_03_29_22_38_02)
+    # game.line_reader()
+
+    game = HSGame(log_file_2020_03_29_21_47_06)
+    game.line_reader()
+    #
+    # game = HSGame(open(os.path.join(HS_LOG_FILE_DIR, "2020-03-31 21-47-06.log"), 'r', encoding="UTF8"))
+    # game.line_reader()
+
 
     # triggerkeyword_set = set()
 

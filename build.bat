@@ -4,5 +4,5 @@ call venv/scripts/activate
 :: rd /s /q work
 :: del output.spec
 pyinstaller -y --clean --workpath build/work --distpath build build.spec
-start build/output/output.exe
+start build/output/BobsSimulator.exe
 

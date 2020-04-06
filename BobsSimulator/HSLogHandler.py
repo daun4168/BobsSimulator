@@ -186,12 +186,12 @@ class HSLogHandler(QObject):
                         hsloghandler_logger.error(f"gametag controller not exist, battle: {self.game.battle_num}, entity_id: {entity_id}")
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
                         battle.me.hero_power.card_id = card_id
-                        if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                            battle.me.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                        if 1398 in self.entities[entity_id]:
+                            battle.me.hero_power.used = self.entities[entity_id][1398]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
                         battle.enemy.hero_power.card_id = card_id
-                        if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                            battle.enemy.hero_power.exhausted = self.entities[entity_id][GameTag["EXHAUSTED"].value]
+                        if 1398 in self.entities[entity_id]:
+                            battle.enemy.hero_power.used = self.entities[entity_id][1398]
 
                 elif cardtype == CardType.MINION.value:
                     if card_id in ['BGS_029', 'OG_123', 'TB_BaconUps_095']:  # if Shifter Zerus

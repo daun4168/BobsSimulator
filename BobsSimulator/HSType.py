@@ -33,19 +33,8 @@ class Battle:
 
         self.is_me_trigger_first = True  # type: bool
         self.is_me_attack = None  # type: Optional[bool]
+        self.attack_player = None  # type: Optional[Player]
         self.seq = 0  # type: int
-
-    def atk_player(self) -> 'Player':
-        if self.is_me_attack:
-            return self.me
-        else:
-            return self.enemy
-
-    def dfn_player(self) -> 'Player':
-        if self.is_me_attack:
-            return self.enemy
-        else:
-            return self.me
 
     def players(self):
         if self.is_me_trigger_first:
@@ -64,7 +53,7 @@ class Battle:
         text += self.enemy.hero.info()
         for i in range(1, 8):
             if self.enemy.board[i] is None:
-                text += "[                 ]"
+                text += "[                   ]"
             else:
                 text += self.enemy.board[i].info()
 
@@ -219,14 +208,14 @@ class Hero(HSObject):
 class HeroPower(HSObject):
     def __init__(self):
         super().__init__()
-        self.exhausted = False  # type: bool
+        self.used = False  # type: bool
 
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)
 
     def info(self):
-        return f"{self.name()}, exhausted: {self.exhausted}"
+        return f"{self.name()}, used: {self.used}"
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -237,8 +226,8 @@ class HeroPower(HSObject):
         else:
             start_text = "EnemyHeroPower"
         log_text = f"""* {start_text} -name "{name}@{self.card_id}" """
-        if self.exhausted:
-            log_text += "-exhausted "
+        if self.used:
+            log_text += "-used "
         logger.info(log_text)
 
 
@@ -311,6 +300,8 @@ class Minion(HSObject):
         self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
         self.enchants = []  # type: List[Enchantment]
+
+        self.creator = None  # type: Optional[Minion, Hero, HeroPower]
 
         self.to_be_destroyed = False  # type: bool
         self.last_damaged_by = None  # type: Optional[HSObject]
@@ -395,6 +386,12 @@ RACE_ALL = (
     Race.TOTEM,
 )
 
+DEATHRATTLE_ENCHANT_CARD_IDS = (
+    "BOT_312e",
+    "TB_BaconUps_032e",
+    "UNG_999t2e",
+)
+
 
 # ENTITY_TYPES = ["CREATE_GAME",
 #                 "FULL_ENTITY",
@@ -410,8 +407,4 @@ RACE_ALL = (
 #                 "SUB_SPELL_END",
 #                 ]
 #
-# DEATHRATTLE_BUFF_CARDIDS = [
-#     "BOT_312e",
-#     "TB_BaconUps_032e",
-#     "UNG_999t2e",
-# ]
+
