@@ -262,12 +262,12 @@ class HSLogHandler(QObject):
                     enchantment = Enchantment()
                     enchantment.card_id = card_id
 
-                    if 1037 in self.entities[entity_id]:
-                        enchant_type = self.entities[entity_id][1037]
-                        if enchant_type == 10:
+
+
+                    if 323 in self.entities[entity_id] and 324 in self.entities[entity_id]:
+                        if self.entities[entity_id][323] == 1 and self.entities[entity_id][324] == 1:
                             enchantment.is_aura = True
-                        elif enchant_type == 2:
-                            enchantment.is_aura = False
+
 
                     if attached_id in entity_id_to_minion_dict:
                         entity_id_to_minion_dict[attached_id].enchants.append(enchantment)

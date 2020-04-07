@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, DefaultDict, Deque
+from typing import List, Dict, Optional, DefaultDict, Deque, Callable
 from collections import defaultdict, deque
 from abc import ABCMeta, abstractmethod
 from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
@@ -406,4 +406,45 @@ DEATHRATTLE_ENCHANT_CARD_IDS = (
     "UNG_999t2e",
 )
 
+
+class AuraInfo:
+    def __init__(self, giver_card_id: str, enchant_card_id: str, add_atk: int = 0, add_hp: int = 0, check_func: Callable[[Minion], bool] = None):
+        self.giver_card_id = giver_card_id  # type: Optional[str]
+        self.enchant_card_id = enchant_card_id  # type: Optional[str]
+        self.add_atk = add_atk  # type: int
+        self.add_hp = add_hp  # type: int
+
+        if check_func is not None:
+            self.check_func = check_func
+
+    @staticmethod
+    def check_func(minion: Minion) -> bool:
+        return True
+
+
+AURAINFO_LIST = [
+
+    AuraInfo(
+        giver_card_id="EX1_507",
+        enchant_card_id="EX1_507e",
+        add_atk=2,
+        add_hp=0,
+        check_func=lambda minion: minion.race in (Race.MURLOC, Race.ALL)
+    ),
+
+    AuraInfo(
+        giver_card_id="TB_BaconUps_008",
+        enchant_card_id="TB_BaconUps_008e",
+        add_atk=4,
+        add_hp=0,
+        check_func=lambda minion: minion.race in (Race.MURLOC, Race.ALL)
+    ),
+
+
+]
+
+
+
+if __name__ == "__main__":
+    pass
 

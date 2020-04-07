@@ -250,9 +250,7 @@ class HSGame(QObject):
                 if card_name == "BaconShop8PlayerEnchant":
                     return
                 print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
-                is_t1037 = False
                 is_aura = False
-                t1037_v = None
                 for tag, value in self.entities[entity_id].items():
                     if tag in GameTag.__members__.values():
                         tag = GameTag(tag).name
@@ -264,28 +262,18 @@ class HSGame(QObject):
                         #            'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
                         #     continue
                     if tag == 1037 and value == 10:
-                        is_t1037 = True
                         is_aura = True
                         continue
                     elif tag == 1037 and value == 2:
-                        is_t1037 = True
                         is_aura = False
                         continue
-                    elif tag == 1037:
-                        is_t1037 = False
-                    if tag == 1037:
-                        t1037_v = value
                     if tag == 'CardID':
                         continue
                     print(f"    TAG: {tag}, VALUE: {value}")
-                if is_t1037:
-                    if is_aura:
-                        print("    AURA!!")
-                    else:
-                        print("    NOT AURA!!!")
-
-                if t1037_v is not None and t1037_v not in (2, 10):
-                    print(f"BIGERROR: {t1037_v}")
+                if is_aura:
+                    print("    ISAURA!!")
+                else:
+                    print("    NOT AURA!!!")
 
 
             if cardtype == CardType.HERO.value:
@@ -885,7 +873,7 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_03_21_23_33_29)
     # game.line_reader()
 
-    game = HSGame(log_file_2020_03_29_20_39_42)
+    game = HSGame(log_file_2020_03_21_23_33_29)
     game.line_reader()
 
     # *******************
