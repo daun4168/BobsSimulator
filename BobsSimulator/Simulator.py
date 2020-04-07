@@ -824,6 +824,85 @@ class Simulator(QObject):
         for each_player in self.battle.players():
             self.simulate_aura_add_to_minion(each_player.hero_power, get_minion)
 
+    def check_aura_is_ok(self):
+        enchant_dict = {
+            "giver_card_id": "EX1_507",
+            "enchant_card_id": "EX1_507e",
+            "aura_buff_atk": 2,
+            "aura_buff_hp": 0,
+            "check_function": (lambda: minion: minion.race in (Race.MURLOC, Race.ALL)),
+        }
+
+
+        for player in self.battle.players():
+            for giver in player.minions():
+                if giver.card_id == "EX1_507":
+                    for get_minion in player.minions():
+                        if get_minion is giver:
+                            continue
+                        # check is aura already exist:
+                        is_aura_exist = False
+                        aura = None  # type: Optional[Enchantment]
+                        for enchant in get_minion.enchants:
+                            if not enchant.is_aura:
+                                continue
+                            if enchant.creator is giver and enchant.card_id == "EX1_507e":
+                                is_aura_exist = True
+                                aura = enchant
+                                break
+
+                        # check should minion have aura
+                        should_have_aura = False
+                        if get_minion.race in (Race.MURLOC, Race.ALL):
+                            should_have_aura = True
+
+                        lambda minion: minion.race in (Race.MURLOC, Race.ALL)
+
+
+
+                if get_minion.race in (Race.MURLOC, Race.ALL):
+
+                    """Murloc Warleader"""
+                    """Mrgglaargl!"""
+                    if giver.card_id == "EX1_507":
+                        self.make_enchant_and_add("EX1_507e", giver, get_minion)
+                        get_minion.buff(2, 0)
+                    elif giver.card_id == "TB_BaconUps_008":
+                        self.make_enchant_and_add("TB_BaconUps_008e", giver, get_minion)
+                        get_minion.buff(4, 0)
+
+                if get_minion.race in (Race.DEMON, Race.ALL):
+
+                    """Siegebreaker"""
+                    """Siegebreaking!"""
+                    if giver.card_id == "EX1_185":
+                        self.make_enchant_and_add("EX1_185e", giver, get_minion)
+                        get_minion.buff(1, 0)
+                    elif giver.card_id == "TB_BaconUps_053":
+                        self.make_enchant_and_add("TB_BaconUps_053e", giver, get_minion)
+                        get_minion.buff(2, 0)
+
+                    """Mal'Ganis"""
+                    """Grasp of Mal'Ganis"""
+                    if giver.card_id == "GVG_021":
+                        self.make_enchant_and_add("GVG_021e", giver, get_minion)
+                        get_minion.buff(2, 2)
+                    elif giver.card_id == "TB_BaconUps_060":
+                        self.make_enchant_and_add("TB_BaconUps_060e", giver, get_minion)
+                        get_minion.buff(4, 4)
+
+                if get_minion.pos in (giver.pos - 1, giver.pos + 1):
+
+                    """Dire Wolf Alpha"""
+                    """Strength of the Pack"""
+                    if giver.card_id == "EX1_162":
+                        self.make_enchant_and_add("EX1_162o", giver, get_minion)
+                        get_minion.buff(1, 0)
+                    elif giver.card_id == "TB_BaconUps_088":
+                        self.make_enchant_and_add("TB_BaconUps_088e", giver, get_minion)
+                        get_minion.buff(2, 0)
+
+
     def simulate_khadgar(self, summoned_minion: Minion, player: Player):
         """Khadgar"""
 
