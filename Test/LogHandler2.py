@@ -192,7 +192,7 @@ class HSGame(QObject):
 
         if card_name and \
                 zone == Zone.PLAY.value and \
-                cardtype in [CardType.HERO.value, CardType.MINION.value, CardType.HERO_POWER.value]:
+                cardtype in [CardType.HERO.value, CardType.MINION.value, CardType.HERO_POWER.value, CardType.ENCHANTMENT.value]:
             # # zone in [Zone.PLAY.value, Zone.DECK.value, Zone.HAND.value, Zone.SETASIDE.value]:
             # print(f"{entity_id} - Name: {card_name}, Zone: {Zone(zone).name}, CardType: {CardType(cardtype).name}")
             #
@@ -231,7 +231,28 @@ class HSGame(QObject):
 
             if cardtype == CardType.HERO_POWER.value:
                 print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
+                #
+                # for tag, value in self.entities[entity_id].items():
+                #     if tag in GameTag.__members__.values():
+                #         tag = GameTag(tag).name
+                #         # if tag in ['COST', 'HEALTH', 'ATK', 'ZONE', 'ENTITY_ID', 'TAUNT', 'DIVINE_SHIELD', 'ZONE_POSITION', 'EXHAUSTED',
+                #         #            'RARITY', 'TAG_LAST_KNOWN_COST_IN_HAND', 'CREATOR_DBID', 'TECH_LEVEL', 'CANT_ATTACK', 'CREATOR',
+                #         #            'IS_BACON_POOL_MINION', 'NUM_TURNS_IN_PLAY', 'JUST_PLAYED', 'BATTLECRY', 'CARDRACE', 'FACTION' ,
+                #         #            'TRIGGER_VISUAL', 'DEATHRATTLE', 'CARDTYPE', 'ELITE', 'REBORN', 'FROZEN', 'BACON_MINION_IS_LEVEL_TWO', 'PREMIUM',
+                #         #            'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
+                #         #            'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
+                #         #     continue
+                #     if tag == 'CardID':
+                #         continue
+                #     print(f"    TAG: {tag}, VALUE: {value}")
 
+            if cardtype == CardType.ENCHANTMENT.value:
+                if card_name == "BaconShop8PlayerEnchant":
+                    return
+                print(f"{entity_id} - {card_name}, CardType: {CardType(cardtype).name}")
+                is_t1037 = False
+                is_aura = False
+                t1037_v = None
                 for tag, value in self.entities[entity_id].items():
                     if tag in GameTag.__members__.values():
                         tag = GameTag(tag).name
@@ -242,9 +263,29 @@ class HSGame(QObject):
                         #            'OVERKILL', 'HIDE_WATERMARK', 'HIDE_COST', 'DISCOVER', 'CHARGE', 'POISONOUS', 'CARD_TARGET',
                         #            'WINDFURY', 'USE_DISCOVER_VISUALS', 'MODULAR', 'CardID', 'HERO_POWER', 'PLAYER_TECH_LEVEL', 'BACON_HERO_CAN_BE_DRAFTED']:
                         #     continue
+                    if tag == 1037 and value == 10:
+                        is_t1037 = True
+                        is_aura = True
+                        continue
+                    elif tag == 1037 and value == 2:
+                        is_t1037 = True
+                        is_aura = False
+                        continue
+                    elif tag == 1037:
+                        is_t1037 = False
+                    if tag == 1037:
+                        t1037_v = value
                     if tag == 'CardID':
                         continue
                     print(f"    TAG: {tag}, VALUE: {value}")
+                if is_t1037:
+                    if is_aura:
+                        print("    AURA!!")
+                    else:
+                        print("    NOT AURA!!!")
+
+                if t1037_v is not None and t1037_v not in (2, 10):
+                    print(f"BIGERROR: {t1037_v}")
 
 
             if cardtype == CardType.HERO.value:
@@ -851,8 +892,8 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_03_29_22_38_02)
     # game.line_reader()
 
-    game = HSGame(log_file_2020_03_29_21_47_06)
-    game.line_reader()
+    # game = HSGame(log_file_2020_03_29_21_47_06)
+    # game.line_reader()
     #
     # game = HSGame(open(os.path.join(HS_LOG_FILE_DIR, "2020-03-31 21-47-06.log"), 'r', encoding="UTF8"))
     # game.line_reader()

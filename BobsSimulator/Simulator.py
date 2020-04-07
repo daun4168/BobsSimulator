@@ -617,29 +617,15 @@ class Simulator(QObject):
                 self.simulate_damage_by_minion(defender=self.battle.attack_player.opponent.left_minion(), attacker=minion, amount=6)
 
     def simulate_summon_minion_by(self, new_minion: Minion, player: Player, pos: Optional[int] = None, summoner: HSObject = None,
-                                  can_summon_by_khadgar=True, khadgar: Minion = None) -> Optional[Minion]:
+                                  can_summon_by_khadgar=True) -> Optional[Minion]:
         new_minion = self.simulate_summon_minion(new_minion, player, pos)
+
+        if new_minion is not None:
+            new_minion.creator = summoner
 
         """Khadgar"""
         if can_summon_by_khadgar and new_minion is not None:
-            new_minion.creator = summoner
-
-            next_khadgar = None  # type: Optional[Minion]
-            extra_summon_num = 0
-
-            for minion in player.minions():
-                if khadgar is not None:
-                    if minion.pos <= khadgar.pos:
-                        continue
-
-                if minion.card_id == "DAL_575":
-                    extra_summon_num = 1
-                    next_khadgar = minion
-                    break
-                elif minion.card_id == "TB_BaconUps_034":
-                    extra_summon_num = 2
-                    next_khadgar = minion
-                    break
+            self.simulate_khadgar(new_minion, player)
 
         return new_minion
 
@@ -772,10 +758,6 @@ class Simulator(QObject):
         # aura hero
         for each_player in self.battle.players():
             self.simulate_aura_add_to_minion(each_player.hero_power, new_minion)
-            if each_player.hero_power.card_id == "TB_BaconShop_HP_061":
-
-                self.make_enchant_and_add("TB_BaconShop_HP_061e", each_player.hero_power, new_minion)
-                new_minion.attack += 2
 
     def simulate_aura_add_to_minion(self, giver: HSObject, get_minion: Minion):
 
@@ -787,10 +769,10 @@ class Simulator(QObject):
                 """Mrgglaargl!"""
                 if giver.card_id == "EX1_507":
                     self.make_enchant_and_add("EX1_507e", giver, get_minion)
-                    get_minion.attack += 2
+                    get_minion.buff(2, 0)
                 elif giver.card_id == "TB_BaconUps_008":
                     self.make_enchant_and_add("TB_BaconUps_008e", giver, get_minion)
-                    get_minion.attack += 4
+                    get_minion.buff(4, 0)
 
             if get_minion.race in (Race.DEMON, Race.ALL):
 
@@ -798,21 +780,19 @@ class Simulator(QObject):
                 """Siegebreaking!"""
                 if giver.card_id == "EX1_185":
                     self.make_enchant_and_add("EX1_185e", giver, get_minion)
-                    get_minion.attack += 1
+                    get_minion.buff(1, 0)
                 elif giver.card_id == "TB_BaconUps_053":
                     self.make_enchant_and_add("TB_BaconUps_053e", giver, get_minion)
-                    get_minion.attack += 2
+                    get_minion.buff(2, 0)
 
                 """Mal'Ganis"""
                 """Grasp of Mal'Ganis"""
                 if giver.card_id == "GVG_021":
                     self.make_enchant_and_add("GVG_021e", giver, get_minion)
-                    get_minion.attack += 2
-                    get_minion.health += 2
+                    get_minion.buff(2, 2)
                 elif giver.card_id == "TB_BaconUps_060":
                     self.make_enchant_and_add("TB_BaconUps_060e", giver, get_minion)
-                    get_minion.attack += 4
-                    get_minion.health += 4
+                    get_minion.buff(4, 4)
 
             if get_minion.pos in (giver.pos - 1, giver.pos + 1):
 
@@ -820,40 +800,87 @@ class Simulator(QObject):
                 """Strength of the Pack"""
                 if giver.card_id == "EX1_162":
                     self.make_enchant_and_add("EX1_162o", giver, get_minion)
-                    get_minion.attack += 1
+                    get_minion.buff(1, 0)
                 elif giver.card_id == "TB_BaconUps_088":
                     self.make_enchant_and_add("TB_BaconUps_088e", giver, get_minion)
-                    get_minion.attack += 2
+                    get_minion.buff(2, 0)
 
         if isinstance(giver, HeroPower):
 
-            "Deathwing"
+            """Deathwing"""
             """ALL Will Burn!"""
-            if giver.card_id == "TB_BaconShop_HP_061e":
+            if giver.card_id == "TB_BaconShop_HP_061":
                 self.make_enchant_and_add("TB_BaconShop_HP_061e", giver, get_minion)
-                get_minion.attack += 2
+                get_minion.buff(2, 0)
+
+    def simulate_aura_add_for_minion(self, get_minion: Minion):
+        # aura minion
+        for minion in get_minion.player.minions():
+            if minion is get_minion:
+                continue
+            self.simulate_aura_add_to_minion(minion, get_minion)
+
+        # aura hero
+        for each_player in self.battle.players():
+            self.simulate_aura_add_to_minion(each_player.hero_power, get_minion)
 
     def simulate_khadgar(self, summoned_minion: Minion, player: Player):
         """Khadgar"""
+
+        summon_khadgar = None  # type: Optional[Minion]
+        if isinstance(summoned_minion.creator, Minion) and summoned_minion.creator.card_id in ("DAL_575", "TB_BaconUps_034"):
+            summon_khadgar = summoned_minion.creator
+
+        next_khadgar = None  # type: Optional[Minion]
+        extra_summon_num = 0
+
         for minion in player.minions():
+            if summon_khadgar is not None and summon_khadgar.zone == Zone.PLAY:
+                if minion.pos <= summon_khadgar.pos:
+                    continue
+
             if minion is summoned_minion:
                 continue
 
-            if summoned_minion.creator is minion:
-                continue
-
             if minion.card_id == "DAL_575":
-                new_minion = self.make_copy_of_minion(summoned_minion, player)
-                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+                extra_summon_num = 1
+                next_khadgar = minion
+                break
             elif minion.card_id == "TB_BaconUps_034":
-                new_minion = self.make_copy_of_minion(summoned_minion, player)
-                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+                extra_summon_num = 2
+                next_khadgar = minion
+                break
 
-                new_minion = self.make_copy_of_minion(summoned_minion, player)
-                self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 2, summoner=minion)
+        if extra_summon_num >= 1:
+            print(f"KHADGAR WILL COPY: {summoned_minion.info()}  by  {next_khadgar.info()}  {extra_summon_num}times")
+
+        for extra_summon_count in range(extra_summon_num):
+            copy_of_minion = self.make_copy_of_minion(summoned_minion, player)
+            print(f"COPY COUNT:{extra_summon_count} , WILL SUMMON: {copy_of_minion.info()}")
+            self.simulate_summon_minion_by(copy_of_minion, player,
+                                           pos=summoned_minion.pos + 1 + extra_summon_count,
+                                           summoner=next_khadgar,
+                                           can_summon_by_khadgar=True)
+
+        # for minion in player.minions():
+        #     if minion is summoned_minion:
+        #         continue
+        #
+        #     if summoned_minion.creator is minion:
+        #         continue
+        #
+        #     if minion.card_id == "DAL_575":
+        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
+        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+        #     elif minion.card_id == "TB_BaconUps_034":
+        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
+        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
+        #
+        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
+        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 2, summoner=minion)
 
     def make_copy_of_minion(self, copy_minion: Minion, player: Player) -> Minion:
-        self.simulate_aura_remove_for_creator(copy_minion)
+        self.simulate_aura_remove_for_minion(copy_minion)
 
         new_minion = copy.copy(copy_minion)
         new_minion.enchants = []
@@ -865,9 +892,8 @@ class Simulator(QObject):
         new_minion.pos = 0
         new_minion.player = player
 
-
         self.copy_deathrattle_enchant_of_minion(copy_minion, new_minion)
-        self.simulate_aura_add(copy_minion, player)
+        self.simulate_aura_add_for_minion(copy_minion)
 
         return new_minion
 
@@ -977,32 +1003,35 @@ class Simulator(QObject):
         """Murloc Warleader"""
         """Mrgglaargl!"""
         if card_id == "EX1_507e":
-            minion.attack = max(minion.attack - 2, 0)
+            minion.buff(-2, 0)
         elif card_id == "TB_BaconUps_008e":
-            minion.attack -= 4
+            minion.buff(-4, 0)
 
         """Dire Wolf Alpha"""
         """Strength of the Pack"""
         if card_id == "EX1_162o":
-            minion.attack -= 1
+            minion.buff(-1, 0)
         elif card_id == "TB_BaconUps_088e":
-            minion.attack -= 2
+            minion.buff(-2, 0)
 
         """Siegebreaker"""
         """Siegebreaking!"""
         if card_id == "EX1_185e":
-            minion.attack -= 1
+            minion.buff(-1, 0)
         elif card_id == "TB_BaconUps_053e":
-            minion.attack -= 2
+            minion.buff(-2, 0)
 
         """Mal'Ganis"""
         """Grasp of Mal'Ganis"""
         if card_id == "GVG_021e":
-            minion.attack -= 2
-            minion.health -= 2
+            minion.buff(-2, -2)
         elif card_id == "TB_BaconUps_060e":
-            minion.attack -= 4
-            minion.health -= 4
+            minion.buff(-4, -4)
+
+        """Deathwing"""
+        """ALL Will Burn!"""
+        if card_id == "TB_BaconShop_HP_061e":
+            minion.buff(-2, 0)
 
         minion.enchants.remove(enchant)
 

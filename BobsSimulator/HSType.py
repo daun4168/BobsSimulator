@@ -262,6 +262,7 @@ class Enchantment(HSObject):
         super().__init__()
         self.attached_minion = None  # type: Optional[Minion]
         self.creator = None  # type: Optional[Minion, Hero, HeroPower]
+        self.is_aura = False  # type: bool
 
     def name(self):
         from BobsSimulator.Util import Util
@@ -301,7 +302,7 @@ class Minion(HSObject):
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
         self.enchants = []  # type: List[Enchantment]
 
-        self.creator = None  # type: Optional[Minion, Hero, HeroPower]
+        self.creator = None  # type: Optional[HSObject]
 
         self.to_be_destroyed = False  # type: bool
         self.last_damaged_by = None  # type: Optional[HSObject]
@@ -344,6 +345,19 @@ class Minion(HSObject):
 
     def hp(self):
         return self.health - self.damage
+
+    def buff(self, atk, hp):
+        if atk >= 0:
+            self.attack += atk
+        else:
+            self.attack = max(self.attack + atk, 0)
+
+        if hp >= 0:
+            self.health += hp
+        else:
+            self.health = max(self.health + hp, 1)
+            self.damage = max(self.damage + hp, 0)
+
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -392,19 +406,4 @@ DEATHRATTLE_ENCHANT_CARD_IDS = (
     "UNG_999t2e",
 )
 
-
-# ENTITY_TYPES = ["CREATE_GAME",
-#                 "FULL_ENTITY",
-#                 "TAG_CHANGE",
-#                 "BLOCK_START",
-#                 "BLOCK_END",
-#                 "SHOW_ENTITY",
-#                 "HIDE_ENTITY",
-#                 "META_DATA",
-#                 "CHANGE_ENTITY",
-#                 "RESET_GAME",
-#                 "SUB_SPELL_START",
-#                 "SUB_SPELL_END",
-#                 ]
-#
 
