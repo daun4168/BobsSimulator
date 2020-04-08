@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict, deque
 
 from PySide2.QtCore import Signal, QObject
 
-from BobsSimulator.HSType import HSObject, Battle, Minion, HeroPower, Zone, Player, Race, Enchantment, RACE_ALL, DEATHRATTLE_ENCHANT_CARD_IDS, AURAINFO_LIST
+from BobsSimulator.HSType import HSObject, Battle, Minion, HeroPower, Zone, Player, Race, Enchantment, RACE_ALL, DEATHRATTLE_ENCHANT_CARD_IDS, AURAINFO_LIST, AURAINFO_DICT
 from BobsSimulator.HSLogging import simulator_logger, console_logger
 from BobsSimulator.Util import Util
 
@@ -207,11 +207,15 @@ class Simulator(QObject):
                 player.death_init()
 
             is_minion_dead = self.check_deaths()
+
             self.check_aura()
+
             if not is_minion_dead:
                 return
             self.simulate_death_triggers()
             self.simulate_reborn_triggers()
+
+            self.check_aura()
 
     def simulate_death_triggers(self):
         for player in self.battle.players():
@@ -830,6 +834,16 @@ class Simulator(QObject):
 
         for aurainfo in AURAINFO_LIST:
             for player in self.battle.players():
+                for get_minion in player.minions():
+                    for enchant in get_minion.enchants:
+                        # remove aura
+                        if enchant.creator is not None and enchant.creator.zone != Zone.PLAY:
+                            print("REMOVE AURA!!!!!!1")
+                            this_info = AURAINFO_DICT[enchant.card_id]
+                            get_minion.buff(-this_info.add_atk, -this_info.add_hp)
+                            get_minion.enchants.remove(enchant)
+                            # enchant.creator.created_enchants.remove(enchant)
+
                 for giver in player.minions():
                     if giver.card_id == aurainfo.giver_card_id:
                         for get_minion in player.minions():
@@ -851,9 +865,15 @@ class Simulator(QObject):
 
                             # remove aura
                             if is_aura_exist and not should_have_aura:
+                                get_minion.buff(-aurainfo.add_atk, -aurainfo.add_hp)
+                                get_minion.enchants.remove(aura)
+                                giver.created_enchants.remove(aura)
+
                                 print("REMOVE AURA!")
                             # add aura
                             elif not is_aura_exist and should_have_aura:
+                                get_minion.buff(aurainfo.add_atk, aurainfo.add_hp)
+                                self.make_enchant_and_add(aurainfo.enchant_card_id, giver, get_minion, is_aura=True)
                                 print("ADD AURA!")
                                 print(giver.info())
                                 print(get_minion.info())
@@ -919,7 +939,7 @@ class Simulator(QObject):
 
         new_minion = copy.copy(copy_minion)
         new_minion.enchants = []
-        new_minion.created_enchants = []
+        # new_minion.created_enchants = []
         new_minion.creator = None
         new_minion.to_be_destroyed = False
         new_minion.last_damaged_by = None
@@ -942,12 +962,13 @@ class Simulator(QObject):
                 new_enchant.attached_minion = new_minion
                 new_minion.enchants.append(new_enchant)
 
-    def make_enchant_and_add(self, card_id: str, creator: HSObject, attached_minion: Minion) -> Enchantment:
+    def make_enchant_and_add(self, card_id: str, creator: HSObject, attached_minion: Minion, is_aura: bool = False) -> Enchantment:
         new_enchant = Enchantment()
         new_enchant.card_id = card_id
+        new_enchant.is_aura = is_aura
 
         new_enchant.creator = creator
-        creator.created_enchants.append(new_enchant)
+        # creator.created_enchants.append(new_enchant)
 
         new_enchant.attached_minion = attached_minion
         attached_minion.enchants.append(new_enchant)
@@ -1010,7 +1031,7 @@ class Simulator(QObject):
         removed_minion.health = Util.default_health_by_id(removed_minion.card_id)
         removed_minion.damage = 0
         removed_minion.enchants.clear()
-        removed_minion.created_enchants.clear()
+        # removed_minion.created_enchants.clear()
         player.graveyard.append(removed_minion)
 
     def simulate_remove_minion_after(self, removed_minion: Minion):
@@ -1073,9 +1094,9 @@ class Simulator(QObject):
 
     def simulate_aura_remove_for_creator(self, removed_minion: Minion):
         # if removed_minion.card_id == "EX1_507":
-        for created_enchant in removed_minion.created_enchants:
-            if created_enchant.attached_minion and created_enchant.attached_minion.zone == Zone.PLAY:
-                minion = created_enchant.attached_minion
+        # for created_enchant in removed_minion.created_enchants:
+        #     if created_enchant.attached_minion and created_enchant.attached_minion.zone == Zone.PLAY:
+        #         minion = created_enchant.attached_minion
 
                 self.simulate_aura_remove_for_each_enchant(minion, created_enchant)
 

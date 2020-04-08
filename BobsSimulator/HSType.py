@@ -231,9 +231,9 @@ class HeroPower(HSObject):
         logger.info(log_text)
 
 
-class Secret(HSObject):
+class Secret():
     def __init__(self):
-        super().__init__()
+        self.card_id = ""  # type: str
 
     def name(self):
         from BobsSimulator.Util import Util
@@ -442,6 +442,12 @@ AURAINFO_LIST = [
 
 
 ]
+
+AURAINFO_DICT = {}
+
+for aurainfo in AURAINFO_LIST:
+    AURAINFO_DICT[aurainfo.giver_card_id] = aurainfo
+    AURAINFO_DICT[aurainfo.enchant_card_id] = aurainfo
 
 
 

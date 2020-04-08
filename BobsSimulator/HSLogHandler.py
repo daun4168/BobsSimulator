@@ -174,6 +174,8 @@ class HSLogHandler(QObject):
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
                         hero = battle.enemy.hero
                     hero.card_id = card_id
+                    hero.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
+
                     if GameTag["HEALTH"].value in self.entities[entity_id]:
                         hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
@@ -184,12 +186,15 @@ class HSLogHandler(QObject):
                 elif cardtype == CardType.HERO_POWER.value:
                     if GameTag["CONTROLLER"].value not in self.entities[entity_id]:
                         hsloghandler_logger.error(f"gametag controller not exist, battle: {self.game.battle_num}, entity_id: {entity_id}")
+
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
                         battle.me.hero_power.card_id = card_id
+                        battle.me.hero_power.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
                         if 1398 in self.entities[entity_id]:
                             battle.me.hero_power.used = self.entities[entity_id][1398]
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
                         battle.enemy.hero_power.card_id = card_id
+                        battle.enemy.hero_power.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
                         if 1398 in self.entities[entity_id]:
                             battle.enemy.hero_power.used = self.entities[entity_id][1398]
 
@@ -261,20 +266,18 @@ class HSLogHandler(QObject):
 
                     enchantment = Enchantment()
                     enchantment.card_id = card_id
-
-
+                    enchantment.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
 
                     if 323 in self.entities[entity_id] and 324 in self.entities[entity_id]:
                         if self.entities[entity_id][323] == 1 and self.entities[entity_id][324] == 1:
                             enchantment.is_aura = True
-
 
                     if attached_id in entity_id_to_minion_dict:
                         entity_id_to_minion_dict[attached_id].enchants.append(enchantment)
                         enchantment.attached_minion = entity_id_to_minion_dict[attached_id]
 
                     if creator_id in entity_id_to_minion_dict:
-                        entity_id_to_minion_dict[creator_id].created_enchants.append(enchantment)
+                        # entity_id_to_minion_dict[creator_id].created_enchants.append(enchantment)
                         enchantment.creator = entity_id_to_minion_dict[creator_id]
 
             elif zone == Zone.SECRET.value:
