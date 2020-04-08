@@ -162,6 +162,8 @@ class HSObject(metaclass=ABCMeta):
     def __init__(self):
         self.card_id = ""  # type: str
         self.created_enchants = []  # type: List[Enchantment]
+        self.zone = Zone.INVALID  # type: Zone
+        self.player = None  # type: Optional[Player]
 
     @abstractmethod
     def name(self) -> str:
@@ -215,7 +217,11 @@ class HeroPower(HSObject):
         return Util.card_name_by_id(self.card_id)
 
     def info(self):
-        return f"{self.name()}, used: {self.used}"
+        text = ""
+        text += self.name()
+        if self.used:
+            text += " +used"
+        return f"[{text}]"
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
@@ -231,7 +237,7 @@ class HeroPower(HSObject):
         logger.info(log_text)
 
 
-class Secret():
+class Secret:
     def __init__(self):
         self.card_id = ""  # type: str
 
@@ -270,10 +276,13 @@ class Enchantment(HSObject):
 
     def info(self):
         text = ""
-        text += f"name: {self.name()}  "
-        text += f"attached_minion: {self.attached_minion.info()} "
-        text += f"creator: {self.creator.info()} "
-        return text
+        text += f"{self.name()}  "
+        if self.is_aura:
+            text += f"(AURA)"
+        text += f"attached-{self.attached_minion.info()} "
+        text += f"creator-{self.creator.info()} "
+
+        return f"[{text}]"
 
 
 class Minion(HSObject):
@@ -300,18 +309,20 @@ class Minion(HSObject):
         self.atk_lowest_atk_minion = False  # type: bool
         self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
         self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
+
         self.enchants = []  # type: List[Enchantment]
+        self.auras = []  # type: List[Enchantment]
 
         self.creator = None  # type: Optional[HSObject]
 
         self.to_be_destroyed = False  # type: bool
         self.last_damaged_by = None  # type: Optional[HSObject]
 
-        self.zone = None  # type: Optional[Zone]
+
         self.pos = 0  # type: int
         self.exhausted = False  # type: bool
 
-        self.player = None  # type: Optional[Player]
+
         # self.is_mine = False  # type: bool  # if card is player's, True
 
     def name(self):
@@ -408,7 +419,7 @@ DEATHRATTLE_ENCHANT_CARD_IDS = (
 
 
 class AuraInfo:
-    def __init__(self, giver_card_id: str, enchant_card_id: str, add_atk: int = 0, add_hp: int = 0, check_func: Callable[[Minion], bool] = None):
+    def __init__(self, giver_card_id: str, enchant_card_id: str, add_atk: int = 0, add_hp: int = 0, check_func: Callable[[Minion, HSObject], bool] = None):
         self.giver_card_id = giver_card_id  # type: Optional[str]
         self.enchant_card_id = enchant_card_id  # type: Optional[str]
         self.add_atk = add_atk  # type: int
@@ -418,18 +429,20 @@ class AuraInfo:
             self.check_func = check_func
 
     @staticmethod
-    def check_func(minion: Minion) -> bool:
+    def check_func(minion: Minion, giver: HSObject) -> bool:
         return True
 
 
 AURAINFO_LIST = [
 
+    # """Murloc Warleader"""
+    # """Mrgglaargl!"""
     AuraInfo(
         giver_card_id="EX1_507",
         enchant_card_id="EX1_507e",
         add_atk=2,
         add_hp=0,
-        check_func=lambda minion: minion.race in (Race.MURLOC, Race.ALL)
+        check_func=lambda minion, giver: minion.race in (Race.MURLOC, Race.ALL) and giver.player is minion.player
     ),
 
     AuraInfo(
@@ -437,7 +450,72 @@ AURAINFO_LIST = [
         enchant_card_id="TB_BaconUps_008e",
         add_atk=4,
         add_hp=0,
-        check_func=lambda minion: minion.race in (Race.MURLOC, Race.ALL)
+        check_func=lambda minion, giver: minion.race in (Race.MURLOC, Race.ALL) and giver.player is minion.player
+    ),
+
+    # """Siegebreaker"""
+    # """Siegebreaking!"""
+    AuraInfo(
+        giver_card_id="EX1_185",
+        enchant_card_id="EX1_185e",
+        add_atk=1,
+        add_hp=0,
+        check_func=lambda minion, giver: minion.race in (Race.DEMON, Race.ALL) and giver.player is minion.player
+    ),
+
+    AuraInfo(
+        giver_card_id="TB_BaconUps_053",
+        enchant_card_id="TB_BaconUps_053e",
+        add_atk=2,
+        add_hp=0,
+        check_func=lambda minion, giver: minion.race in (Race.DEMON, Race.ALL) and giver.player is minion.player
+    ),
+
+    # """Mal'Ganis"""
+    # """Grasp of Mal'Ganis"""
+    AuraInfo(
+        giver_card_id="GVG_021",
+        enchant_card_id="GVG_021e",
+        add_atk=2,
+        add_hp=2,
+        check_func=lambda minion, giver: minion.race in (Race.DEMON, Race.ALL) and giver.player is minion.player
+    ),
+
+    AuraInfo(
+        giver_card_id="TB_BaconUps_060",
+        enchant_card_id="TB_BaconUps_060e",
+        add_atk=4,
+        add_hp=4,
+        check_func=lambda minion, giver: minion.race in (Race.DEMON, Race.ALL) and giver.player is minion.player
+    ),
+
+
+    # """Dire Wolf Alpha"""
+    # """Strength of the Pack"""
+    AuraInfo(
+        giver_card_id="EX1_162",
+        enchant_card_id="EX1_162o",
+        add_atk=1,
+        add_hp=0,
+        check_func=lambda minion, giver: minion.pos in (giver.pos - 1, giver.pos + 1) and giver.player is minion.player
+    ),
+
+    AuraInfo(
+        giver_card_id="TB_BaconUps_088",
+        enchant_card_id="TB_BaconUps_088e",
+        add_atk=2,
+        add_hp=0,
+        check_func=lambda minion, giver: minion.pos in (giver.pos - 1, giver.pos + 1) and giver.player is minion.player
+    ),
+
+    # """Deathwing"""
+    # """ALL Will Burn!"""
+    AuraInfo(
+        giver_card_id="TB_BaconShop_HP_061",
+        enchant_card_id="TB_BaconShop_HP_061e",
+        add_atk=2,
+        add_hp=0,
+        check_func=lambda minion, giver: True
     ),
 
 
@@ -448,7 +526,6 @@ AURAINFO_DICT = {}
 for aurainfo in AURAINFO_LIST:
     AURAINFO_DICT[aurainfo.giver_card_id] = aurainfo
     AURAINFO_DICT[aurainfo.enchant_card_id] = aurainfo
-
 
 
 if __name__ == "__main__":

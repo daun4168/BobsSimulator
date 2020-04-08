@@ -4,7 +4,7 @@ from PySide2.QtCore import QObject, Signal
 
 from BobsSimulator.HSLogging import hsloghandler_logger
 from BobsSimulator.HSType import Battle, CardType, Enchantment, Faction, Game, \
-    GameTag, Minion, PowerType, Race, Secret, State, Zone, Hero
+    GameTag, Minion, PowerType, Race, Secret, State, Zone, Hero, HeroPower
 from BobsSimulator.Main import LOCALE, VERSION_NUMBER
 from BobsSimulator.Regex import *
 from BobsSimulator.Util import Util
@@ -158,7 +158,7 @@ class HSLogHandler(QObject):
         else:
             battle.is_me_trigger_first = False
 
-        entity_id_to_minion_dict = {}
+        entity_id_to_hsobject_dict = {}
         key_list = list(self.entities.keys())
         key_list.sort()
         for entity_id in key_list:
@@ -174,7 +174,14 @@ class HSLogHandler(QObject):
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
                         hero = battle.enemy.hero
                     hero.card_id = card_id
+                    entity_id_to_hsobject_dict[entity_id] = hero
                     hero.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
+
+                    if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
+                        hero.player = battle.me
+
+                    elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
+                        hero.player = battle.enemy
 
                     if GameTag["HEALTH"].value in self.entities[entity_id]:
                         hero.health = self.entities[entity_id][GameTag["HEALTH"].value]
@@ -187,23 +194,29 @@ class HSLogHandler(QObject):
                     if GameTag["CONTROLLER"].value not in self.entities[entity_id]:
                         hsloghandler_logger.error(f"gametag controller not exist, battle: {self.game.battle_num}, entity_id: {entity_id}")
 
+                    hero_power = None  # type: Optional[HeroPower]
+
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:  # player hero
-                        battle.me.hero_power.card_id = card_id
-                        battle.me.hero_power.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
-                        if 1398 in self.entities[entity_id]:
-                            battle.me.hero_power.used = self.entities[entity_id][1398]
+                        hero_power = battle.me.hero_power
+                        hero_power.player = battle.me
+
                     elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:  # enemy hero
-                        battle.enemy.hero_power.card_id = card_id
-                        battle.enemy.hero_power.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
-                        if 1398 in self.entities[entity_id]:
-                            battle.enemy.hero_power.used = self.entities[entity_id][1398]
+                        hero_power = battle.enemy.hero_power
+                        hero_power.player = battle.enemy
+
+                    hero_power.card_id = card_id
+                    entity_id_to_hsobject_dict[entity_id] = hero_power
+                    hero_power.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
+                    if 1398 in self.entities[entity_id]:
+                        hero_power.used = self.entities[entity_id][1398]
+
 
                 elif cardtype == CardType.MINION.value:
                     if card_id in ['BGS_029', 'OG_123', 'TB_BaconUps_095']:  # if Shifter Zerus
                         if 1429 in self.entities[entity_id]:
                             card_id = Util.enum_id_to_card_id(self.entities[entity_id][1429])
                     minion = Minion()
-                    entity_id_to_minion_dict[entity_id] = minion
+                    entity_id_to_hsobject_dict[entity_id] = minion
                     minion.card_id = card_id
                     if GameTag["PREMIUM"].value in self.entities[entity_id]:
                         minion.golden = bool(self.entities[entity_id][GameTag["PREMIUM"].value])
@@ -266,19 +279,30 @@ class HSLogHandler(QObject):
 
                     enchantment = Enchantment()
                     enchantment.card_id = card_id
+                    entity_id_to_hsobject_dict[entity_id] = enchantment
                     enchantment.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
 
                     if 323 in self.entities[entity_id] and 324 in self.entities[entity_id]:
                         if self.entities[entity_id][323] == 1 and self.entities[entity_id][324] == 1:
                             enchantment.is_aura = True
 
-                    if attached_id in entity_id_to_minion_dict:
-                        entity_id_to_minion_dict[attached_id].enchants.append(enchantment)
-                        enchantment.attached_minion = entity_id_to_minion_dict[attached_id]
+                    if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:
+                        enchantment.player = battle.me
+                    elif int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.enemy_player_id:
+                        enchantment.player = battle.enemy
 
-                    if creator_id in entity_id_to_minion_dict:
-                        # entity_id_to_minion_dict[creator_id].created_enchants.append(enchantment)
-                        enchantment.creator = entity_id_to_minion_dict[creator_id]
+                    if attached_id in entity_id_to_hsobject_dict:
+                        enchantment.attached_minion = entity_id_to_hsobject_dict[attached_id]
+                        entity_id_to_hsobject_dict[attached_id].enchants.append(enchantment)
+
+                        if enchantment.is_aura:
+                            entity_id_to_hsobject_dict[attached_id].auras.append(enchantment)
+                        else:
+                            entity_id_to_hsobject_dict[attached_id].enchants.append(enchantment)
+
+                    if creator_id in entity_id_to_hsobject_dict:
+                        # entity_id_to_hsobject_dict[creator_id].created_enchants.append(enchantment)
+                        enchantment.creator = entity_id_to_hsobject_dict[creator_id]
 
             elif zone == Zone.SECRET.value:
                 secret = Secret()

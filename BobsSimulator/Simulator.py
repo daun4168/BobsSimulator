@@ -108,32 +108,38 @@ class Simulator(QObject):
                 self.battle.attack_player = player.opponent
 
     def simulate_start_of_combat(self):
-        pass
-        # player1 = self.battle.atk_player()
-        # player2 = self.battle.dfn_player()
-        #
-        # player1_minions = player1.minions()
-        # player2_minions = player2.minions()
-        #
-        # player1_minion_pos = 0
-        # player2_minion_pos = 0
-        #
-        #
-        #
-        # is_player1_turn = True
-        #
-        # while player1_minion_pos < len(player1.minions()) and player2_minion_pos < len(player2.minions()):
-        #     if is_player1_turn:
-        #         if self.check_start_of_combat(player1_minions[player1_minion_pos], player1):
-        #             is_player1_turn = False
-        #         player1_minion_pos += 1
-        #
-        #     else:
-        #         if self.check_start_of_combat(player2_minions)
+        player_minions = (self.battle.attack_player.minions(), self.battle.attack_player.opponent.minions())
 
-    def check_start_of_combat(self, st_minion: Minion, player: Player) -> bool:
+        attack_player_num = 0
+
+        while player_minions[0] or player_minions[1]:
+            if player_minions[attack_player_num]:
+
+                minion = player_minions[attack_player_num][0]
+                if minion.zone == Zone.PLAY and minion.start_of_combat:
+                    self.check_start_of_combat(minion)
+                    self.check_deaths()
+                player_minions[attack_player_num].remove(minion)
+            attack_player_num = 1 - attack_player_num
+
+    def check_start_of_combat(self, st_minion: Minion):
         print(f"START OF COMBAT: {st_minion.info()}")
-        pass
+
+        card_id = st_minion.card_id
+        player = st_minion.player
+
+        """Red Whelp"""
+
+        num_of_dragons = 0
+        for minion in player.minions():
+            if minion.race in (Race.DRAGON, Race.ALL):
+                num_of_dragons += 1
+
+        if card_id == 'BGS_019':
+            self.simulate_damage_to_random_minion_by_minion(player.opponent, st_minion, num_of_dragons)
+        elif card_id == 'TB_BaconUps_102':
+            for i in range(2):
+                self.simulate_damage_to_random_minion_by_minion(player.opponent, st_minion, num_of_dragons)
 
     def simulate_attack(self):
         attacker = self.find_next_attacker(self.battle.attack_player)
@@ -498,7 +504,6 @@ class Simulator(QObject):
                 random_minion = self.random_alive_minion(player)
                 if random_minion is not None:
                     random_minion.attack += trigger.attack
-                random_minion.attack += trigger.attack
             elif card_id == 'TB_BaconUps_112':
                 for i in range(2):
                     random_minion = self.random_alive_minion(player)
@@ -752,132 +757,52 @@ class Simulator(QObject):
         # self.simulate_aura_add(new_minion, player)
         # self.check_aura()
 
-    def simulate_aura_add(self, new_minion: Minion, player: Player):
+    def check_aura_for_giver(self, giver: HSObject):
+        if giver.card_id not in AURAINFO_DICT:
+            return
 
-        # aura minion
-        for minion in player.minions():
-            if minion is new_minion:
-                continue
-            self.simulate_aura_add_to_minion(new_minion, minion)
-            self.simulate_aura_add_to_minion(minion, new_minion)
+        aurainfo = AURAINFO_DICT[giver.card_id]
 
-        # aura hero
-        for each_player in self.battle.players():
-            self.simulate_aura_add_to_minion(each_player.hero_power, new_minion)
+        for player in self.battle.players():
+            for get_minion in player.minions():
+                if get_minion is giver:
+                    continue
 
-    def simulate_aura_add_to_minion(self, giver: HSObject, get_minion: Minion):
+                is_aura_exist = False
+                aura_exist = None  # type: Optional[Enchantment]
+                for aura in get_minion.auras:
+                    if aura.creator is giver and aura.card_id == aurainfo.enchant_card_id:
+                        is_aura_exist = True
+                        aura_exist = aura
+                        break
 
-        if isinstance(giver, Minion):
+                # check should minion have aura
+                should_have_aura = aurainfo.check_func(get_minion, giver)
 
-            if get_minion.race in (Race.MURLOC, Race.ALL):
+                # remove aura
+                if is_aura_exist and not should_have_aura:
+                    print(f"REMOVE AURA: {aura_exist.info()}")
+                    self.simulate_aura_remove_for_each_enchant(get_minion, aura_exist)
 
-                """Murloc Warleader"""
-                """Mrgglaargl!"""
-                if giver.card_id == "EX1_507":
-                    self.make_enchant_and_add("EX1_507e", giver, get_minion)
-                    get_minion.buff(2, 0)
-                elif giver.card_id == "TB_BaconUps_008":
-                    self.make_enchant_and_add("TB_BaconUps_008e", giver, get_minion)
-                    get_minion.buff(4, 0)
-
-            if get_minion.race in (Race.DEMON, Race.ALL):
-
-                """Siegebreaker"""
-                """Siegebreaking!"""
-                if giver.card_id == "EX1_185":
-                    self.make_enchant_and_add("EX1_185e", giver, get_minion)
-                    get_minion.buff(1, 0)
-                elif giver.card_id == "TB_BaconUps_053":
-                    self.make_enchant_and_add("TB_BaconUps_053e", giver, get_minion)
-                    get_minion.buff(2, 0)
-
-                """Mal'Ganis"""
-                """Grasp of Mal'Ganis"""
-                if giver.card_id == "GVG_021":
-                    self.make_enchant_and_add("GVG_021e", giver, get_minion)
-                    get_minion.buff(2, 2)
-                elif giver.card_id == "TB_BaconUps_060":
-                    self.make_enchant_and_add("TB_BaconUps_060e", giver, get_minion)
-                    get_minion.buff(4, 4)
-
-            if get_minion.pos in (giver.pos - 1, giver.pos + 1):
-
-                """Dire Wolf Alpha"""
-                """Strength of the Pack"""
-                if giver.card_id == "EX1_162":
-                    self.make_enchant_and_add("EX1_162o", giver, get_minion)
-                    get_minion.buff(1, 0)
-                elif giver.card_id == "TB_BaconUps_088":
-                    self.make_enchant_and_add("TB_BaconUps_088e", giver, get_minion)
-                    get_minion.buff(2, 0)
-
-        if isinstance(giver, HeroPower):
-
-            """Deathwing"""
-            """ALL Will Burn!"""
-            if giver.card_id == "TB_BaconShop_HP_061":
-                self.make_enchant_and_add("TB_BaconShop_HP_061e", giver, get_minion)
-                get_minion.buff(2, 0)
-
-    def simulate_aura_add_for_minion(self, get_minion: Minion):
-        # aura minion
-        for minion in get_minion.player.minions():
-            if minion is get_minion:
-                continue
-            self.simulate_aura_add_to_minion(minion, get_minion)
-
-        # aura hero
-        for each_player in self.battle.players():
-            self.simulate_aura_add_to_minion(each_player.hero_power, get_minion)
+                # add aura
+                elif not is_aura_exist and should_have_aura:
+                    get_minion.buff(aurainfo.add_atk, aurainfo.add_hp)
+                    new_aura = self.make_enchant_and_add(aurainfo.enchant_card_id, giver, get_minion, is_aura=True)
+                    print(f"ADD AURA: {new_aura.info()}")
 
     def check_aura(self):
+        for player in self.battle.players():
+            # REMOVE AURA if creator removed
+            for get_minion in player.minions():
+                for aura in get_minion.auras:
+                    if aura.creator is not None and aura.creator.zone != Zone.PLAY:
+                        print(f"REMOVE AURA: {aura.info()}")
+                        self.simulate_aura_remove_for_each_enchant(get_minion, aura)
 
-        for aurainfo in AURAINFO_LIST:
-            for player in self.battle.players():
-                for get_minion in player.minions():
-                    for enchant in get_minion.enchants:
-                        # remove aura
-                        if enchant.creator is not None and enchant.creator.zone != Zone.PLAY:
-                            print("REMOVE AURA!!!!!!1")
-                            this_info = AURAINFO_DICT[enchant.card_id]
-                            get_minion.buff(-this_info.add_atk, -this_info.add_hp)
-                            get_minion.enchants.remove(enchant)
-                            # enchant.creator.created_enchants.remove(enchant)
-
-                for giver in player.minions():
-                    if giver.card_id == aurainfo.giver_card_id:
-                        for get_minion in player.minions():
-                            if get_minion is giver:
-                                continue
-                            # check is aura already exist:
-                            is_aura_exist = False
-                            aura = None  # type: Optional[Enchantment]
-                            for enchant in get_minion.enchants:
-                                if not enchant.is_aura:
-                                    continue
-                                if enchant.creator is giver and enchant.card_id == aurainfo.enchant_card_id:
-                                    is_aura_exist = True
-                                    aura = enchant
-                                    break
-
-                            # check should minion have aura
-                            should_have_aura = aurainfo.check_func(get_minion)
-
-                            # remove aura
-                            if is_aura_exist and not should_have_aura:
-                                get_minion.buff(-aurainfo.add_atk, -aurainfo.add_hp)
-                                get_minion.enchants.remove(aura)
-                                giver.created_enchants.remove(aura)
-
-                                print("REMOVE AURA!")
-                            # add aura
-                            elif not is_aura_exist and should_have_aura:
-                                get_minion.buff(aurainfo.add_atk, aurainfo.add_hp)
-                                self.make_enchant_and_add(aurainfo.enchant_card_id, giver, get_minion, is_aura=True)
-                                print("ADD AURA!")
-                                print(giver.info())
-                                print(get_minion.info())
-
+            # REMOVE and ADD AURA if something changed
+            for giver_minion in player.minions():
+                self.check_aura_for_giver(giver_minion)
+            self.check_aura_for_giver(player.hero_power)
 
     def simulate_khadgar(self, summoned_minion: Minion, player: Player):
         """Khadgar"""
@@ -911,35 +836,17 @@ class Simulator(QObject):
 
         for extra_summon_count in range(extra_summon_num):
             copy_of_minion = self.make_copy_of_minion(summoned_minion, player)
-            print(f"COPY COUNT:{extra_summon_count} , WILL SUMMON: {copy_of_minion.info()}")
+            print(f"COPY COUNT:{extra_summon_count + 1} , WILL SUMMON: {copy_of_minion.info()}")
             self.simulate_summon_minion_by(copy_of_minion, player,
                                            pos=summoned_minion.pos + 1 + extra_summon_count,
                                            summoner=next_khadgar,
                                            can_summon_by_khadgar=True)
-
-        # for minion in player.minions():
-        #     if minion is summoned_minion:
-        #         continue
-        #
-        #     if summoned_minion.creator is minion:
-        #         continue
-        #
-        #     if minion.card_id == "DAL_575":
-        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
-        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
-        #     elif minion.card_id == "TB_BaconUps_034":
-        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
-        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 1, summoner=minion)
-        #
-        #         new_minion = self.make_copy_of_minion(summoned_minion, player)
-        #         self.simulate_summon_minion_by(new_minion, player, pos=minion.pos + 2, summoner=minion)
 
     def make_copy_of_minion(self, copy_minion: Minion, player: Player) -> Minion:
         self.simulate_aura_remove_for_minion(copy_minion)
 
         new_minion = copy.copy(copy_minion)
         new_minion.enchants = []
-        # new_minion.created_enchants = []
         new_minion.creator = None
         new_minion.to_be_destroyed = False
         new_minion.last_damaged_by = None
@@ -948,7 +855,6 @@ class Simulator(QObject):
         new_minion.player = player
 
         self.copy_deathrattle_enchant_of_minion(copy_minion, new_minion)
-        self.simulate_aura_add_for_minion(copy_minion)
 
         return new_minion
 
@@ -971,7 +877,11 @@ class Simulator(QObject):
         # creator.created_enchants.append(new_enchant)
 
         new_enchant.attached_minion = attached_minion
-        attached_minion.enchants.append(new_enchant)
+
+        if is_aura:
+            attached_minion.auras.append(new_enchant)
+        else:
+            attached_minion.enchants.append(new_enchant)
 
         return new_enchant
 
@@ -1051,54 +961,18 @@ class Simulator(QObject):
         # self.check_aura()
 
     def simulate_aura_remove_for_minion(self, minion: Minion):
-        for enchant in minion.enchants:
-            self.simulate_aura_remove_for_each_enchant(minion, enchant)
+        for aura in minion.auras:
+            self.simulate_aura_remove_for_each_enchant(minion, aura)
 
-    def simulate_aura_remove_for_each_enchant(self, minion: Minion, enchant: Enchantment):
-        card_id = enchant.card_id
+    def simulate_aura_remove_for_each_enchant(self, minion: Minion, aura: Enchantment):
+        card_id = aura.card_id
 
-        """Murloc Warleader"""
-        """Mrgglaargl!"""
-        if card_id == "EX1_507e":
-            minion.buff(-2, 0)
-        elif card_id == "TB_BaconUps_008e":
-            minion.buff(-4, 0)
+        if card_id not in AURAINFO_DICT:
+            return False
 
-        """Dire Wolf Alpha"""
-        """Strength of the Pack"""
-        if card_id == "EX1_162o":
-            minion.buff(-1, 0)
-        elif card_id == "TB_BaconUps_088e":
-            minion.buff(-2, 0)
-
-        """Siegebreaker"""
-        """Siegebreaking!"""
-        if card_id == "EX1_185e":
-            minion.buff(-1, 0)
-        elif card_id == "TB_BaconUps_053e":
-            minion.buff(-2, 0)
-
-        """Mal'Ganis"""
-        """Grasp of Mal'Ganis"""
-        if card_id == "GVG_021e":
-            minion.buff(-2, -2)
-        elif card_id == "TB_BaconUps_060e":
-            minion.buff(-4, -4)
-
-        """Deathwing"""
-        """ALL Will Burn!"""
-        if card_id == "TB_BaconShop_HP_061e":
-            minion.buff(-2, 0)
-
-        minion.enchants.remove(enchant)
-
-    def simulate_aura_remove_for_creator(self, removed_minion: Minion):
-        # if removed_minion.card_id == "EX1_507":
-        # for created_enchant in removed_minion.created_enchants:
-        #     if created_enchant.attached_minion and created_enchant.attached_minion.zone == Zone.PLAY:
-        #         minion = created_enchant.attached_minion
-
-                self.simulate_aura_remove_for_each_enchant(minion, created_enchant)
+        aurainfo = AURAINFO_DICT[card_id]
+        minion.buff(-aurainfo.add_atk, -aurainfo.add_hp)
+        minion.auras.remove(aura)
 
     def simulate_damage(self, defender: Minion, amount: int, poisonous: bool = False):
         if amount <= 0:
@@ -1136,8 +1010,9 @@ class Simulator(QObject):
 
     def simulate_damage_to_random_minion_by_minion(self, defender_player: Player, attacker: Minion, amount=None):
         random_opponent_minion = self.random_alive_minion(defender_player)
-        if random_opponent_minion is not None:
-            self.simulate_damage_by_minion(random_opponent_minion, attacker, amount)
+        if random_opponent_minion is None:
+            return False
+        self.simulate_damage_by_minion(random_opponent_minion, attacker, amount)
 
     def simualte_minion_broken_divine_shield_after(self, broken_minion: Minion, player: Player):
         for minion in player.minions():
