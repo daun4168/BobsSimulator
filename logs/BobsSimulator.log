@@ -1,15 +1,5 @@
-2020-04-08 23:51:32,914 - INFO: Logging Start
-2020-04-08 23:51:32,914 - INFO: Version: 44222
-2020-04-08 23:51:33,351 - INFO: Bob's Simulator Home.
-2020-04-08 23:51:33,929 - INFO: Log File Simulate Start
-2020-04-08 23:51:50,581 - INFO: Log File Simulate Start
-2020-04-08 23:52:09,652 - INFO: Log File Simulate End
-2020-04-08 23:52:10,902 - INFO: Bob's Simulator Home.
-2020-04-08 23:52:11,473 - INFO: Log File Simulate Start
-2020-04-08 23:52:14,718 - INFO: Log File Simulate Start
-2020-04-08 23:52:23,847 - INFO: Log File Simulate End
-2020-04-08 23:52:24,652 - INFO: Bob's Simulator Home.
-2020-04-08 23:52:25,063 - INFO: Log File Simulate Start
-2020-04-08 23:52:30,320 - INFO: Log File Simulate End
-2020-04-08 23:52:30,960 - INFO: Bob's Simulator Home.
-2020-04-08 23:52:31,423 - INFO: Log File Simulate Start
+2020-04-09 10:20:40,294 - INFO: Logging Start
+2020-04-09 10:20:40,294 - INFO: Version: 44222
+2020-04-09 10:20:40,945 - INFO: Bob's Simulator Home.
+2020-04-09 10:20:41,817 - INFO: Log File Simulate Start
+2020-04-09 10:20:43,762 - WARNING: Build number NOT correct, Program: 44222, CardDefs: 44582
