@@ -187,6 +187,7 @@ class Hero(HSObject):
         self.taken_damage = 0  # type: int
         self.tech_level = 0  # type: int
 
+
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)

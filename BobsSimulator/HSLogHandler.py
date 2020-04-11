@@ -95,6 +95,7 @@ class HSLogHandler(QObject):
             entity_id = self.entity_names[entity]
         else:
             entity_id = self.enemy_entity_id
+            self.entity_names[entity] = self.enemy_entity_id
         return entity_id
 
     def get_default_values(self, entity_id):
@@ -153,6 +154,9 @@ class HSLogHandler(QObject):
 
         me_player_id = self.entities[self.me_entity_id][GameTag.PLAYER_ID.value]
         enemy_player_id = self.entities[self.me_entity_id][GameTag.NEXT_OPPONENT_PLAYER_ID.value]
+
+        battle.me.player_name = self.game.battle.me.player_name
+        battle.enemy.player_name = self.game.battle.enemy.player_name
 
         if me_player_id < enemy_player_id:
             battle.is_me_trigger_first = True
@@ -443,7 +447,6 @@ class HSLogHandler(QObject):
             player_name = str(PLAYER_ID_NAME_RE.match(context).group("PlayerName"))
             if self.me_player_id == player_id:
                 self.entity_names[player_name] = self.me_entity_id
-                self.game.player_battle_tag = player_name
             elif self.enemy_player_id == player_id:
                 self.entity_names[player_name] = self.enemy_entity_id
                 self.game_info()
