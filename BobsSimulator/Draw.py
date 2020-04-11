@@ -3,6 +3,7 @@ from PySide2.QtGui import QPixmap, QFont, QPainter, QFontDatabase, QPen
 from PySide2.QtWidgets import QWidget, QApplication, QLabel
 
 from BobsSimulator.HSType import Minion
+from BobsSimulator.Main import CARD_RES
 
 
 def draw_hero(widget, card_id):
@@ -10,7 +11,7 @@ def draw_hero(widget, card_id):
     pixmap = QPixmap(712, 712)
     pixmap.fill(Qt.transparent)
     painter = QPainter(pixmap)
-    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/512x/{card_id}.jpg"))
+    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/{CARD_RES}/{card_id}.jpg"))
 
     painter.setCompositionMode(QPainter.CompositionMode_DestinationIn)
     painter.drawPixmap(100, 100, 512, 512, QPixmap("res/img/hero_mask.png"))
@@ -31,7 +32,7 @@ def draw_minion(widget, minion: Minion):
     pixmap.fill(Qt.transparent)
     painter = QPainter(pixmap)
 
-    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/512x/{minion.card_id}.jpg"))
+    painter.drawPixmap(100, 100, 512, 512, QPixmap(f"res/img/cards/{CARD_RES}/{minion.card_id}.jpg"))
     painter.setCompositionMode(QPainter.CompositionMode_DestinationIn)
     painter.drawPixmap(0, 0, 712, 712, QPixmap("res/img/minion_mask.png"))
     painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
@@ -54,7 +55,7 @@ def draw_minion(widget, minion: Minion):
         painter.drawPixmap(135, 40, 570, 576, QPixmap(f"res/img/minion_golden_legendary.png"))
 
     painter.drawPixmap(150, 410, 154, 173, QPixmap(f"res/img/attack_minion.png"))
-    painter.drawPixmap(435, 405, 130, 191, QPixmap(f"res/img/cost_health2.png"))
+    painter.drawPixmap(435, 405, 130, 191, QPixmap(f"res/img/cost_health.png"))
 
     QFontDatabase.addApplicationFont('res/font/BelweMediumBT.ttf')
     number_font = QFont()

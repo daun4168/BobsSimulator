@@ -4,7 +4,8 @@ from PySide2.QtCore import QObject, Signal
 
 from BobsSimulator.HSLogging import hsloghandler_logger
 from BobsSimulator.HSType import Battle, CardType, Enchantment, Faction, Game, \
-    GameTag, Minion, PowerType, Race, Secret, State, Zone, Hero, HeroPower
+    GameTag, Minion, PowerType, Race, Secret, State, Zone, Hero, HeroPower, \
+    DEATHRATTLE_ENCHANT_CARD_IDS
 from BobsSimulator.Main import LOCALE, VERSION_NUMBER
 from BobsSimulator.Regex import *
 from BobsSimulator.Util import Util
@@ -226,8 +227,6 @@ class HSLogHandler(QObject):
                         minion.elite = bool(self.entities[entity_id][GameTag["ELITE"].value])
                     if GameTag["TECH_LEVEL"].value in self.entities[entity_id]:
                         minion.tech_level = self.entities[entity_id][GameTag["TECH_LEVEL"].value]
-                    if GameTag["EXHAUSTED"].value in self.entities[entity_id]:
-                        minion.exhausted = bool(self.entities[entity_id][GameTag["EXHAUSTED"].value])
                     if GameTag["COST"].value in self.entities[entity_id]:
                         minion.cost = self.entities[entity_id][GameTag["COST"].value]
                     if GameTag["ATK"].value in self.entities[entity_id]:
@@ -254,14 +253,8 @@ class HSLogHandler(QObject):
                         minion.start_of_combat = bool(self.entities[entity_id][GameTag["START_OF_COMBAT"].value])
                     if GameTag["OVERKILL"].value in self.entities[entity_id]:
                         minion.overkill = bool(self.entities[entity_id][GameTag["OVERKILL"].value])
-                    if GameTag["TAG_SCRIPT_DATA_NUM_1"].value in self.entities[entity_id]:
-                        minion.TAG_SCRIPT_DATA_NUM_1 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_1"].value]
-                    if GameTag["TAG_SCRIPT_DATA_NUM_2"].value in self.entities[entity_id]:
-                        minion.TAG_SCRIPT_DATA_NUM_2 = self.entities[entity_id][GameTag["TAG_SCRIPT_DATA_NUM_2"].value]
                     if GameTag["CARDRACE"].value in self.entities[entity_id]:
                         minion.race = Race(self.entities[entity_id][GameTag["CARDRACE"].value])
-                    if 1530 in self.entities[entity_id]:  # Zapp, Attack minion with the lowest Attack
-                        minion.atk_lowest_atk_minion = bool(self.entities[entity_id][1530])
                     minion.zone = Zone(self.entities[entity_id][GameTag["ZONE"].value])
                     minion.pos = self.entities[entity_id][GameTag["ZONE_POSITION"].value]
                     if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:
@@ -298,7 +291,8 @@ class HSLogHandler(QObject):
                         if enchantment.is_aura:
                             entity_id_to_hsobject_dict[attached_id].auras.append(enchantment)
                         else:
-                            entity_id_to_hsobject_dict[attached_id].enchants.append(enchantment)
+                            if enchantment.card_id in DEATHRATTLE_ENCHANT_CARD_IDS:
+                                entity_id_to_hsobject_dict[attached_id].enchants.append(enchantment)
 
                     if creator_id in entity_id_to_hsobject_dict:
                         # entity_id_to_hsobject_dict[creator_id].created_enchants.append(enchantment)
@@ -371,13 +365,6 @@ class HSLogHandler(QObject):
             self.print_entities_pretty()
 
         self.do_line_reader = False
-        # noinspection PyUnresolvedReferences
-        # import json
-        # import jsonpickle
-        # json_text = jsonpickle.encode(self.game)
-        # json_log_file = open('logs/game.json', mode='w', encoding='UTF-8')
-        # json_log_file.write(json_text)
-        # json_log_file.close()
 
         self.sig_end_game.emit()
 

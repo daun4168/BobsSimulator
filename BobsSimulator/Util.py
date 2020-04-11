@@ -167,8 +167,6 @@ class Util:
             minion.elite = bool(cls.card_dict[card_id][GameTag["ELITE"].value])
         if GameTag["TECH_LEVEL"].value in cls.card_dict[card_id]:
             minion.tech_level = cls.card_dict[card_id][GameTag["TECH_LEVEL"].value]
-        if GameTag["EXHAUSTED"].value in cls.card_dict[card_id]:
-            minion.exhausted = bool(cls.card_dict[card_id][GameTag["EXHAUSTED"].value])
         if GameTag["COST"].value in cls.card_dict[card_id]:
             minion.cost = cls.card_dict[card_id][GameTag["COST"].value]
         if GameTag["ATK"].value in cls.card_dict[card_id]:
@@ -195,14 +193,8 @@ class Util:
             minion.start_of_combat = bool(cls.card_dict[card_id][GameTag["START_OF_COMBAT"].value])
         if GameTag["OVERKILL"].value in cls.card_dict[card_id]:
             minion.overkill = bool(cls.card_dict[card_id][GameTag["OVERKILL"].value])
-        if GameTag["TAG_SCRIPT_DATA_NUM_1"].value in cls.card_dict[card_id]:
-            minion.TAG_SCRIPT_DATA_NUM_1 = cls.card_dict[card_id][GameTag["TAG_SCRIPT_DATA_NUM_1"].value]
-        if GameTag["TAG_SCRIPT_DATA_NUM_2"].value in cls.card_dict[card_id]:
-            minion.TAG_SCRIPT_DATA_NUM_2 = cls.card_dict[card_id][GameTag["TAG_SCRIPT_DATA_NUM_2"].value]
         if GameTag["CARDRACE"].value in cls.card_dict[card_id]:
             minion.race = Race(cls.card_dict[card_id][GameTag["CARDRACE"].value])
-        if 1530 in cls.card_dict[card_id]:  # Zapp, Attack minion with the lowest Attack
-            minion.atk_lowest_atk_minion = bool(cls.card_dict[card_id][1530])
 
         if level2:
             if not minion.card_id.startswith('TB_BaconUps'):

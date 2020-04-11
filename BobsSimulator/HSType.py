@@ -3,6 +3,7 @@ from collections import defaultdict, deque
 from abc import ABCMeta, abstractmethod
 from hearthstone.enums import GameTag, CardType, Faction, Race, Zone, State, \
     Rarity, Mulligan, Step, PlayState, CardClass, PowerType
+import copy
 import random
 import logging
 
@@ -24,9 +25,16 @@ class Game:
 
 
 class Battle:
-    def __init__(self):
-        self.me = Player()  # type: Player
-        self.enemy = Player()  # type: Player
+    def __init__(self, me: Optional["Player"] = None, enemy: Optional["Player"] = None):
+        if me is None:
+            self.me = Player()  # type: Player
+        else:
+            self.me = me
+
+        if enemy is None:
+            self.enemy = Player()  # type: Player
+        else:
+            self.enemy = enemy
 
         self.me.opponent = self.enemy
         self.enemy.opponent = self.me
@@ -50,22 +58,9 @@ class Battle:
 
     def info(self):
         text = ""
-        text += self.enemy.hero.info()
-        for i in range(1, 8):
-            if self.enemy.board[i] is None:
-                text += "[                   ]"
-            else:
-                text += self.enemy.board[i].info()
-
+        text += self.enemy.info()
         text += '\n'
-
-        text += self.me.hero.info()
-        for i in range(1, 8):
-            if self.me.board[i] is None:
-                text += "[                 ]"
-            else:
-                text += self.me.board[i].info()
-
+        text += self.me.info()
         return text
 
 
@@ -88,6 +83,16 @@ class Player:
 
         self.reborn_triggers = defaultdict(deque)  # type: DefaultDict[int, Deque[str]]
         self.reborn_trigger_pos = 0  # type: int
+
+    def info(self):
+        text = ""
+        text += self.hero.info()
+        for i in range(1, 8):
+            if self.board[i] is None:
+                text += f"<X>[{' '*20}]"
+            else:
+                text += self.board[i].info()
+        return text
 
     def death_init(self):
         self.death_triggers = defaultdict(deque)
@@ -307,8 +312,6 @@ class Minion(HSObject):
         self.overkill = False  # type: bool
         self.start_of_combat = False  # type: bool
         self.atk_lowest_atk_minion = False  # type: bool
-        self.TAG_SCRIPT_DATA_NUM_1 = 0  # type: int  # Number of Hero Power Used
-        self.TAG_SCRIPT_DATA_NUM_2 = 0  # type: int  # Red Whelp combat start damage
 
         self.enchants = []  # type: List[Enchantment]
         self.auras = []  # type: List[Enchantment]
@@ -318,18 +321,40 @@ class Minion(HSObject):
         self.to_be_destroyed = False  # type: bool
         self.last_damaged_by = None  # type: Optional[HSObject]
 
-
         self.pos = 0  # type: int
         self.exhausted = False  # type: bool
-
-
-        # self.is_mine = False  # type: bool  # if card is player's, True
 
     def name(self):
         from BobsSimulator.Util import Util
         return Util.card_name_by_id(self.card_id)
 
     def info(self):
+        return self.info_emoji()
+        from BobsSimulator.Util import Util
+        text = ''
+        if self.golden:
+            text += '황금 '
+        text += f'{self.name()} {self.attack}/{self.hp()}'
+
+        if self.deathrattle:
+            text += '|죽메'
+        if self.divine_shield:
+            text += '|천보'
+        if self.poisonous:
+            text += '|독성'
+        if self.taunt:
+            text += '|도발'
+        if self.reborn:
+            text += '|환생'
+
+        non_ascii = 0
+        for c in text:
+            if ord(c) < 0 or ord(c) > 127:
+                non_ascii += 1
+
+        return f'<{self.pos}>[{text:^{20-non_ascii}}]'
+
+    def info_emoji(self):
         from BobsSimulator.Util import Util
         text = ''
         if self.golden:

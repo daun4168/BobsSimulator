@@ -1,21 +1,7 @@
-2020-04-08 23:51:46,828 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-30 20-49-20.log
-2020-04-08 23:51:55,812 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-31 21-47-06.log
-2020-04-08 23:51:55,814 - WARNING: Build number NOT correct, Program: 44222, Log File: 44582
-2020-04-08 23:51:58,117 - WARNING: Build number NOT correct, Program: 44222, Log File: 44582
-2020-04-08 23:52:01,062 - WARNING: Build number NOT correct, Program: 44222, Log File: 44582
-2020-04-08 23:52:02,813 - WARNING: Build number NOT correct, Program: 44222, Log File: 44582
-2020-04-08 23:52:05,814 - WARNING: Build number NOT correct, Program: 44222, Log File: 44582
-2020-04-08 23:52:12,845 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-30 20-49-20.log
-2020-04-08 23:52:16,485 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-31 01-14-06.log
-2020-04-08 23:52:18,489 - ERROR: line_parser() error - Line: D 00:12:04.5504684 ChoiceCardMgr.DoesLocalChoiceMatchPacket(): Null list passed in! localChoices=, packetChoices=System.Collections.Generic.List`1[System.Int32].
-
-2020-04-08 23:52:18,737 - ERROR: line_parser() error - Line: D 00:13:52.5720587 ChoiceCardMgr.DoesLocalChoiceMatchPacket(): Null list passed in! localChoices=, packetChoices=System.Collections.Generic.List`1[System.Int32].
-
-2020-04-08 23:52:20,210 - ERROR: line_parser() error - Line: D 00:24:52.4751047 ChoiceCardMgr.DoesLocalChoiceMatchPacket(): Null list passed in! localChoices=, packetChoices=System.Collections.Generic.List`1[System.Int32].
-
-2020-04-08 23:52:20,533 - ERROR: line_parser() error - Line: D 00:26:32.0042821 ================== End Spectator Game ==================
-
-2020-04-08 23:52:20,533 - ERROR: line_parser() error - Line: D 00:26:33.1766553 ================== End Spectator Mode ==================
-
-2020-04-08 23:52:26,773 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-29 20-39-42.log
-2020-04-08 23:52:32,923 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-03-29 14-59-53.log
+2020-04-11 23:58:11,653 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/2020-03-21 23-33-29.log
+2020-04-11 23:58:11,655 - WARNING: Build number NOT correct, Program: 44222, Log File: 43246
+2020-04-12 00:02:47,698 - WARNING: Build number NOT correct, Program: 44222, Log File: 43246
+2020-04-12 00:07:11,126 - WARNING: Build number NOT correct, Program: 44222, Log File: 43246
+2020-04-12 00:15:58,164 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/2020-03-29 20-39-42.log
+2020-04-12 00:42:46,679 - INFO: HSLogHandler Start: C:/Users/daun4/PycharmProjects/BobsSimulator/Test/logs/2020-02-29 20-44-13.log
+2020-04-12 00:42:46,681 - WARNING: Build number NOT correct, Program: 44222, Log File: 42174

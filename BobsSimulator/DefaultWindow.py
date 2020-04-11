@@ -1,6 +1,7 @@
 import sys
 import os
 from enum import IntEnum
+from typing import Optional
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import *
 from PySide2.QtGui import *
@@ -17,6 +18,7 @@ from BobsSimulator.GameEndWidget import GameEndWidget
 from BobsSimulator.HSType import Game
 from BobsSimulator.HSLogging import main_logger, hsbattle_logger
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
+
 
 
 class SimulateType(IntEnum):
@@ -50,7 +52,7 @@ class DefaultWindow(QMainWindow):
         self.filewatcher = None
         self.simulate_type = None  # SimulateType
         self.log_file = None  # file pointer
-        self.log_handler = None  # HSLogHandler
+        self.log_handler = None  # type: Optional["HSLogHandler"]
 
         # background setting
         bg_image = QImage("res/img/background.jpg").scaled(self.window_size)
@@ -80,9 +82,11 @@ class DefaultWindow(QMainWindow):
         self.show()
 
     def log_file_changed(self):
+        from BobsSimulator.HSLogHandler import HSLogHandler
+
         if not self.log_handler:
             self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
-            from BobsSimulator.HSLogHandler import HSLogHandler
+
             self.log_handler = HSLogHandler(self.log_file)
 
             self.log_handler.sig_game_start.connect(self.game_start_handler)
@@ -354,23 +358,23 @@ class DefaultWindow(QMainWindow):
     def simulate(self):
         from BobsSimulator.Simulator import Simulator
         simulator = Simulator()
-        result = simulator.simulate(self.log_handler.game.battle, simulate_num=1)
+        simulator.find_best_arrangement(self.log_handler.game.battle)
+        # result = simulator.simulate(self.log_handler.game.battle, simulate_num=1, print_info=True)
 
-        simulate_num = len(result)
-        if not simulate_num:
-            return
-        win_num = sum(x > 0 for x in result)
-        lose_num = sum(x < 0 for x in result)
-        draw_num = sum(x == 0 for x in result)
-        average_damage = sum(result) / simulate_num
-
-        print("------simulation result-------")
-        print(f'Simulate Number: {simulate_num}')
-        print(result)
-        print(f'Win Number: {win_num}, ratio: {win_num/simulate_num * 100}%')
-        print(f'Lose Number: {lose_num}, ratio: {lose_num/simulate_num * 100}%')
-        print(f'Draw Number: {draw_num}, ratio: {draw_num/simulate_num * 100}%')
-        print(f'Average Damage: {average_damage}')
+        # simulate_num = len(result)
+        # if not simulate_num:
+        #     return
+        # win_num = sum(x > 0 for x in result)
+        # lose_num = sum(x < 0 for x in result)
+        # draw_num = sum(x == 0 for x in result)
+        # average_damage = sum(result) / simulate_num
+        #
+        # print("------simulation result-------")
+        # print(f'Simulate Number: {simulate_num}')
+        # print(f'Win Number: {win_num}, ratio: {win_num/simulate_num:2.2%}')
+        # print(f'Lose Number: {lose_num}, ratio: {lose_num/simulate_num:2.2%}')
+        # print(f'Draw Number: {draw_num}, ratio: {draw_num/simulate_num:2.2%}')
+        # print(f'Average Damage: {average_damage}')
 
 
     def next_battle(self):
