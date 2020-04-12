@@ -69,3 +69,24 @@
 * PlayerMinion -name "코발트 수호자@GVG_062" -atk 6 -hp 3 -pos 2 
 * PlayerMinion -name "멀록 바다사냥꾼@EX1_506" -atk 2 -hp 1 -pos 3 
 * PlayerMinion -name "융합체@TB_BaconShop_HP_033t" -atk 1 -hp 1 -pos 4 
+# Battle 4 End
+# DRAW
+# PlayerHP: 37, EnemyHP: 37
+# PlayerRank: 3
+# --------------------------------------------------
+# Battle 5
+# Battle Info
+* PlayerHero -name "이세라@TB_BaconShop_HERO_53" -hp 37 -tech 3 
+* PlayerHeroPower -name "꿈 차원문@TB_BaconShop_HP_062" 
+* PlayerMinion -name "코발트 수호자@GVG_062" -atk 6 -hp 3 -pos 1 -divine_shield 
+* PlayerMinion -name "캥거루로봇@BOT_445" -atk 1 -hp 1 -pos 2 
+* PlayerMinion -name "헌신적인 영웅@TB_BaconUps_014" -atk 4 -hp 2 -pos 3 -level2 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 4 
+# versus
+* PlayerHero -name "무한의 토키@TB_BaconShop_HERO_28" -hp 31 -tech 3 
+* PlayerHeroPower -name "시간의 선술집@TB_BaconShop_HP_028" 
+* PlayerMinion -name "느조스의 피조물@OG_256" -atk 2 -hp 2 -pos 1 
+* PlayerMinion -name "느조스의 피조물@OG_256" -atk 2 -hp 2 -pos 2 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 3 
+* PlayerMinion -name "콰광로봇@BOT_606" -atk 2 -hp 2 -pos 4 
+* PlayerMinion -name "쥐 떼@CFM_316" -atk 2 -hp 2 -pos 5 

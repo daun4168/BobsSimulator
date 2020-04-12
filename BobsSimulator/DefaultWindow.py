@@ -367,14 +367,6 @@ class DefaultWindow(QMainWindow):
 
 
 
-        st_time = time()
-        import BobsSimulator.HSSimulator
-        simulator = BobsSimulator.HSSimulator.Simulator()
-        simulator.find_best_arrangement(self.log_handler.game.battle)
-
-        print("Cython Simultion Time: ", time() - st_time)
-
-
 
 
 
