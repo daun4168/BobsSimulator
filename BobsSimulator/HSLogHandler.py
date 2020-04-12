@@ -155,9 +155,6 @@ class HSLogHandler(QObject):
         me_player_id = self.entities[self.me_entity_id][GameTag.PLAYER_ID.value]
         enemy_player_id = self.entities[self.me_entity_id][GameTag.NEXT_OPPONENT_PLAYER_ID.value]
 
-        battle.me.player_name = self.game.battle.me.player_name
-        battle.enemy.player_name = self.game.battle.enemy.player_name
-
         if me_player_id < enemy_player_id:
             battle.is_me_trigger_first = True
         else:

@@ -356,9 +356,28 @@ class DefaultWindow(QMainWindow):
         self.log_handler.line_reader_start()
 
     def simulate(self):
-        from BobsSimulator.Simulator import Simulator
+        from time import time
+
+        st_time = time()
+        from BobsSimulator.HSSimulator import Simulator
         simulator = Simulator()
         simulator.find_best_arrangement(self.log_handler.game.battle)
+
+        print("Python Simultion Time: ", time() - st_time)
+
+
+
+        st_time = time()
+        import BobsSimulator.HSSimulator
+        simulator = BobsSimulator.HSSimulator.Simulator()
+        simulator.find_best_arrangement(self.log_handler.game.battle)
+
+        print("Cython Simultion Time: ", time() - st_time)
+
+
+
+
+
         # result = simulator.simulate(self.log_handler.game.battle, simulate_num=1, print_info=True)
 
         # simulate_num = len(result)
