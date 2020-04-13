@@ -2,11 +2,17 @@
 
 block_cipher = None
 
+datas = [('res', 'res'),
+         ('BobsSimulator/logging.json', 'BobsSimulator'),
+         ('venv/Lib/site-packages/hearthstone_data/CardDefs.xml', 'hearthstone_data'),
+         ('config.ini', './'),
+        ]
+
 
 a = Analysis(['BobsSimulator\\__init__.py'],
              pathex=['./'],
              binaries=[],
-             datas=[('res', 'res'), ('BobsSimulator/logging.json', 'BobsSimulator'), ('venv/Lib/site-packages/hearthstone_data/CardDefs.xml', 'hearthstone_data')],
+             datas=datas,
              hiddenimports=['hearthstone', 'hearthstone_data'],
              hookspath=['BobsSimulator/hooks'],
              runtime_hooks=[],

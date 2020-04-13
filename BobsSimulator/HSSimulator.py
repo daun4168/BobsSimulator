@@ -2,6 +2,7 @@ import copy
 import random
 import sys
 import os
+import time
 from typing import List, Dict, Optional, Tuple
 from collections import defaultdict, OrderedDict, deque
 from itertools import permutations
@@ -14,44 +15,63 @@ from BobsSimulator.Util import Util
 
 
 class Simulator(QObject):
+    # Signals
+    sig_process_npercent = Signal()
+
     def __init__(self):
         super().__init__()
         self.is_print = False
+        self.print_func = print
         self.battle = Battle()
+        self.simulation_ratio = 0
 
     @staticmethod
     def nullprint(self, *args, **kwargs):
         return
 
     def simulate(self, battle: Battle, simulate_num=1, print_info=None) -> list:
-        result = []
-        # simulator_logger.info(f'''# {"=" * 50}''')
-        # simulator_logger.info("Simulate Start")
-        # simulator_logger.info("-" * 50)
-        # simulator_logger.info("Battle Info")
-        # battle.print_log(simulator_logger)
-        # simulator_logger.info("-" * 50)
 
-        self.is_print = bool(print_info)
+        st_time = time.time()
+
+        if print_info is None:
+            self.is_print = False
+        else:
+            self.is_print = True
+            self.print_func = print_info
 
         if self.is_print:
-            print('='*50)
-            print("Simulate Start")
-            print('-'*50)
-            print(battle.info())
-            print('-'*50)
+            self.print_func('-'*50)
+            self.print_func("Simulation Start")
+            self.print_func("Battle Info")
+            self.print_func('-'*50)
+            self.print_func(battle.info())
 
-
-
+        result = []
         for i in range(simulate_num):
-            # simulator_logger.info("-" * 50)
-            # simulator_logger.info(f"# Simulation {i + 1}/{simulate_num}")
+            if self.is_print:
+                self.print_func("-" * 50)
+                self.print_func(f"Simulation {i + 1}/{simulate_num} Start")
+                self.print_func("-" * 50)
+
             self.battle = copy.deepcopy(battle)
-
-
             result.append(self.simulate_once())
-            # simulator_logger.info("-" * 50)
-        # simulator_logger.info("=" * 50)
+
+            if self.is_print:
+                self.print_func("-" * 50)
+
+        if self.is_print:
+            score = sum(result) / len(result)
+            win_ratio = sum(x > 0 for x in result) / len(result)
+            draw_ratio = sum(x == 0 for x in result) / len(result)
+            lose_ratio = sum(x < 0 for x in result) / len(result)
+
+            self.print_func("Simulation Result")
+            self.print_func(f"Your Damage: {score:2.1f}")
+            self.print_func(f"Win: {win_ratio:2.1%}")
+            self.print_func(f"Draw: {draw_ratio:2.1%}")
+            self.print_func(f"Lose: {lose_ratio:2.1%}")
+            self.print_func(f"Simulation Time: {time.time() - st_time:.4f}")
+            self.print_func(f"="*50)
 
         return result
 
@@ -87,58 +107,66 @@ class Simulator(QObject):
             player.next_atk_minion_pos = None
             player.death_triggers = defaultdict(list)
 
-    def find_best_arrangement(self, battle: Battle):
+    def find_best_arrangement(self, battle: Battle, print_info=None) -> (Battle, list, list):
+
+        if print_info is None:
+            self.is_print = False
+        else:
+            self.is_print = True
+            self.print_func = print_info
+
+        self.simulation_ratio = 0
+
         minion_num = battle.me.minion_num()
 
         if minion_num <= 1:
-            return battle.me
+            simulation_result = self.simulate(battle, 200)
+            return battle, simulation_result, simulation_result
 
         battle_list = []
         arrangement_list = list(permutations(range(1, minion_num + 1), minion_num))
 
-        arrangement_list = random.choices(arrangement_list, k=min(50, len(arrangement_list)))
+        arrangement_list = random.choices(arrangement_list, k=min(40, len(arrangement_list)))
 
-        simulation_result = self.simulate(battle, 200)
+        my_simulation_result = self.simulate(battle, 350)
 
-        default_battle_score = sum(simulation_result) / len(simulation_result)
-        default_win_ratio = sum(x >= 0 for x in simulation_result) / len(simulation_result)
+        default_battle_score = sum(my_simulation_result) / len(my_simulation_result)
+        default_win_ratio = sum(x >= 0 for x in my_simulation_result) / len(my_simulation_result)
 
         best_score_battle = battle
         best_score = default_battle_score
+        best_simulation_result = my_simulation_result
 
-        best_win_ratio_battle = battle
-        best_win_ratio = default_win_ratio
-
+        self.simulation_ratio = 0
+        simulation_num = 0
         for arrange_tuple in arrangement_list:
             new_battle = self.copy_arrange_battle(battle, arrange_tuple)
-            simulation_result = self.simulate(new_battle, 200)
+            simulation_result = self.simulate(new_battle, 130)
 
             score = sum(simulation_result) / len(simulation_result)
             if score > best_score:
                 best_score_battle = new_battle
                 best_score = score
+                best_simulation_result = simulation_result
 
-            win_ratio = sum(x >= 0 for x in simulation_result) / len(simulation_result)
-            if win_ratio > best_win_ratio:
-                best_win_ratio_battle = new_battle
-                best_win_ratio = win_ratio
 
-        print('='*100)
-        print("Default Battle Info: ")
-        print(f"Default Battle, score: {default_battle_score}, win ratio: {default_win_ratio:2.2%}")
-        print(battle.info())
+            simulation_num += 1
+            self.simulation_ratio = simulation_num / len(arrangement_list)
+            self.sig_process_npercent.emit()
 
-        print('-'*100)
-        print("Best Of Arrangement Info: ")
-        print(f"Best Score Battle, score: {best_score}")
-        print(best_score_battle.me.info())
+        if self.is_print:
+            self.print_func('='*50)
+            self.print_func("Default Battle Info: ")
+            self.print_func(f"Default Battle, score: {default_battle_score:2.1f}, win ratio: {default_win_ratio:2.2%}")
+            self.print_func(battle.info())
 
-        print('-'*100)
+            self.print_func('-'*50)
+            self.print_func("Best Of Arrangement Info: ")
+            self.print_func(f"Best Score Battle, score: {best_score:2.1f}")
+            self.print_func(best_score_battle.me.info())
 
-        print(f"Best Win Ratio Battle, win ratio: {best_win_ratio:2.2%}")
-        print(best_win_ratio_battle.me.info())
 
-        print('='*100)
+        return best_score_battle, best_simulation_result, my_simulation_result
 
 
 
@@ -169,7 +197,7 @@ class Simulator(QObject):
             """Nefarious Fire"""
             if card_id == "TB_BaconShop_HP_043":
                 if self.is_print:
-                    print("Nefarious Fire")
+                    self.print_func("Nefarious Fire")
                 if used:
                     self.simulate_damage_to_every_minions(player.opponent, 1)
                     self.simulate_deaths()
@@ -205,7 +233,7 @@ class Simulator(QObject):
 
     def check_start_of_combat(self, st_minion: Minion):
         if self.is_print:
-            print(f"START OF COMBAT: {st_minion.info()}")
+            self.print_func(f"START OF COMBAT: {st_minion.info()}")
 
         card_id = st_minion.card_id
         player = st_minion.player
@@ -272,7 +300,7 @@ class Simulator(QObject):
         else:
             defender = self.random_defense_minion(attacker.player.opponent)
         if self.is_print:
-            print(f"ATTACK: {attacker.player.hero.name()} {attacker.info()} attack {defender.info()}")
+            self.print_func(f"ATTACK: {attacker.player.hero.name()} {attacker.info()} attack {defender.info()}")
 
         self.simulate_damage_by_minion(defender, attacker)
         self.simulate_damage_by_minion(attacker, defender)
@@ -287,9 +315,9 @@ class Simulator(QObject):
 
         self.simulate_deaths()
         if self.is_print:
-            print('-'*50)
-            print(self.battle.info())
-            print('-'*50)
+            self.print_func('-'*50)
+            self.print_func(self.battle.info())
+            self.print_func('-'*50)
 
     def simulate_deaths(self):
         while True:
@@ -357,7 +385,7 @@ class Simulator(QObject):
 
     def simulate_deathrattle(self, trigger: Minion, player: Player):
         if self.is_print:
-            print(f"DEATHRATTLE: {player.hero.name()} {trigger.info()}")
+            self.print_func(f"DEATHRATTLE: {player.hero.name()} {trigger.info()}")
 
         deathrattle_num = 1
 
@@ -647,7 +675,7 @@ class Simulator(QObject):
                     new_minion.reborn = False
 
                     if self.is_print:
-                        print(f"REBORN: {player.hero.name()} {new_minion.info()}")
+                        self.print_func(f"REBORN: {player.hero.name()} {new_minion.info()}")
                     self.simulate_summon_minion_by(new_minion, player, pos=player.reborn_trigger_pos, can_summon_by_khadgar=False)
 
                 del player.reborn_triggers[player.reborn_trigger_pos]
@@ -706,7 +734,7 @@ class Simulator(QObject):
 
     def simulate_overkill(self, minion: Minion):
         if self.is_print:
-            print(f'OVERKILL: {minion.player.hero.name()} {minion.info()}')
+            self.print_func(f'OVERKILL: {minion.player.hero.name()} {minion.info()}')
 
         card_id = minion.card_id
         golden = minion.golden
@@ -743,7 +771,7 @@ class Simulator(QObject):
     def simulate_summon_minion(self, new_minion: Minion, player: Player, pos: Optional[int] = None) -> Optional[Minion]:
         if player.minion_num() >= 7:
             if self.is_print:
-                print(f"SUMMON Fail: {player.hero.name()} {new_minion.info()}")
+                self.print_func(f"SUMMON Fail: {player.hero.name()} {new_minion.info()}")
             return None
 
         if pos is None:
@@ -751,7 +779,7 @@ class Simulator(QObject):
 
         if pos < 1 or pos > 7:
             if self.is_print:
-                print(f"SUMMON Fail: {player.hero.name()} {new_minion.info()}")
+                self.print_func(f"SUMMON Fail: {player.hero.name()} {new_minion.info()}")
             return None
 
         # pos change
@@ -799,7 +827,7 @@ class Simulator(QObject):
 
         self.simulate_summon_minion_after(new_minion, player)
         if self.is_print:
-            print(f"SUMMON: {player.hero.name()} {new_minion.info()}")
+            self.print_func(f"SUMMON: {player.hero.name()} {new_minion.info()}")
 
         return new_minion
 
@@ -886,7 +914,7 @@ class Simulator(QObject):
                 # remove aura
                 if is_aura_exist and not should_have_aura:
                     if self.is_print:
-                        print(f"REMOVE AURA: {aura_exist.info()}")
+                        self.print_func(f"REMOVE AURA: {aura_exist.info()}")
                     self.simulate_aura_remove_for_each_enchant(get_minion, aura_exist)
 
                 # add aura
@@ -894,7 +922,7 @@ class Simulator(QObject):
                     get_minion.buff(aurainfo.add_atk, aurainfo.add_hp)
                     new_aura = self.make_enchant_and_add(aurainfo.enchant_card_id, giver, get_minion, is_aura=True)
                     if self.is_print:
-                        print(f"ADD AURA: {new_aura.info()}")
+                        self.print_func(f"ADD AURA: {new_aura.info()}")
 
     def check_aura(self):
         for player in self.battle.players():
@@ -903,7 +931,7 @@ class Simulator(QObject):
                 for aura in get_minion.auras:
                     if aura.creator is None or aura.creator.zone != Zone.PLAY:
                         if self.is_print:
-                            print(f"REMOVE AURA: {aura.info()}")
+                            self.print_func(f"REMOVE AURA: {aura.info()}")
                         self.simulate_aura_remove_for_each_enchant(get_minion, aura)
 
             # REMOVE and ADD AURA if something changed
@@ -940,12 +968,12 @@ class Simulator(QObject):
 
         if extra_summon_num >= 1:
             if self.is_print:
-                print(f"KHADGAR WILL COPY: {summoned_minion.info()}  by  {next_khadgar.info()}  {extra_summon_num}times")
+                self.print_func(f"KHADGAR WILL COPY: {summoned_minion.info()}  by  {next_khadgar.info()}  {extra_summon_num}times")
 
         for extra_summon_count in range(extra_summon_num):
             copy_of_minion = self.make_copy_of_minion(summoned_minion, player)
             if self.is_print:
-                print(f"COPY COUNT:{extra_summon_count + 1} , WILL SUMMON: {copy_of_minion.info()}")
+                self.print_func(f"COPY COUNT:{extra_summon_count + 1} , WILL SUMMON: {copy_of_minion.info()}")
             self.simulate_summon_minion_by(copy_of_minion, player,
                                            pos=summoned_minion.pos + 1 + extra_summon_count,
                                            summoner=next_khadgar,
@@ -997,7 +1025,7 @@ class Simulator(QObject):
     def simulate_remove_minion(self, removed_minion: Minion, player: Player):
         if player.board[removed_minion.pos] is not removed_minion:
             if self.is_print:
-                print(f'REMOVE Fail: {removed_minion.player.hero.name()} {removed_minion.info()}')
+                self.print_func(f'REMOVE Fail: {removed_minion.player.hero.name()} {removed_minion.info()}')
             return False
 
         # pos change
@@ -1047,7 +1075,7 @@ class Simulator(QObject):
         self.simulate_remove_minion_after(removed_minion)
 
         if self.is_print:
-            print(f'REMOVE: {removed_minion.player.hero.name()} {removed_minion.info()}')
+            self.print_func(f'REMOVE: {removed_minion.player.hero.name()} {removed_minion.info()}')
         removed_minion.attack = Util.default_attack_by_id(removed_minion.card_id)
         removed_minion.health = Util.default_health_by_id(removed_minion.card_id)
         removed_minion.damage = 0
@@ -1090,7 +1118,7 @@ class Simulator(QObject):
         if defender.divine_shield:
             defender.divine_shield = False
             if self.is_print:
-                print(f"DAMAGE: {defender.player.hero.name()} {defender.info()}'s divine shield is broken")
+                self.print_func(f"DAMAGE: {defender.player.hero.name()} {defender.info()}'s divine shield is broken")
             self.simualte_minion_broken_divine_shield_after(defender, defender.player)
             return False
         else:
@@ -1100,7 +1128,7 @@ class Simulator(QObject):
             if poisonous:
                 defender.to_be_destroyed = True
             if self.is_print:
-                print(f"DAMAGE: {defender.player.hero.name()} {pre_defender_info} is damaged {amount} {'(poisonous)' if poisonous else ''} -> {defender.info()}")
+                self.print_func(f"DAMAGE: {defender.player.hero.name()} {pre_defender_info} is damaged {amount} {'(poisonous)' if poisonous else ''} -> {defender.info()}")
             self.simulate_get_damage_after(defender)
             return True
 

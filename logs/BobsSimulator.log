@@ -1,5 +1,5 @@
-2020-04-12 09:43:37,900 - INFO: Logging Start
-2020-04-12 09:43:37,901 - INFO: Version: 44222
-2020-04-12 09:43:38,603 - INFO: Bob's Simulator Home.
-2020-04-12 09:43:39,114 - INFO: Log File Simulate Start
-2020-04-12 09:43:40,552 - WARNING: Build number NOT correct, Program: 44222, CardDefs: 44582
+2020-04-13 21:14:59,540 - INFO: Logging Start
+2020-04-13 21:14:59,540 - INFO: Version: 44222
+2020-04-13 21:15:00,281 - INFO: Bob's Simulator Home.
+2020-04-13 21:15:01,629 - INFO: Real Time Simulate Starts.
+2020-04-13 21:15:01,672 - WARNING: Build number NOT correct, Program: 44222, CardDefs: 44582

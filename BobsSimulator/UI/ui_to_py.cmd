@@ -7,3 +7,4 @@ pyside2-uic ErrorWidget.ui > ErrorWidgetUI.py
 pyside2-uic BattleInfoWidget.ui > BattleInfoWidgetUI.py
 pyside2-uic FileEndWidget.ui > FileEndWidgetUI.py
 pyside2-uic GameEndWidget.ui > GameEndWidgetUI.py
+pyside2-uic ResultWidget.ui > ResultWidgetUI.py

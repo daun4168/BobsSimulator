@@ -3,7 +3,7 @@ import logging.config
 import os
 import json
 
-from BobsSimulator.Main import VERSION_NUMBER
+from BobsSimulator.Config import VERSION_NUMBER
 
 
 class HSLogBugFilter(logging.Filter):

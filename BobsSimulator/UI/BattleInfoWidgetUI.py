@@ -40,12 +40,12 @@ class Ui_BattleInfoWidget(object):
         self.homeButton.setFont(font1)
         self.simulateButton = QPushButton(BattleInfoWidget)
         self.simulateButton.setObjectName(u"simulateButton")
-        self.simulateButton.setGeometry(QRect(290, 490, 251, 61))
+        self.simulateButton.setGeometry(QRect(260, 490, 311, 61))
         sizePolicy.setHeightForWidth(self.simulateButton.sizePolicy().hasHeightForWidth())
         self.simulateButton.setSizePolicy(sizePolicy)
         font2 = QFont()
-        font2.setFamily(u"Yu Gothic")
-        font2.setPointSize(30)
+        font2.setFamily(u"Arial")
+        font2.setPointSize(25)
         font2.setBold(True)
         font2.setWeight(75)
         self.simulateButton.setFont(font2)
@@ -55,6 +55,10 @@ class Ui_BattleInfoWidget(object):
         sizePolicy.setHeightForWidth(self.nextButton.sizePolicy().hasHeightForWidth())
         self.nextButton.setSizePolicy(sizePolicy)
         self.nextButton.setFont(font1)
+        self.battle_num = QLabel(BattleInfoWidget)
+        self.battle_num.setObjectName(u"battle_num")
+        self.battle_num.setGeometry(QRect(240, 210, 341, 101))
+        self.battle_num.setAlignment(Qt.AlignCenter)
 
         self.retranslateUi(BattleInfoWidget)
 
@@ -66,5 +70,6 @@ class Ui_BattleInfoWidget(object):
         self.homeButton.setText(QCoreApplication.translate("BattleInfoWidget", u"GO HOME", None))
         self.simulateButton.setText(QCoreApplication.translate("BattleInfoWidget", u"SIMULATE", None))
         self.nextButton.setText(QCoreApplication.translate("BattleInfoWidget", u"NEXT BATTLE", None))
+        self.battle_num.setText(QCoreApplication.translate("BattleInfoWidget", u"TextLabel", None))
     # retranslateUi
 

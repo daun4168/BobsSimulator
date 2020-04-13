@@ -61,7 +61,7 @@
     "simulator_file_handler": {
       "class": "logging.FileHandler",
       "level": "DEBUG",
-      "formatter": "default",
+      "formatter": "only_message",
       "filename": "logs/Simulator.log",
       "mode": "w",
       "encoding": "UTF-8"

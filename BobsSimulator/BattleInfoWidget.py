@@ -1,9 +1,10 @@
 import sys
 
+from PySide2.QtGui import QImage, QPixmap, QFont
 from PySide2.QtCore import QRect
 from PySide2.QtWidgets import QWidget, QApplication
 
-from BobsSimulator.Draw import draw_minion
+from BobsSimulator.Draw import draw_minion, draw_minions, draw_hero
 from BobsSimulator.HSType import Battle, Minion
 from BobsSimulator.UI.BattleInfoWidgetUI import Ui_BattleInfoWidget
 
@@ -15,17 +16,23 @@ class BattleInfoWidget(QWidget):
         self.ui = Ui_BattleInfoWidget()
         self.ui.setupUi(self)
 
-        for minion in battle.me.minions():
-            widget = QWidget(self)
-            widget.setGeometry(QRect(-150 + minion.pos * 115 + (7 - battle.me.minion_num()) * 57.5, 220, 178, 178))
-            draw_minion(widget, minion)
+        draw_minions(battle.me, self, -150, 320)
+        draw_minions(battle.enemy, self, -150, -20)
 
-        for minion in battle.enemy.minions():
-            if minion is None:
-                continue
-            widget = QWidget(self)
-            widget.setGeometry(QRect(-150 + minion.pos * 115 + (7 - battle.enemy.minion_num()) * 57.5, -20, 178, 178))
-            draw_minion(widget, minion)
+        hero_widget = QWidget(self)
+        hero_widget.setGeometry(QRect(600, 190, 170, 170))
+        draw_hero(hero_widget, battle.me.hero.card_id, hp=battle.me.hero.hp())
+
+        hero_widget = QWidget(self)
+        hero_widget.setGeometry(QRect(30, 130, 170, 170))
+        draw_hero(hero_widget, battle.enemy.hero.card_id, hp=battle.enemy.hero.hp())
+
+
+        self.ui.battle_num.setText(f"BATTLE {battle.battle_num}")
+        font = QFont("Times", 50)
+        font.setBold(True)
+        self.ui.battle_num.setFont(font)
+        self.ui.battle_num.setStyleSheet(f"QLabel {{ color: white; }}")
 
         if parent:
             self.ui.homeButton.clicked.connect(parent.home)

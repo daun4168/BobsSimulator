@@ -6,7 +6,7 @@ from BobsSimulator.HSLogging import hsloghandler_logger
 from BobsSimulator.HSType import Battle, CardType, Enchantment, Faction, Game, \
     GameTag, Minion, PowerType, Race, Secret, State, Zone, Hero, HeroPower, \
     DEATHRATTLE_ENCHANT_CARD_IDS
-from BobsSimulator.Main import LOCALE, VERSION_NUMBER
+from BobsSimulator.Config import LOCALE, VERSION_NUMBER
 from BobsSimulator.Regex import *
 from BobsSimulator.Util import Util
 
@@ -47,6 +47,7 @@ class HSLogHandler(QObject):
         self.recent_parsing_line = None
         self.do_line_reader = False
         self.is_line_reader = False
+        self.is_game_end = False
 
     def init_game(self):
         self.game = Game()
@@ -61,6 +62,8 @@ class HSLogHandler(QObject):
         self.me_player_id = None
         self.enemy_entity_id = None
         self.enemy_player_id = None
+
+        self.is_game_end = False
 
     def read_line(self):
         return self.log_file.readline()
@@ -151,6 +154,8 @@ class HSLogHandler(QObject):
         self.game.battle_num = self.game.turn_num // 2
 
         battle = Battle()
+
+        battle.battle_num = self.game.battle_num
 
         me_player_id = self.entities[self.me_entity_id][GameTag.PLAYER_ID.value]
         enemy_player_id = self.entities[self.me_entity_id][GameTag.NEXT_OPPONENT_PLAYER_ID.value]
@@ -614,6 +619,7 @@ class HSLogHandler(QObject):
 
         if entity_id == self.game_entity and GameTag.STATE.value in self.entities[self.game_entity]:
             if self.entities[self.game_entity][GameTag.STATE.value] == State.COMPLETE:
+                self.is_game_end = True
                 self.end_game()
 
         if entity_id == self.me_entity_id and tag == 1481 and value == 0:

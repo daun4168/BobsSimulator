@@ -38,6 +38,7 @@ class Battle:
 
         self.me.opponent = self.enemy
         self.enemy.opponent = self.me
+        self.battle_num = 0  # type: int
 
         self.is_me_trigger_first = True  # type: bool
         self.is_me_attack = None  # type: Optional[bool]
@@ -203,7 +204,7 @@ class Hero(HSObject):
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
-        from BobsSimulator.Main import LOCALE
+        from BobsSimulator.Config import LOCALE
         name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerHero"
@@ -211,6 +212,9 @@ class Hero(HSObject):
             start_text = "EnemyHero"
         logger.info(
             f"""* {start_text} -name "{name}@{self.card_id}" -hp {self.health - self.damage} -tech {self.tech_level} """)
+
+    def hp(self):
+        return self.health - self.damage
 
 
 class HeroPower(HSObject):
@@ -231,7 +235,7 @@ class HeroPower(HSObject):
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
-        from BobsSimulator.Main import LOCALE
+        from BobsSimulator.Config import LOCALE
         name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerHeroPower"
@@ -259,7 +263,7 @@ class Secret:
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
-        from BobsSimulator.Main import LOCALE
+        from BobsSimulator.Config import LOCALE
         name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerSecret"
@@ -398,7 +402,7 @@ class Minion(HSObject):
 
     def print_log(self, logger: logging.Logger, is_me=True):
         from BobsSimulator.Util import Util
-        from BobsSimulator.Main import LOCALE
+        from BobsSimulator.Config import LOCALE
         name = Util.card_name_by_id(self.card_id, locale=LOCALE)
         if is_me:
             start_text = "PlayerMinion"

@@ -5,7 +5,7 @@ from typing import Dict, Optional, List, Iterable
 from collections import defaultdict
 
 from BobsSimulator.HSLogging import main_logger
-from BobsSimulator.Main import VERSION_NUMBER, LOCALE
+from BobsSimulator.Config import VERSION_NUMBER, LOCALE
 from BobsSimulator.HSType import GameTag, CardType, Faction, Race, Rarity, Zone, Mulligan, Step, State, CardClass, PlayState, Minion, RACE_ALL
 import hearthstone_data
 

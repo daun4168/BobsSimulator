@@ -2,11 +2,18 @@ from PySide2.QtCore import Qt, QRect
 from PySide2.QtGui import QPixmap, QFont, QPainter, QFontDatabase, QPen
 from PySide2.QtWidgets import QWidget, QApplication, QLabel
 
-from BobsSimulator.HSType import Minion
-from BobsSimulator.Main import CARD_RES
+from BobsSimulator.HSType import Minion, Player
+from BobsSimulator.Config import CARD_RES
 
 
-def draw_hero(widget, card_id):
+def draw_minions(player: Player, parent: QWidget, x_pos: int, y_pos: int):
+    for minion in player.minions():
+        widget = QWidget(parent)
+        widget.setGeometry(QRect(x_pos + minion.pos * 115 + (7 - player.minion_num()) * 57.5, y_pos, 178, 178))
+        draw_minion(widget, minion)
+
+
+def draw_hero(widget, card_id, hp=None):
     pic = QLabel(widget)
     pixmap = QPixmap(712, 712)
     pixmap.fill(Qt.transparent)
@@ -18,6 +25,18 @@ def draw_hero(widget, card_id):
     painter.setCompositionMode(QPainter.CompositionMode_SourceOver)
 
     painter.drawPixmap(81, 25, 550, 637, QPixmap(f"res/img/hero_frame.png"))
+
+    if hp is not None:
+        painter.drawPixmap(465, 420, 212, 302, QPixmap(f"res/img/cost_health.png"))
+
+        QFontDatabase.addApplicationFont('res/font/BelweMediumBT.ttf')
+        number_font = QFont()
+        number_font.setFamily("Belwe Medium BT")
+        number_font.setPointSize(120)
+        painter.setFont(number_font)
+
+        draw_outlined_text(painter, str(hp), 450, 480)
+
 
     painter.end()
     pixmap = pixmap.scaled(widget.size(), mode=Qt.SmoothTransformation)
@@ -128,7 +147,7 @@ if __name__ == "__main__":
             # Create widget
             widget = QWidget(self)
             widget.setGeometry(QRect(0, 0, 712, 712))
-            draw_hero(widget, "TB_BaconShop_HERO_49")
+            draw_hero(widget, "TB_BaconShop_HERO_49", hp=15)
             self.show()
 
 
