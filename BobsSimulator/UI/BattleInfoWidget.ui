@@ -45,12 +45,12 @@
     <string>GO HOME</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="simulateButton">
+  <widget class="QPushButton" name="optimizeButton">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>390</x>
      <y>490</y>
-     <width>311</width>
+     <width>231</width>
      <height>61</height>
     </rect>
    </property>
@@ -69,7 +69,7 @@
     </font>
    </property>
    <property name="text">
-    <string>SIMULATE</string>
+    <string>OPTIMIZE</string>
    </property>
   </widget>
   <widget class="QPushButton" name="nextButton">
@@ -113,6 +113,33 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="simulateButton">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>490</y>
+     <width>201</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>25</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>SIMULATE</string>
    </property>
   </widget>
  </widget>

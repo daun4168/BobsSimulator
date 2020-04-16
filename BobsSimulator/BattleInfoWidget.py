@@ -7,6 +7,7 @@ from PySide2.QtWidgets import QWidget, QApplication
 from BobsSimulator.Draw import draw_minion, draw_minions, draw_hero
 from BobsSimulator.HSType import Battle, Minion
 from BobsSimulator.UI.BattleInfoWidgetUI import Ui_BattleInfoWidget
+from BobsSimulator.__init__ import Font
 
 
 class BattleInfoWidget(QWidget):
@@ -21,21 +22,26 @@ class BattleInfoWidget(QWidget):
 
         hero_widget = QWidget(self)
         hero_widget.setGeometry(QRect(600, 190, 170, 170))
-        draw_hero(hero_widget, battle.me.hero.card_id, hp=battle.me.hero.hp())
+        draw_hero(hero_widget, battle.me.hero.card_id, hp=battle.me.hero.hp() + battle.me.hero.taken_damage)
 
         hero_widget = QWidget(self)
         hero_widget.setGeometry(QRect(30, 130, 170, 170))
-        draw_hero(hero_widget, battle.enemy.hero.card_id, hp=battle.enemy.hero.hp())
-
+        draw_hero(hero_widget, battle.enemy.hero.card_id, hp=battle.enemy.hero.hp() + battle.enemy.hero.taken_damage)
 
         self.ui.battle_num.setText(f"BATTLE {battle.battle_num}")
-        font = QFont("Times", 50)
+        font = QFont("Showlove", 50)
         font.setBold(True)
         self.ui.battle_num.setFont(font)
         self.ui.battle_num.setStyleSheet(f"QLabel {{ color: white; }}")
 
+        self.ui.homeButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+        self.ui.optimizeButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+        self.ui.simulateButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+        self.ui.nextButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+
         if parent:
             self.ui.homeButton.clicked.connect(parent.home)
+            self.ui.optimizeButton.clicked.connect(parent.simulate_optimize)
             self.ui.simulateButton.clicked.connect(parent.simulate)
             self.ui.nextButton.clicked.connect(parent.next_battle)
 

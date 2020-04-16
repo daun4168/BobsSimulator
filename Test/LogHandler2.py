@@ -873,7 +873,7 @@ if __name__ == '__main__':
     # game = HSGame(log_file_2020_03_21_23_33_29)
     # game.line_reader()
 
-    game = HSGame(log_file_2020_03_21_23_33_29)
+    game = HSGame(open(os.path.join(HS_LOG_FILE_DIR, "Power.log"), 'r', encoding="UTF8"))
     game.line_reader()
 
     # *******************

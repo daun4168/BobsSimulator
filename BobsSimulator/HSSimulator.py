@@ -29,7 +29,7 @@ class Simulator(QObject):
     def nullprint(self, *args, **kwargs):
         return
 
-    def simulate(self, battle: Battle, simulate_num=1, print_info=None) -> list:
+    def simulate(self, battle: Battle, simulate_num=1, print_info=None, sig_npercent=False) -> list:
 
         st_time = time.time()
 
@@ -58,6 +58,10 @@ class Simulator(QObject):
 
             if self.is_print:
                 self.print_func("-" * 50)
+
+            if sig_npercent:
+                self.simulation_ratio = i / simulate_num
+                self.sig_process_npercent.emit()
 
         if self.is_print:
             score = sum(result) / len(result)
@@ -107,7 +111,7 @@ class Simulator(QObject):
             player.next_atk_minion_pos = None
             player.death_triggers = defaultdict(list)
 
-    def find_best_arrangement(self, battle: Battle, print_info=None) -> (Battle, list, list):
+    def find_best_arrangement(self, battle: Battle, print_info=None, sig_npercent=False) -> (Battle, list, list):
 
         if print_info is None:
             self.is_print = False
@@ -151,8 +155,9 @@ class Simulator(QObject):
 
 
             simulation_num += 1
-            self.simulation_ratio = simulation_num / len(arrangement_list)
-            self.sig_process_npercent.emit()
+            if sig_npercent:
+                self.simulation_ratio = simulation_num / len(arrangement_list)
+                self.sig_process_npercent.emit()
 
         if self.is_print:
             self.print_func('='*50)
@@ -164,7 +169,6 @@ class Simulator(QObject):
             self.print_func("Best Of Arrangement Info: ")
             self.print_func(f"Best Score Battle, score: {best_score:2.1f}")
             self.print_func(best_score_battle.me.info())
-
 
         return best_score_battle, best_simulation_result, my_simulation_result
 

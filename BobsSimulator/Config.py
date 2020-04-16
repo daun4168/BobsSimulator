@@ -1,6 +1,7 @@
 import os
 import configparser
 
+
 config = configparser.ConfigParser()
 config.optionxform = str
 config.read('config.ini')
@@ -11,6 +12,7 @@ CARD_RES = config['LIVE']['CARD_RES']
 HS_DIR = config['LIVE']['HS_DIR']
 
 
+
 def set_hs_dir_config(hs_dir: str):
     config.set('LIVE', 'HS_DIR', hs_dir)
     with open('config.ini', 'w') as configfile:
@@ -19,11 +21,10 @@ def set_hs_dir_config(hs_dir: str):
 
 def set_use_power_log():
     localappdata_dir = os.getenv("LOCALAPPDATA")
-    log_config_dir = os.path.join(localappdata_dir, 'Blizzar/Hearthstone')
+    log_config_dir = os.path.join(localappdata_dir, 'Blizzard/Hearthstone')
 
     if not os.path.isdir(log_config_dir):
         os.makedirs(log_config_dir, exist_ok=True)
-
 
     log_config_path = os.path.join(log_config_dir, 'log.config')
     if not os.path.isfile(log_config_path):

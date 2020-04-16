@@ -99,7 +99,7 @@ class MyApp(QWidget):
         painter.drawPixmap(150, 410, 154, 173, QPixmap(path(f"res/img/attack_minion.png")))
         painter.drawPixmap(430, 390, 143, 210, QPixmap(path(f"res/img/cost_health.png")))
 
-        QFontDatabase.addApplicationFont(path('res/font/BelweMediumBT.ttf'))
+
         number_font = QFont()
         number_font.setFamily("Belwe Medium BT")
         number_font.setPointSize(80)

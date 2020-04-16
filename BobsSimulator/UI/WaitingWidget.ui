@@ -71,9 +71,9 @@
   <widget class="QLabel" name="waitingTextBottom">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>160</x>
      <y>420</y>
-     <width>461</width>
+     <width>501</width>
      <height>121</height>
     </rect>
    </property>

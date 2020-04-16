@@ -22,8 +22,8 @@ class ErrorWidget(QWidget):
         error_img_pxm = error_img_pxm.scaled(self.ui.errorImg.width(), self.ui.errorImg.height())
         self.ui.errorImg.setPixmap(error_img_pxm)
 
-        self.ui.oopsText.setText("Oops!!!")
-        font = QFont("Times", 60, QFont.Bold)
+        self.ui.oopsText.setText("Oops!!")
+        font = QFont("Dr.Ziemboz", 70)
         self.ui.oopsText.setFont(font)
         self.ui.oopsText.setStyleSheet(f"QLabel {{ color: white; }}")
 
@@ -32,10 +32,12 @@ class ErrorWidget(QWidget):
             error_msg = "Maybe file is broken."
 
         self.ui.errorText.setText(f"Something went wrong. {error_msg}")
-        font = QFont("Times", 30)
+        font = QFont("LHF Uncial Caps", 30)
         self.ui.errorText.setFont(font)
         self.ui.errorText.setStyleSheet(f"QLabel {{ color: white; }}")
         self.ui.errorText.setWordWrap(True)
+
+        self.ui.homeButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
 
         self.ui.homeButton.clicked.connect(parent.home)
 

@@ -16,18 +16,21 @@ class GameEndWidget(QWidget):
         draw_hero(self.ui.heroImg, hero_card_id)
 
         self.ui.rankText.setText("YOUR FINAL RANK")
-        font = QFont("Times", 45, QFont.Bold)
+        font = QFont("Hambu Radul", 45, QFont.Bold)
         self.ui.rankText.setFont(font)
         self.ui.rankText.setStyleSheet(f"QLabel {{ color: orange; }}")
 
-        font = QFont("Arial", 120, QFont.Bold)
+        font = QFont("Showlove", 120, QFont.Bold)
         self.ui.rankNumber.setFont(font)
         self.ui.rankNumber.setText(f"{rank_num}")
         self.ui.rankNumber.setStyleSheet(f"QLabel {{ color: orange; }}")
 
+        self.ui.homeButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+        self.ui.nextButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
+
         if parent:
             self.ui.homeButton.clicked.connect(parent.home)
-            self.ui.nextButton.clicked.connect(parent.next_battle)
+            self.ui.nextButton.clicked.connect(parent.next_game)
 
 
 if __name__ == '__main__':

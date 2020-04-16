@@ -34,12 +34,14 @@ class HSLogHandler(QObject):
     enemy_entity_id: Optional[int]
     enemy_player_id: Optional[int]
 
-    def __init__(self, log_file, is_print_console=False):
+    def __init__(self, log_file_name: str, is_print_console=False):
         super().__init__()
-        self.log_file = log_file
+        self.log_file_name = log_file_name
+        self.log_file = open(log_file_name, 'r', encoding="UTF8")
+        self.before_log_file_tell = 0  # file byte
         self.is_print_console = is_print_console
 
-        hsloghandler_logger.info(f"HSLogHandler Start: {log_file.name}")
+        hsloghandler_logger.info(f"HSLogHandler Start: {log_file_name}")
 
         self.init_game()
 
@@ -70,6 +72,20 @@ class HSLogHandler(QObject):
 
     def line_reader_start(self):
         self.do_line_reader = True
+
+        if self.log_file is None or self.log_file.closed:
+            self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
+
+            self.log_file.seek(0, os.SEEK_END)
+            log_file_size = self.log_file.tell()
+
+            if self.before_log_file_tell <= log_file_size:
+                self.log_file.seek(self.before_log_file_tell)
+            else:
+                self.log_file.seek(0)
+
+            self.log_file = self.log_file
+
         if self.is_line_reader:
             return
         else:
@@ -329,7 +345,7 @@ class HSLogHandler(QObject):
         for entity_id in key_list:
             card_id, card_name, cardtype, zone = self.get_default_values(entity_id)
 
-            if cardtype == CardType.HERO.value and (zone == Zone.PLAY.value or zone == Zone.GRAVEYARD.value):
+            if cardtype == CardType.HERO.value and zone == Zone.PLAY.value:
                 if int(self.entities[entity_id][GameTag["CONTROLLER"].value]) == self.me_player_id:
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
                         damage = int(self.entities[entity_id][GameTag["DAMAGE"].value])
@@ -341,6 +357,7 @@ class HSLogHandler(QObject):
                     if GameTag["DAMAGE"].value in self.entities[entity_id]:
                         damage = int(self.entities[entity_id][GameTag["DAMAGE"].value])
                         self.game.battle.enemy.hero.taken_damage = damage - self.game.battle.enemy.hero.damage
+                        print("BATTLE", self.game.battle.battle_num," Enemy Damage: ", self.game.battle.enemy.hero.taken_damage)
                         self.game.battle.enemy.hero.damage = damage
 
         if self.is_print_console:
@@ -372,10 +389,16 @@ class HSLogHandler(QObject):
 
         self.do_line_reader = False
 
+        self.game.game_end = True
+
         self.sig_end_game.emit()
 
     def end_file(self):
         self.do_line_reader = False
+
+        self.before_log_file_tell = self.log_file.tell()
+        self.log_file.close()
+
         # noinspection PyUnresolvedReferences
         self.sig_end_file.emit()
 
@@ -622,7 +645,8 @@ class HSLogHandler(QObject):
                 self.is_game_end = True
                 self.end_game()
 
-        if entity_id == self.me_entity_id and tag == 1481 and value == 0:
+        if ((entity_id == self.me_entity_id and tag == 1481 and value == 0) or tag == 479 and value == 0) and not self.game.battle.is_end:
+            self.game.battle.is_end = True
             self.battle_end()
 
     def show_entity_handler(self, level):

@@ -23,9 +23,11 @@ class FileEndWidget(QWidget):
         self.ui.endImg.setPixmap(end_img_pxm)
 
         self.ui.endText1.setText("File End!")
-        font = QFont("Times", 55, QFont.Bold)
+        font = QFont("Hambu Radul", 55, QFont.Bold)
         self.ui.endText1.setFont(font)
         self.ui.endText1.setStyleSheet(f"QLabel {{ color: white; }}")
+
+        self.ui.homeButton.setFont(QFont("배달의민족 주아", 15, QFont.Bold))
 
         if parent:
             self.ui.homeButton.clicked.connect(parent.home)

@@ -47,7 +47,7 @@ class Ui_ErrorWidget(object):
         self.homeButton.setFont(font)
         self.oopsText = QLabel(ErrorWidget)
         self.oopsText.setObjectName(u"oopsText")
-        self.oopsText.setGeometry(QRect(110, 170, 291, 161))
+        self.oopsText.setGeometry(QRect(60, 170, 371, 161))
         self.oopsText.setAlignment(Qt.AlignCenter)
 
         self.retranslateUi(ErrorWidget)

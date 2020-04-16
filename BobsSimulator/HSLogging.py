@@ -32,6 +32,8 @@ hsloghandler_logger.addFilter(HSLogBugFilter())
 main_logger.info("Logging Start")
 main_logger.info(f"Version: {VERSION_NUMBER}")
 
+simulator_logger.info("| 🌟 lv2 | 💀 deathrattle | ⚪ divine shield | ☣️ poisonous |  🛡️ taunt | 🎗️ reborn |\n")
+
 if __name__ == '__main__':
     main_logger.info("HELLO Logger")
     main_logger.error("Logger Error")

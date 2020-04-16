@@ -76,7 +76,6 @@ def draw_minion(widget, minion: Minion):
     painter.drawPixmap(150, 410, 154, 173, QPixmap(f"res/img/attack_minion.png"))
     painter.drawPixmap(435, 405, 130, 191, QPixmap(f"res/img/cost_health.png"))
 
-    QFontDatabase.addApplicationFont('res/font/BelweMediumBT.ttf')
     number_font = QFont()
     number_font.setFamily("Belwe Medium BT")
     number_font.setPointSize(80)

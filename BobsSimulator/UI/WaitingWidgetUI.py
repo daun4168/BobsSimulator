@@ -36,7 +36,7 @@ class Ui_LoadingWidget(object):
         self.waitingTextTop.setAlignment(Qt.AlignCenter)
         self.waitingTextBottom = QLabel(LoadingWidget)
         self.waitingTextBottom.setObjectName(u"waitingTextBottom")
-        self.waitingTextBottom.setGeometry(QRect(180, 420, 461, 121))
+        self.waitingTextBottom.setGeometry(QRect(160, 420, 501, 121))
         self.waitingTextBottom.setAlignment(Qt.AlignCenter)
 
         self.retranslateUi(LoadingWidget)

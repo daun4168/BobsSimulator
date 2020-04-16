@@ -15,7 +15,8 @@ from BobsSimulator.BattleInfoWidget import BattleInfoWidget
 from BobsSimulator.ErrorWidget import ErrorWidget
 from BobsSimulator.FileEndWidget import FileEndWidget
 from BobsSimulator.GameEndWidget import GameEndWidget
-from BobsSimulator.ResultWidget import ResultWidget
+from BobsSimulator.OptimizeResultWidget import OptimizeResultWidget
+from BobsSimulator.SimulationResultWidget import SimulationResultWidget
 from BobsSimulator.HSType import Game
 from BobsSimulator.HSLogging import main_logger, hsbattle_logger, simulator_logger
 from BobsSimulator.UI.DefaultWindowUI import Ui_DefaultWindow
@@ -51,13 +52,13 @@ class DefaultWindow(QMainWindow):
         self.dirwatcher = None
         self.filewatcher = None
         self.simulate_type = None  # SimulateType
-        self.log_file = None  # file pointer
-        self.before_log_file_tell = 0  # file byte
+
         self.log_handler = None  # type: Optional["HSLogHandler"]
 
         self.ignore_battle_handler = False
         self.real_time_simulate_starting = False
         self.is_waiting_next_battle = False
+        self.is_updating_power_file = False
 
         self.simulator = None
 
@@ -77,14 +78,14 @@ class DefaultWindow(QMainWindow):
         self.dirwatcher = None
         self.filewatcher = None
         self.simulate_type = None
-        self.log_file = None
         self.log_handler = None
         self.simulator = None
 
         self.ignore_battle_handler = False
         self.real_time_simulate_starting = False
         self.is_waiting_next_battle = False
-        self.before_log_file_tell = 0
+        self.is_updating_power_file = False
+
 
     def home(self):
         self.init()
@@ -100,10 +101,7 @@ class DefaultWindow(QMainWindow):
         from BobsSimulator.HSLogHandler import HSLogHandler
 
         if not self.log_handler:
-            self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
-
-            self.log_handler = HSLogHandler(self.log_file)
-
+            self.log_handler = HSLogHandler(self.log_file_name)
             self.log_handler.sig_game_start.connect(self.game_start_handler)
             self.log_handler.sig_game_info.connect(self.game_info_handler)
             self.log_handler.sig_battle_start.connect(self.battle_start_handler)
@@ -111,40 +109,35 @@ class DefaultWindow(QMainWindow):
             self.log_handler.sig_end_game.connect(self.end_game_handler)
             self.log_handler.sig_end_file.connect(self.end_file_handler)
         else:
-            print("log file changed!!!")
-            if self.log_file is None or self.log_file.closed:
-                self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
+            pass
 
-                self.log_file.seek(0, os.SEEK_END)
-                log_file_size = self.log_file.tell()
-
-                if self.before_log_file_tell < log_file_size:
-                    self.log_file.seek(self.before_log_file_tell)
-                else:
-                    self.log_file.seek(0)
-
-                self.log_handler.log_file = self.log_file
-
+        if self.simulate_type == SimulateType.REAL:
+            if not self.real_time_simulate_starting and not self.is_waiting_next_battle:
+                return
         self.log_handler.line_reader_start()
 
     def log_dir_changed(self):
-        print('log_dir_changed')
         if not self.filewatcher:
-            print('new filewatcher!')
             self.filewatcher = QFileSystemWatcher()
             self.filewatcher.addPath(self.log_file_name)
             self.filewatcher.fileChanged.connect(self.log_file_changed)
-        print("len filewatcher", len(self.filewatcher.files()))
         if len(self.filewatcher.files()) == 0:
-            print("ADD PATH")
             self.filewatcher.addPath(self.log_file_name)
             self.filewatcher.fileChanged.connect(self.log_file_changed)
+
+    def update_power_file(self):
+        if self.is_updating_power_file:
+            if self.log_file_name:
+                file = open(self.log_file_name)
+                file.close()
+
+            QTimer.singleShot(1000, self.update_power_file)
 
     def real_time_simulate(self):
         self.init()
         self.simulate_type = SimulateType.REAL
         main_logger.info("Real Time Simulate Starts.")
-        errorWidget = ErrorWidget(self, "It's not implemented..")
+        errorWidget = ErrorWidget(self, "It's not implemented.")
 
         if not os.path.isfile(os.path.join(self.hs_dir, 'Hearthstone.exe')):
             QMessageBox.information(self, "ERROR", "Please Set Correct Hearthstone Directory First")
@@ -173,6 +166,9 @@ class DefaultWindow(QMainWindow):
 
         self.log_dir_changed()
 
+        self.is_updating_power_file = True
+        self.update_power_file()
+
         if os.path.isfile(self.log_file_name):
             self.log_file_changed()
 
@@ -188,9 +184,8 @@ class DefaultWindow(QMainWindow):
 
         self.loading()
 
-        self.log_file = open(self.log_file_name, 'r', encoding="UTF8")
         from BobsSimulator.HSLogHandler import HSLogHandler
-        self.log_handler = HSLogHandler(self.log_file)
+        self.log_handler = HSLogHandler(self.log_file_name)
         self.setWindowTitle(f'Bobs Simulator    Log File Simulate: {os.path.basename(self.log_file_name)}')
 
         self.log_handler.sig_game_start.connect(self.game_start_handler)
@@ -232,13 +227,14 @@ class DefaultWindow(QMainWindow):
         QMessageBox.about(self, "About Bob's Simulator",
                           "<h2>Bob's Simulator 0.1</h2>"
                           "<p>Copyright &copy; 2020 Daun Jeong</p>"
-                          "<p>github: <a href='https://github.com/daun4168/BobsSimulator'>https://github.com/daun4168/BobsSimulator</a></p>"
-                          "<p>e-mail: <a href='mailto:daun4168@naver.com'>daun4168@naver.com</a></p>")
+                          "<p>Report Error, Suggest something, Update Notice<br><br><a href='https://discord.gg/nXvScgR'>https://discord.gg/nXvScgR</a></p><br>"
+                          "<p>github: <a href='https://github.com/daun4168/BobsSimulator'>https://github.com/daun4168/BobsSimulator</a><br>"
+                          "e-mail: <a href='mailto:daun4168@gmail.com'>daun4168@gmail.com</a></p>")
 
     def help(self):
         QMessageBox.information(self, "Help",
-                                "<h2>Hello</h2>"
-                                "<p>I will help you :)</p>")
+                                "<h2>Sorry</h2>"
+                                "<p>I can't help you :(</p>")
 
     def license(self):
         QMessageBox.aboutQt(self)
@@ -309,7 +305,6 @@ class DefaultWindow(QMainWindow):
         help_menu.addAction(self.licenseAction)
 
     def game_start_handler(self):
-        print("game_start_handler")
         if self.ignore_battle_handler:
             self.log_handler.line_reader_start()
             return
@@ -325,7 +320,6 @@ class DefaultWindow(QMainWindow):
         self.log_handler.line_reader_start()
 
     def game_info_handler(self):
-        print("game_info_handler")
         if self.ignore_battle_handler:
             self.log_handler.line_reader_start()
             return
@@ -347,17 +341,14 @@ class DefaultWindow(QMainWindow):
         self.log_handler.game.battle.print_log(hsbattle_logger)
 
     def battle_start_handler(self):
-        print("battle_start_handler")
+
         if self.ignore_battle_handler:
             self.log_handler.line_reader_start()
             return
 
         self.battle_start_log_handler()
 
-        battle_info_widget = BattleInfoWidget(self.log_handler.game.battle, self)
-        self.setCentralWidget(battle_info_widget)
-        self.show()
-        QtCore.QCoreApplication.processEvents()
+        self.log_handler.line_reader_start()
 
     def battle_end_log_handler(self):
         hsbattle_logger.info(f"# Battle {self.log_handler.game.battle_num} End")
@@ -379,7 +370,8 @@ class DefaultWindow(QMainWindow):
         hsbattle_logger.info(f"# {'-'*50}")
 
     def battle_end_handler(self):
-        print("battle_end_handler")
+        self.is_waiting_next_battle = False
+
         if self.ignore_battle_handler:
             self.log_handler.line_reader_start()
             return
@@ -393,10 +385,12 @@ class DefaultWindow(QMainWindow):
             self.show()
             QtCore.QCoreApplication.processEvents()
 
-        self.log_handler.line_reader_start()
+        battle_info_widget = BattleInfoWidget(self.log_handler.game.battle, self)
+        self.setCentralWidget(battle_info_widget)
+        self.show()
+        QtCore.QCoreApplication.processEvents()
 
     def end_game_handler(self):
-        print("end_game_handler")
         if self.simulate_type == SimulateType.REAL and self.real_time_simulate_starting:
             self.next_battle()
             return
@@ -419,7 +413,6 @@ class DefaultWindow(QMainWindow):
         QtCore.QCoreApplication.processEvents()
 
     def end_file_handler(self):
-        print("End Of File")
         if self.simulate_type == SimulateType.FILE:
             main_logger.info("Log File Simulate End")
             fileEndWidget = FileEndWidget(self)
@@ -430,18 +423,44 @@ class DefaultWindow(QMainWindow):
         if self.simulate_type == SimulateType.REAL and self.real_time_simulate_starting:
             self.ignore_battle_handler = False
             self.real_time_simulate_starting = False
+            self.is_waiting_next_battle = True
 
             if not self.log_handler.is_game_end:
-                self.battle_start_handler()
-
-        self.before_log_file_tell = self.log_file.tell()
-        self.log_file.close()
+                if self.log_handler.game.battle_num == 0 or self.log_handler.game.game_end:
+                    self.next_game()
+                else:
+                    self.battle_end_handler()
+            else:
+                self.next_game()
 
         # self.log_handler.line_reader_start()
 
     def process_npercent_handler(self):
         self.loading_widget.set_progress(self.simulator.simulation_ratio * 100)
         QtCore.QCoreApplication.processEvents()
+
+    def simulate_optimize(self):
+        from BobsSimulator.HSSimulator import Simulator
+        self.simulator = Simulator()
+
+        self.simulator.sig_process_npercent.connect(self.process_npercent_handler)
+
+        self.loading_widget = LoadingWidget(parent=self)
+        self.setCentralWidget(self.loading_widget)
+        self.show()
+
+        QtCore.QCoreApplication.processEvents()
+
+        best_score_battle, best_simulation_result, my_simulation_result = self.simulator.find_best_arrangement(self.log_handler.game.battle, sig_npercent=True)
+
+        simulator_logger.info("<Your Arrangement Simulation>")
+        self.simulator.simulate(self.log_handler.game.battle, simulate_num=1, print_info=simulator_logger.info)
+        simulator_logger.info("<Best Arrangement Simulation>")
+        self.simulator.simulate(best_score_battle, simulate_num=1, print_info=simulator_logger.info)
+
+        result_widget = OptimizeResultWidget(self.log_handler.game.battle, my_simulation_result, best_score_battle, best_simulation_result, parent=self)
+        self.setCentralWidget(result_widget)
+        self.show()
 
     def simulate(self):
         from BobsSimulator.HSSimulator import Simulator
@@ -455,24 +474,37 @@ class DefaultWindow(QMainWindow):
 
         QtCore.QCoreApplication.processEvents()
 
-        best_score_battle, best_simulation_result, my_simulation_result = self.simulator.find_best_arrangement(self.log_handler.game.battle)
-
         simulator_logger.info("<Your Arrangement Simulation>")
-        self.simulator.simulate(self.log_handler.game.battle, simulate_num=1, print_info=simulator_logger.info)
-        simulator_logger.info("<Best Arrangement Simulation>")
-        self.simulator.simulate(best_score_battle, simulate_num=1, print_info=simulator_logger.info)
+        self.simulator.simulate(self.log_handler.game.battle, simulate_num=1)
+        simulation_result = self.simulator.simulate(self.log_handler.game.battle, simulate_num=300, sig_npercent=True)
 
-        result_widget = ResultWidget(self.log_handler.game.battle, my_simulation_result, best_score_battle, best_simulation_result, parent=self)
+        result_widget = SimulationResultWidget(self.log_handler.game.battle, simulation_result, parent=self)
         self.setCentralWidget(result_widget)
         self.show()
 
+    def prev_battle(self):
+        pass
+
     def next_battle(self):
+        if self.simulate_type == SimulateType.REAL:
+            battle_num = self.log_handler.game.battle_num
+            waitingWidget = WaitingBattleWidget(self, battle_num)
+
+            self.setCentralWidget(waitingWidget)
+            self.show()
+            QtCore.QCoreApplication.processEvents()
+
+        self.is_waiting_next_battle = True
+        self.log_handler.line_reader_start()
+
+    def next_game(self):
         if self.simulate_type == SimulateType.REAL:
             waitingWidget = WaitingGameWidget(self)
             self.setCentralWidget(waitingWidget)
             self.show()
             QtCore.QCoreApplication.processEvents()
 
+        self.is_waiting_next_battle = True
         self.log_handler.line_reader_start()
 
 

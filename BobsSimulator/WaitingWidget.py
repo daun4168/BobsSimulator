@@ -33,7 +33,7 @@ class WaitingGameWidget(WaitingWidget):
         WaitingWidget.__init__(self, parent)
 
         self.ui.waitingTextTop.setText("Waiting For\nGame Starts...")
-        font = QFont("Times", 50, QFont.Bold)
+        font = QFont("LHF Uncial Caps", 50, QFont.Bold)
         self.ui.waitingTextTop.setFont(font)
         self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
 
@@ -43,13 +43,13 @@ class WaitingBattleWidget(WaitingWidget):
         WaitingWidget.__init__(self, parent)
 
         self.ui.waitingTextTop.setText("Waiting For\nNext Battle...")
-        font = QFont("Times", 50, QFont.Bold)
+        font = QFont("LHF Uncial Caps", 50, QFont.Bold)
         self.ui.waitingTextTop.setFont(font)
         self.ui.waitingTextTop.setStyleSheet(f"QLabel {{ color: orange; }}")
 
         if battle_num > 0:
             self.ui.waitingTextBottom.setText(f"Previous Battle: {battle_num}")
-            font = QFont("Times", 40, QFont.Bold)
+            font = QFont("LHF Uncial Caps", 35, QFont.Bold)
             self.ui.waitingTextBottom.setFont(font)
             self.ui.waitingTextBottom.setStyleSheet(f"QLabel {{ color: orange; }}")
 

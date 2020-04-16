@@ -19,6 +19,7 @@ class Game:
         self.turn_num = 0  # type: int
         self.battle_num = 0  # type: int
         self.leaderboard_place = 1  # type: int
+        self.game_end = False
 
         self.battle = Battle()  # type: Battle
         self.battle_history = {}  # type: Dict[int, Battle] # key: battle_num, value: board
@@ -39,6 +40,7 @@ class Battle:
         self.me.opponent = self.enemy
         self.enemy.opponent = self.me
         self.battle_num = 0  # type: int
+        self.is_end = False  # type: bool
 
         self.is_me_trigger_first = True  # type: bool
         self.is_me_attack = None  # type: Optional[bool]
@@ -369,9 +371,9 @@ class Minion(HSObject):
         if self.deathrattle:
             text += '💀'
         if self.divine_shield:
-            text += '🟡'
+            text += '⚪'
         if self.poisonous:
-            text += '🧪'
+            text += '☣️'
         if self.taunt:
             text += '🛡️'
         if self.reborn:
