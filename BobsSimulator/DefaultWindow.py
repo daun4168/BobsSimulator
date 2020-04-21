@@ -161,6 +161,8 @@ class DefaultWindow(QMainWindow):
         self.real_time_simulate_starting = True
         self.ignore_battle_handler = True
 
+        if not os.path.isdir(self.log_file_dir):
+            os.mkdir(self.log_file_dir)
         self.dirwatcher = QFileSystemWatcher([self.log_file_dir])
         self.dirwatcher.directoryChanged.connect(self.log_dir_changed)
 

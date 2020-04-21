@@ -16,7 +16,7 @@ LOG_DIR = 'logs'
 if not os.path.isdir(LOG_DIR):
     os.mkdir(LOG_DIR)
 
-with open('BobsSimulator/logging.json', 'rt') as f:
+with open('res/json/logging.json', 'rt') as f:
     config = json.load(f)
 
 logging.config.dictConfig(config)

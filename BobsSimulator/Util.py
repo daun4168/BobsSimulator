@@ -279,17 +279,17 @@ if __name__ == "__main__":
 
     # print(Util.enum_id_to_card_id(58412))
 
-    # print(hearthstone.__version__)
-    # print(hearthstone_data.__version__)
-    # print(hearthstone_data.get_carddefs_path())
+    print(hearthstone.__version__)
+    print(hearthstone_data.__version__)
+    print(hearthstone_data.get_carddefs_path())
     #
     # card_name_by_id('LOOT_078')
 
     # print(Util.make_number_circle(1))
-
-    for i in range(50):
-        new_minion = Util.random_bp_minion_race(Race.BEAST)
-        print(new_minion.info())
+    #
+    # for i in range(50):
+    #     new_minion = Util.random_bp_minion_race(Race.BEAST)
+    #     print(new_minion.info())
 
 
 
